@@ -9,6 +9,7 @@ import type {
     TranslationFn_Body,
     TranslationFn_Params,
     TranslationNode,
+    VariableNode,
 } from "./types";
 
 export function extractTranslationsFromObject(obj: t.ObjectExpression): TranslationNode[] {
@@ -25,7 +26,6 @@ export function extractTranslationsFromObject(obj: t.ObjectExpression): Translat
 
         const expr = prop.value;
 
-        // Nested object
         if (t.isObjectExpression(expr)) {
             const children = extractTranslationsFromObject(expr);
             const node: TranslationNode = {
@@ -37,7 +37,6 @@ export function extractTranslationsFromObject(obj: t.ObjectExpression): Translat
             continue;
         }
 
-        // Function
         if (isFunctionLike(expr)) {
             const fnNode = extractFunctionNode(expr);
             nodes.push({
@@ -47,17 +46,21 @@ export function extractTranslationsFromObject(obj: t.ObjectExpression): Translat
             continue;
         }
 
-        // Arrays of string nodes
         const arrayNode = extractArrayNode(expr);
         if (arrayNode) {
             nodes.push({ key, ...arrayNode });
             continue;
         }
 
-        // Strings
         const stringNode = extractStringNode(expr);
         if (stringNode) {
             nodes.push({ key, ...stringNode });
+            continue;
+        }
+
+        const variableNode = extractVariableNode(expr);
+        if (variableNode) {
+            nodes.push({ key, ...variableNode });
             continue;
         }
     }
@@ -131,18 +134,34 @@ function tryExtractStringLiteral(expr: t.Expression): string | null {
     return null;
 }
 
+function extractVariableNode(expr: t.Expression): VariableNode | null {
+    if (!t.isIdentifier(expr)) return null;
+
+    return {
+        type: "variable",
+        name: expr.name,
+    };
+}
+
 // currently translation arrays can only contain strings (plain or template)
 function extractArrayNode(expr: t.Expression): ArrayNode | null {
     if (!t.isArrayExpression(expr)) return null;
 
-    const items: StringNode[] = [];
+    const items: ArrayNode["value"] = [];
     for (const el of expr.elements) {
         if (!el || !t.isExpression(el)) return null;
 
         const sNode = extractStringNode(el);
-        if (!sNode) return null;
+        if (sNode) {
+            items.push(sNode);
+            continue;
+        }
 
-        items.push(sNode);
+        const vNode = extractVariableNode(el);
+        if (vNode) {
+            items.push(vNode);
+            continue;
+        }
     }
 
     return {
@@ -182,7 +201,7 @@ function extractFnParams(fn: t.FunctionExpression | t.ArrowFunctionExpression): 
 
         return {
             name: p.name,
-            type: mapTsTypeToParamType(typeCode),
+            type: typeCode,
         };
     });
 }
@@ -208,12 +227,4 @@ function extractFnCode(fn: t.FunctionExpression | t.ArrowFunctionExpression): st
     }
     // arrow function with expression body: x => expr
     return generate(fn.body).code;
-}
-
-function mapTsTypeToParamType(tsTypeCode: string): TranslationFn_Params["type"] {
-    if (tsTypeCode === "string") return "string";
-    if (tsTypeCode === "number") return "number";
-    if (tsTypeCode.includes("ReactNode")) return "ReactNode";
-    // default to string for unknown types; tweak as needed
-    return "unknown";
 }

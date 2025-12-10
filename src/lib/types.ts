@@ -1,4 +1,4 @@
-type TranslationBase = { key: string };
+type NodeBase = { key: string };
 
 // Strings
 type StringLiteralNode = {
@@ -11,20 +11,27 @@ type StringTemplateLiteralNode = {
 };
 export type StringNode = StringLiteralNode | StringTemplateLiteralNode;
 
+// Variables
+export type VariableNode = {
+    type: "variable";
+    name: string;
+};
+
 // Arrays
 export type ArrayNode = {
     type: "array";
-    value: StringNode[];
+    value: (StringNode | VariableNode)[];
     length: number;
 };
 
 // Functions
 export type TranslationFn_Params = {
     name: string;
-    type: "string" | "number" | "ReactNode" | "unknown";
+    type: string;
 };
 export type TranslationFn_Body =
     | StringNode
+    | VariableNode
     | ArrayNode
     | {
           type: "BlockExpression"; // can't determine return types of block functions yet, so just default to unknown :))
@@ -43,4 +50,4 @@ export type ObjectNode = {
 };
 
 // Union type for all translation nodes
-export type TranslationNode = TranslationBase & (StringNode | ArrayNode | ObjectNode | FunctionNode);
+export type TranslationNode = NodeBase & (StringNode | VariableNode | ArrayNode | ObjectNode | FunctionNode);

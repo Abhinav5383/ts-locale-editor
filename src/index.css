@@ -7,3 +7,53 @@ body {
 
     width: 100%;
 }
+
+pre {
+    margin: 0;
+    overflow-x: auto;
+    word-wrap: break-word;
+    color: #e6edf3;
+    padding: 6px 0;
+}
+
+
+/* Github Dark Color Scheme */
+.key {
+    color: #79c0ff;
+}
+
+.function {
+    color: #d2a8ff;
+}
+
+.variable {
+    color: #79c0ff;
+}
+
+.type {
+    color: #BD9CFE;
+}
+
+.string {
+    color: #77D5A3;
+}
+
+.object {
+    color: #e6edf3;
+}
+
+.delimiter {
+    color: #7d8590;
+}
+
+.special-delimiter {
+    color: #e3b341;
+}
+
+.decl {
+    color: #ff7b72;
+}
+
+.parens {
+    color: #ffe3a8;
+}
