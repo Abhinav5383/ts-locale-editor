@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import "./index.css";
+import React from "react";
+import Navbar from "./components/layout/navbar";
 import { getFileContents } from "./lib/gh_api";
 import { extractTranslationsFromObject, getDefaultExportObject } from "./lib/parser";
 import type { ArrayNode, FunctionNode, ObjectNode, StringNode, TranslationNode, VariableNode } from "./lib/types";
@@ -18,15 +20,19 @@ export default function AppRoot() {
     }, []);
 
     return (
-        <main>
-            <div
-                style={{
-                    padding: "1rem 2rem",
-                }}
-            >
-                {refParsed && <RenderObject parentKeys={[]} node={{ type: "object", value: refParsed }} />}
-            </div>
-        </main>
+        <div className="app">
+            <Navbar />
+
+            <main>
+                <div
+                    style={{
+                        padding: "1rem 2rem",
+                    }}
+                >
+                    {refParsed && <RenderObject parentKeys={[]} node={{ type: "object", value: refParsed }} />}
+                </div>
+            </main>
+        </div>
     );
 }
 
@@ -42,7 +48,7 @@ function RenderObject(props: RenderProps<ObjectNode>) {
         <div
             style={{
                 fontFamily: "monospace",
-                fontSize: "16px",
+                fontSize: "1.17rem",
                 marginBlock: "10px",
             }}
         >
@@ -52,7 +58,7 @@ function RenderObject(props: RenderProps<ObjectNode>) {
             ) : (
                 "export default "
             )}{" "}
-            <Delimiter char="{" />
+            <Delimiter char="{" className="object-braces" />
             <div>
                 {props.node.value.map((node) => {
                     const parentKeys = [...props.parentKeys, node.key];
@@ -63,7 +69,12 @@ function RenderObject(props: RenderProps<ObjectNode>) {
                     switch (node.type) {
                         case "string":
                             return (
-                                <div key={componentKey}>
+                                <div
+                                    key={componentKey}
+                                    style={{
+                                        verticalAlign: "center",
+                                    }}
+                                >
                                     {pad}
                                     <span className="key">{node.key}</span>
                                     <Delimiter char=":" />{" "}
@@ -74,7 +85,12 @@ function RenderObject(props: RenderProps<ObjectNode>) {
 
                         case "variable":
                             return (
-                                <div key={componentKey}>
+                                <div
+                                    key={componentKey}
+                                    style={{
+                                        verticalAlign: "center",
+                                    }}
+                                >
                                     {pad}
                                     <span className="key">{node.key}</span>
                                     <Delimiter char=":" />{" "}
@@ -88,10 +104,10 @@ function RenderObject(props: RenderProps<ObjectNode>) {
                                 <div key={componentKey}>
                                     {pad}
                                     <span className="key">{node.key}</span>
-                                    <Delimiter char=":" /> <Delimiter char="[" className="special-delimiter" />
+                                    <Delimiter char=":" /> <Delimiter char="[" className="array-braces" />
                                     <RenderArray key={componentKey} parentKeys={parentKeys} node={node} />
                                     {pad}
-                                    <Delimiter char="]" className="special-delimiter" />
+                                    <Delimiter char="]" className="array-braces" />
                                     <Delimiter char="," />
                                 </div>
                             );
@@ -108,7 +124,7 @@ function RenderObject(props: RenderProps<ObjectNode>) {
                 })}
             </div>
             {padding(props.parentKeys.length)}
-            <Delimiter char="}" />
+            <Delimiter char="}" className="object-braces" />
             {props.parentKeys.length > 0 ? <Delimiter char="," /> : ""}
         </div>
     );
@@ -153,10 +169,10 @@ function RenderFunction(props: RenderProps<FunctionNode>) {
                 {padding(props.parentKeys.length)}
                 <RenderKey keyName={props.parentKeys.at(-1)} customClassName="function" />{" "}
                 <span className="decl">function</span> <RenderFnParams fnParams={props.node.params} />{" "}
-                <Delimiter className="special-delimiter" char="{" />
+                <Delimiter className="block-braces" char="{" />
                 <pre>{paddedBody}</pre>
                 {padding(props.parentKeys.length)}
-                <Delimiter className="special-delimiter" char="}" />
+                <Delimiter className="block-braces" char="}" />
                 <Delimiter char="," />
             </div>
         );
@@ -174,14 +190,14 @@ function RenderFunction(props: RenderProps<FunctionNode>) {
         case "array":
             renderedBody = (
                 <>
-                    <Delimiter char="[" className="special-delimiter" />
+                    <Delimiter char="[" className="array-braces" />
                     <RenderArray
                         parentKeys={props.parentKeys.map((_, i) => i)}
                         node={props.node.body}
                         startBlockPadding={false}
                     />
                     {padding(props.parentKeys.length)}
-                    <Delimiter char="]" className="special-delimiter" />
+                    <Delimiter char="]" className="array-braces" />
                 </>
             );
             break;
@@ -192,7 +208,7 @@ function RenderFunction(props: RenderProps<FunctionNode>) {
     return (
         <div>
             {padding(props.parentKeys.length)}
-            <RenderKey keyName={props.parentKeys.at(-1)} customClassName="decl" />{" "}
+            <RenderKey keyName={props.parentKeys.at(-1)} customClassName="function" />{" "}
             <RenderFnParams fnParams={props.node.params} /> <Delimiter char="=>" /> {renderedBody}
             <Delimiter char="," />
         </div>
@@ -205,8 +221,8 @@ function RenderFnParams(props: { fnParams: FunctionNode["params"] }) {
             <Delimiter char="(" className="parens" />
             {props.fnParams.map((p, index) => {
                 return (
-                    <>
-                        <span className="variable">{p.name}</span>
+                    <React.Fragment key={p.name}>
+                        <span className="param">{p.name}</span>
                         {p.type ? (
                             <>
                                 <Delimiter char=": " />
@@ -214,7 +230,7 @@ function RenderFnParams(props: { fnParams: FunctionNode["params"] }) {
                             </>
                         ) : null}
                         {index < props.fnParams.length - 1 ? <Delimiter char=", " /> : null}
-                    </>
+                    </React.Fragment>
                 );
             })}
             <Delimiter char=")" className="parens" />
@@ -223,15 +239,32 @@ function RenderFnParams(props: { fnParams: FunctionNode["params"] }) {
 }
 
 function RenderVariable(props: RenderProps<VariableNode>) {
-    return <span className="variable">{props.node.name}</span>;
+    return <span className="param editable-block">{props.node.name}</span>;
 }
 
 function RenderString(props: RenderProps<StringNode>) {
-    if (props.node.type === "string_template") {
-        // the backticks are part of the string template
-        return <span className="string">{props.node.value}</span>;
-    }
-    return <span className="string">"{props.node.value}"</span>;
+    const [inEditMode, setInEditMode] = useState(false);
+    const isTemplate = props.node.type === "string_template";
+
+    return (
+        <div style={{ display: "inline-block" }}>
+            <Delimiter char={isTemplate ? "`" : '"'} className="string" />
+            <span
+                contentEditable
+                className="string editable-block"
+                onClick={() => setInEditMode(true)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") setInEditMode(true);
+                }}
+                onBlur={(e) => console.log(e.target.innerText)}
+                suppressContentEditableWarning
+                spellCheck={false}
+            >
+                {props.node.value}
+            </span>
+            <Delimiter char={isTemplate ? "`" : '"'} className="string" />
+        </div>
+    );
 }
 
 function RenderKey(props: { keyName: string | number | undefined; customClassName?: string }) {

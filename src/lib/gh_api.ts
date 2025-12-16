@@ -14,4 +14,3 @@ export async function getFileContents(repo: string, path: string, ref: string) {
     const data = await res.text();
     return data;
 }
-3;

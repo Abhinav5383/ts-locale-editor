@@ -61,7 +61,6 @@ export function extractTranslationsFromObject(obj: t.ObjectExpression): Translat
         const variableNode = extractVariableNode(expr);
         if (variableNode) {
             nodes.push({ key, ...variableNode });
-            continue;
         }
     }
 
@@ -110,7 +109,9 @@ function extractStringNode(expr: t.Expression): StringNode | null {
 
     if (t.isTemplateLiteral(expr)) {
         // keep full template source as-is, e.g. `A template literal ${SOME_CONST}`
-        return { type: "string_template", value: generate(expr).code };
+        let template = generate(expr).code;
+        template = template.slice(1, -1);
+        return { type: "string_template", value: template };
     }
 
     return null;
@@ -160,7 +161,6 @@ function extractArrayNode(expr: t.Expression): ArrayNode | null {
         const vNode = extractVariableNode(el);
         if (vNode) {
             items.push(vNode);
-            continue;
         }
     }
 
