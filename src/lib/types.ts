@@ -29,14 +29,15 @@ export type TranslationFn_Params = {
     name: string;
     type: string;
 };
+export type TranslationFn_BlockExprBody = {
+    type: "BlockExpression"; // can't determine return types of block functions yet, so just default to unknown :))
+    value: string; // raw code string of the function body
+};
 export type TranslationFn_Body =
     | StringNode
     | VariableNode
     | ArrayNode
-    | {
-          type: "BlockExpression"; // can't determine return types of block functions yet, so just default to unknown :))
-          value: string; // raw code string of the function body
-      };
+    | TranslationFn_BlockExprBody; // raw code string of the function body
 export type FunctionNode = {
     type: "function";
     params: TranslationFn_Params[];

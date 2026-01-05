@@ -26,9 +26,11 @@ export default function App() {
             <Show when={!refParsed.loading && !refParsed.error && refParsed()}>
                 {(data) => {
                     const refNode = { type: "object", value: data() } satisfies ObjectNode;
-                    const editNode = { type: "object", value: data() } satisfies ObjectNode;
+                    // const editNode = { type: "object", value: data() } satisfies ObjectNode;
 
-                    return <Editor refLocale={refNode} editLocale={editNode} />;
+                    return (
+                        <Editor refLocale={refNode} editLocale={{ type: "object", value: [] }} />
+                    );
                 }}
             </Show>
         </main>

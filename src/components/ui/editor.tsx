@@ -7,6 +7,7 @@ import type {
     TranslationNode,
     VariableNode,
 } from "~/lib/types";
+import { ContentEditable } from "./editable-string";
 import "./editor.css";
 import { flattenLocaleEntries } from "./utils";
 
@@ -95,36 +96,29 @@ function StringRenderer(props: StringRendererProps) {
     const isTemplate = props.node.type === "string_template";
 
     return (
-        <div class="node-string">
-            <Show
-                when={props.isEditable}
-                fallback={
-                    <pre
-                        style={{
-                            "text-wrap": "wrap",
-                            "word-wrap": "break-word",
-                            "word-break": "break-all",
-                            margin: 0,
-                            padding: 0,
-                        }}
-                        class="token token-string-content"
-                    >
-                        <span class="token token-string">{isTemplate ? "`" : '"'}</span>
-                        {value()}
-                        <span class="token token-string">{isTemplate ? "`" : '"'}</span>
-                    </pre>
-                }
-            >
-                <span
-                    class="string-editable token token-string-content"
-                    contenteditable={true}
-                    spellcheck={false}
-                    onInput={(e) => setValue(e.currentTarget.textContent || "")}
+        <Show
+            when={props.isEditable}
+            fallback={
+                <pre
+                    style={{
+                        "text-wrap": "wrap",
+                        margin: 0,
+                        padding: 0,
+                    }}
+                    class="token token-string-content"
                 >
+                    <span class="token token-string">{isTemplate ? "`" : '"'}</span>
                     {value()}
-                </span>
-            </Show>
-        </div>
+                    <span class="token token-string">{isTemplate ? "`" : '"'}</span>
+                </pre>
+            }
+        >
+            <ContentEditable
+                value={value()}
+                onChange={setValue}
+                className="string-editable token token-string-content"
+            />
+        </Show>
     );
 }
 
@@ -177,12 +171,10 @@ interface FunctionRendererProps {
 }
 
 function FunctionRenderer(props: FunctionRendererProps) {
-    const [bodyValue, setBodyValue] = createSignal(
+    const [editorBodyTxt, setEditorBodyTxt] = createSignal(
         props.node.body.type === "BlockExpression" ? props.node.body.value : "",
     );
-
     const isBlockExpression = props.node.body.type === "BlockExpression";
-    const minHeightEm = () => bodyValue().split("\n").length * 1.5 + 1;
 
     return (
         <Show
@@ -236,21 +228,15 @@ function FunctionRenderer(props: FunctionRendererProps) {
                     when={props.isEditable}
                     fallback={
                         <div class="code-block">
-                            <code class="token token-code">{bodyValue()}</code>
+                            <code class="token token-code">{editorBodyTxt()}</code>
                         </div>
                     }
                 >
-                    <div
-                        class="code-editable"
-                        contenteditable={true}
-                        onInput={(e) => setBodyValue(e.currentTarget.textContent || "")}
-                        spellcheck={false}
-                        style={{
-                            "min-height": `${minHeightEm()}em`,
-                        }}
-                    >
-                        {bodyValue()}
-                    </div>
+                    <ContentEditable
+                        value={editorBodyTxt()}
+                        onChange={setEditorBodyTxt}
+                        className="code-editable"
+                    />
                 </Show>
                 <span class="token token-punctuation">{"}"}</span>
             </div>

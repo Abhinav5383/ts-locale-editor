@@ -40,6 +40,8 @@
 .node-row {
     border-bottom: 1px solid var(--gh-bg-tertiary);
     padding-block: var(--gap);
+    align-items: center;
+    display: grid;
 }
 
 .node-row:last-child {
@@ -58,11 +60,6 @@
 .node-row-object .node-key {
     color: var(--gh-text-primary);
     font-weight: 700;
-}
-
-.node-value-ref,
-.node-value-edit {
-    align-self: center;
 }
 
 /* .node-value-ref,
@@ -125,9 +122,6 @@
 }
 
 /* strings */
-.node-string {
-    display: inline-flex;
-}
 
 .string-editable {
     background-color: var(--gh-bg-secondary);
@@ -137,7 +131,7 @@
     border-radius: 4px;
     font-family: inherit;
     font-size: inherit;
-    min-width: 3ch;
+    min-width: 1ch;
     display: inline-block;
     word-wrap: break-word;
     white-space: pre-wrap;
@@ -221,7 +215,7 @@
     color: var(--gh-text-primary);
     border: 1px solid var(--gh-border);
     border-radius: 4px;
-    padding: 12px;
+    padding: 8px;
     font-family: inherit;
     font-size: 13px;
     line-height: 1.5;
