@@ -1,5 +1,22 @@
 :root {
-    --main-bg: lch(11 10 265);
+    --gh-bg-primary: #0d1117;
+    --gh-bg-secondary: #161b22;
+    --gh-bg-tertiary: #21262d;
+    --gh-text-primary: #d9e1e9;
+    --gh-text-secondary: #8b949e;
+    --gh-border: #30363d;
+
+    /* github dark */
+    --gh-token-keyword: #ff7b72;
+    --gh-token-string: #a5d6ff;
+    --gh-token-variable: #ffa657;
+    --gh-token-punctuation: #c9d1d9;
+    --gh-token-type: #79c0ff;
+    --gh-token-comment: #8b949e;
+    --gh-token-bracket: #c9d1d9;
+    --gh-token-parameter: #ffa657;
+
+    --indent-size: 4ch;
 }
 
 body,
@@ -7,8 +24,8 @@ html {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    background-color: var(--main-bg);
-    color: lch(from var(--main-bg) 92% c h);
+    background-color: var(--gh-bg-primary);
+    color: lch(from var(--gh-bg-primary) 92% c h);
     color-scheme: dark;
     font-family: "Space Grotesk", system-ui;
 }

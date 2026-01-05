@@ -1,4 +1,4 @@
-type NodeBase = { key: string };
+export type NodeBase = { key: string };
 
 // Strings
 type StringLiteralNode = {
@@ -49,6 +49,12 @@ export type ObjectNode = {
     value: TranslationNode[];
 };
 
+export type TranslationNodeUnion =
+    | StringNode
+    | VariableNode
+    | ArrayNode
+    | ObjectNode
+    | FunctionNode;
+
 // Union type for all translation nodes
-export type TranslationNode = NodeBase &
-    (StringNode | VariableNode | ArrayNode | ObjectNode | FunctionNode);
+export type TranslationNode = NodeBase & TranslationNodeUnion;

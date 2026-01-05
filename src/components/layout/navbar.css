@@ -1,7 +1,7 @@
 .nav-header {
     width: 100%;
     display: grid;
-    background-color: lch(from var(--main-bg) calc(l - 6) c h);
+    background-color: var(--gh-bg-secondary)
 }
 
 .nav-header nav {
