@@ -95,7 +95,11 @@ export function getDefaultExportObject(code: string): t.ObjectExpression | null 
 // eg: export default { ... } satisfies Locale;
 // we need the inner object expression
 function unwrapExpression(expr: t.Expression): t.Expression {
-    if (t.isTSSatisfiesExpression(expr) || t.isTSAsExpression(expr) || t.isParenthesizedExpression(expr)) {
+    if (
+        t.isTSSatisfiesExpression(expr) ||
+        t.isTSAsExpression(expr) ||
+        t.isParenthesizedExpression(expr)
+    ) {
         return unwrapExpression(expr.expression as t.Expression);
     }
     return expr;
@@ -186,7 +190,9 @@ function extractFunctionNode(expr: t.FunctionExpression | t.ArrowFunctionExpress
     } satisfies FunctionNode;
 }
 
-function extractFnParams(fn: t.FunctionExpression | t.ArrowFunctionExpression): TranslationFn_Params[] {
+function extractFnParams(
+    fn: t.FunctionExpression | t.ArrowFunctionExpression,
+): TranslationFn_Params[] {
     return fn.params.map((p) => {
         // shouldn't really happen in our case
         // only happens if using destructuring or rest params

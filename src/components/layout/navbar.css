@@ -1,5 +1,10 @@
-/* Navbar */
 .nav-header {
     width: 100%;
+    display: grid;
+    background-color: lch(from var(--main-bg) calc(l - 6) c h);
+}
+
+.nav-header nav {
+    padding-inline: 1rem;
     padding-block: 1rem;
 }

@@ -50,4 +50,5 @@ export type ObjectNode = {
 };
 
 // Union type for all translation nodes
-export type TranslationNode = NodeBase & (StringNode | VariableNode | ArrayNode | ObjectNode | FunctionNode);
+export type TranslationNode = NodeBase &
+    (StringNode | VariableNode | ArrayNode | ObjectNode | FunctionNode);

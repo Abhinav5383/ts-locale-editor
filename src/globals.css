@@ -1,0 +1,14 @@
+:root {
+    --main-bg: lch(11 10 265);
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: var(--main-bg);
+    color: lch(from var(--main-bg) 92% c h);
+    color-scheme: dark;
+    font-family: "Space Grotesk", system-ui;
+}

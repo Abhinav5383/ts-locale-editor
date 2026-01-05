@@ -2,8 +2,10 @@ import "./navbar.css";
 
 export default function Navbar() {
     return (
-        <header className="nav-header">
-            <nav>&lt;/&gt;</nav>
+        <header class="nav-header">
+            <nav>
+                <span>&lt;/&gt;</span>
+            </nav>
         </header>
     );
 }

@@ -1,5 +1,5 @@
 {
-    "name": "ts-locale-editor",
+    "name": "new",
     "private": true,
     "version": "0.0.0",
     "type": "module",
@@ -11,16 +11,12 @@
     "dependencies": {
         "@babel/parser": "^7.28.5",
         "@babel/traverse": "^7.28.5",
-        "react": "^19.2.0",
-        "react-dom": "^19.2.0"
+        "solid-js": "^1.9.10"
     },
     "devDependencies": {
         "@types/node": "^24.10.1",
-        "@types/react": "^19.2.5",
-        "@types/react-dom": "^19.2.3",
-        "@vitejs/plugin-react": "^5.1.1",
-        "globals": "^16.5.0",
         "typescript": "~5.9.3",
-        "vite": "^7.2.4"
+        "vite": "^7.2.4",
+        "vite-plugin-solid": "^2.11.10"
     }
 }

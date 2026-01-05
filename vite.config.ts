@@ -1,8 +1,13 @@
-import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import solid from "vite-plugin-solid";
 
 export default defineConfig({
-    plugins: [react()],
+    plugins: [solid()],
+    resolve: {
+        alias: {
+            "~": "/src",
+        },
+    },
     define: {
         process: {
             env: {
