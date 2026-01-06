@@ -28,4 +28,5 @@ html {
     color: lch(from var(--gh-bg-primary) 92% c h);
     color-scheme: dark;
     font-family: "Space Grotesk", system-ui;
+    scrollbar-gutter: stable;
 }

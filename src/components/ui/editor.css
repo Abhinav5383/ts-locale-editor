@@ -8,7 +8,7 @@
     --gap: 18px;
     display: grid;
     gap: var(--gap);
-    grid-template-columns: minmax(12ch, 1fr) 2fr 2fr;
+    grid-template-columns: 1fr 2fr 2fr;
 }
 
 .editor-header {
@@ -156,6 +156,7 @@
 }
 
 .array-items.editable {
+    position: relative;
     padding-inline-start: 1ch;
 
     .array-item {
@@ -163,11 +164,17 @@
         min-height: 2em;
         display: flex;
         gap: 4px;
-        transition: background-color 0.3s;
+        transition: background-color 0.3s, translate 0.3s;
         background-color: transparent;
 
+        &.dragging,
         &:has(.drag-handle:hover) {
             background-color: var(--gh-bg-tertiary);
+        }
+
+        &.dragging {
+            z-index: 100;
+            transition: background-color 0.3s, translate 0.03s;
         }
     }
 
@@ -183,6 +190,10 @@
         opacity: 0;
         transition: opacity 0.3s;
         padding-inline-start: calc(var(--indent-size) - 3ch);
+    }
+
+    .drag-handle:active {
+        cursor: grabbing;
     }
 }
 
