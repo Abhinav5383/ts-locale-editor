@@ -1,7 +1,6 @@
 import type {
     ArrayNode,
     FunctionNode,
-    NodeBase,
     ObjectNode,
     StringNode,
     TranslationFn_BlockExprBody,
@@ -10,12 +9,32 @@ import type {
     VariableNode,
 } from "~/lib/types";
 
-export interface IterationItem {
-    refNode: TranslationNode;
-    editNode: TranslationNode;
-    depth: number;
-    key: string;
+export enum IterationItemType {
+    OBJ_START = "obj_start",
+    OBJ_ENTRY = "obj_entry",
+    OBJ_END = "obj_end",
 }
+
+type IterationItem_Base = {
+    key: string;
+    depth: number;
+    isLastChild: boolean;
+};
+
+type IterationItem_Variants =
+    | {
+          type: IterationItemType.OBJ_ENTRY;
+          refNode: TranslationNode;
+          editNode: TranslationNode;
+      }
+    | {
+          type: IterationItemType.OBJ_START;
+      }
+    | {
+          type: IterationItemType.OBJ_END;
+      };
+
+export type IterationItem = IterationItem_Base & IterationItem_Variants;
 
 export function flattenLocaleEntries(
     refLocaleNodes: TranslationNode[],
@@ -29,34 +48,40 @@ export function flattenLocaleEntries(
         editLocaleKeyMap.set(node.key, node);
     }
 
-    for (const refNode of refLocaleNodes) {
+    for (let i = 0; i < refLocaleNodes.length; i++) {
+        const refNode = refLocaleNodes[i];
         const editNode = editLocaleKeyMap.get(refNode.key) ?? {
             ...emptyNode(refNode),
             key: refNode.key,
         };
+        const isLastChild = i === refLocaleNodes.length - 1;
 
         if (refNode.type === "object" && editNode.type === "object") {
-            const refNodeWihNoValue = {
-                key: refNode.key,
-                type: "object",
-                value: [],
-            } satisfies ObjectNode & NodeBase;
-
             items.push({
+                type: IterationItemType.OBJ_START,
                 key: refNode.key,
-                refNode: refNodeWihNoValue,
-                editNode: refNodeWihNoValue,
-                depth,
+                depth: depth,
+                isLastChild,
             });
 
             const childItems = flattenLocaleEntries(refNode.value, editNode.value, depth + 1);
+
             items.push(...childItems);
+
+            items.push({
+                type: IterationItemType.OBJ_END,
+                key: refNode.key,
+                depth,
+                isLastChild,
+            });
         } else {
             items.push({
+                type: IterationItemType.OBJ_ENTRY,
                 key: refNode.key,
-                refNode: refNode,
-                editNode: editNode,
-                depth: depth,
+                depth,
+                isLastChild,
+                refNode,
+                editNode,
             });
         }
     }

@@ -5,7 +5,7 @@
     font-size: 14px;
     line-height: 1.6;
 
-    --gap: 12px;
+    --gap: 18px;
     display: grid;
     gap: var(--gap);
     grid-template-columns: minmax(12ch, 1fr) 2fr 2fr;
@@ -44,22 +44,24 @@
     display: grid;
 }
 
-.node-row:last-child {
+.node-row:last-child,
+.node-row.obj-start-brace,
+.node-row.last-entry {
     border-bottom: none;
+    padding-block-end: 0;
 }
 
-.node-row>* {
+.node-row>*:first-child {
     padding-inline-start: calc(var(--depth, 0) * var(--indent-size));
 }
 
-.node-row-object {
-    padding-block-start: calc(var(--gap) * 2);
-    /* background-color: var(--gh-bg-secondary); */
-}
-
-.node-row-object .node-key {
-    color: var(--gh-text-primary);
-    font-weight: 700;
+.node-row.obj-brace .node-key {
+    font-weight: 600;
+    font-style: italic;
+    font-size: 1.05em;
+    /* text-decoration: dotted underline;
+    text-underline-offset: 0.2em;
+    text-decoration-color: var(--gh-text-secondary); */
 }
 
 /* .node-value-ref,
@@ -71,11 +73,6 @@
 .token {
     font-family: inherit;
     color: var(--gh-text-secondary);
-}
-
-.token.token-string {
-    user-select: none;
-    color: var(--gh-token-string);
 }
 
 .token-keyword {
@@ -103,18 +100,8 @@
     color: var(--gh-token-bracket);
 }
 
-.token-object {
-    color: var(--gh-token-bracket);
-    font-style: italic;
-    opacity: 0.7;
-}
-
 .token-parameter {
     color: var(--gh-token-parameter);
-}
-
-.token-comma {
-    color: var(--gh-token-punctuation);
 }
 
 .token-code {
@@ -156,6 +143,10 @@
     gap: 4px;
 }
 
+.inline-func .node-array {
+    width: 100%;
+}
+
 .array-items {
     display: grid;
     margin-inline-start: 1ch;
@@ -164,26 +155,25 @@
     border-left: 1px solid var(--gh-border);
 }
 
-.array-item {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-}
-
+/* .array-item {} */
 
 /* fn renderer */
 .node-function {
     display: grid;
-    gap: 8px;
+    gap: 4px;
     background-color: var(--gh-bg-secondary);
     border: 1px solid var(--gh-border);
     border-radius: 4px;
     padding: 12px;
 }
 
+.node-function.inline-func {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 .function-signature {
     display: inline-flex;
-    align-items: center;
     gap: 2px;
     flex-wrap: wrap;
     color: var(--gh-text-primary);
@@ -236,4 +226,11 @@
 .node-unknown {
     color: var(--gh-text-secondary);
     font-style: italic;
+}
+
+
+/* utility classes */
+
+.no-select {
+    user-select: none;
 }

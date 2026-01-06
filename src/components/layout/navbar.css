@@ -1,7 +1,7 @@
 .nav-header {
     width: 100%;
     display: grid;
-    background-color: var(--gh-bg-secondary)
+    background-color: var(--gh-bg-secondary);
 }
 
 .nav-header nav {
