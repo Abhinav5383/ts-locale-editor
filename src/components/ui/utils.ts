@@ -169,7 +169,7 @@ function emptyStringNode(refNode: StringNode): StringNode {
     return { ...refNode, value: "" };
 }
 
-// NOTE: Variables don't change in translation, so no need to empty them
+// NOTE: Variables don't change in translation, so they can be the same as the reference.
 function emptyVariableNode(refNode: VariableNode): VariableNode {
     return refNode;
 }

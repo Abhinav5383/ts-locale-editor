@@ -155,7 +155,42 @@
     border-left: 1px solid var(--gh-border);
 }
 
-/* .array-item {} */
+.array-items.editable {
+    padding-inline-start: 1ch;
+
+    .array-item {
+        border-radius: 4px;
+        min-height: 2em;
+        display: flex;
+        gap: 4px;
+        transition: background-color 0.3s;
+        background-color: transparent;
+
+        &:has(.drag-handle:hover) {
+            background-color: var(--gh-bg-tertiary);
+        }
+    }
+
+    .drag-handle {
+        cursor: grab;
+        user-select: none;
+        color: var(--gh-text-secondary);
+        display: flex;
+        align-items: center;
+        border: transparent;
+        background-color: transparent;
+        outline: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+        padding-inline-start: calc(var(--indent-size) - 3ch);
+    }
+}
+
+.node-function:hover .drag-handle,
+.node-array:hover .drag-handle,
+.node-array:focus-within .drag-handle {
+    opacity: 1;
+}
 
 /* fn renderer */
 .node-function {
