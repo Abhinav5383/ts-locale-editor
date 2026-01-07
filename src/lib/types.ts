@@ -47,7 +47,7 @@ export type FunctionNode<T extends TranslationFn_Body = TranslationFn_Body> = {
 // Objects
 export type ObjectNode = {
     type: "object";
-    value: KeyedTranslationNode[];
+    value: WithKey<TranslationNode>[];
 };
 
 export type WithKey<T extends TranslationNodeUnion> = NodeBase & T;
@@ -61,4 +61,3 @@ export type TranslationNodeUnion =
 
 // Union type for all translation nodes
 export type TranslationNode = TranslationNodeUnion;
-export type KeyedTranslationNode = WithKey<TranslationNode>;

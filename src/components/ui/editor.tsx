@@ -35,8 +35,7 @@ interface EditorContentProps {
 }
 
 function EditorContent(props: EditorContentProps) {
-    const flattenedItems = () =>
-        flattenLocaleEntries(props.refLocale.value, props.editLocale.value);
+    const flattenedItems = () => flattenLocaleEntries(props.refLocale, props.editLocale);
 
     return (
         <div class="object-renderer">

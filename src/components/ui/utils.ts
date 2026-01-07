@@ -6,6 +6,7 @@ import type {
     TranslationFn_BlockExprBody,
     TranslationNode,
     VariableNode,
+    WithKey,
 } from "~/lib/types";
 
 export enum IterationItemType {
@@ -24,8 +25,8 @@ type IterationItem_Base = {
 type IterationItem_Variants =
     | {
           type: IterationItemType.OBJ_ENTRY;
-          refNode: TranslationNode;
-          editNode: TranslationNode;
+          refNode: WithKey<TranslationNode>;
+          editNode: WithKey<TranslationNode>;
       }
     | {
           type: IterationItemType.OBJ_START;
@@ -37,22 +38,25 @@ type IterationItem_Variants =
 export type IterationItem = IterationItem_Base & IterationItem_Variants;
 
 export function flattenLocaleEntries(
-    refLocaleNodes: TranslationNode[],
-    editLocaleNodes: TranslationNode[],
+    refLocaleNode: ObjectNode,
+    translatingLocaleNode: ObjectNode,
     depth = 0,
     parentPath: string[] = [],
 ): IterationItem[] {
     const items: IterationItem[] = [];
 
-    const editLocaleKeyMap = new Map<string, TranslationNode>();
-    for (const node of editLocaleNodes) {
+    const editLocaleKeyMap = new Map<string, WithKey<TranslationNode>>();
+    for (const node of translatingLocaleNode.value) {
         editLocaleKeyMap.set(node.key, node);
     }
 
-    for (let i = 0; i < refLocaleNodes.length; i++) {
-        const refNode = refLocaleNodes[i];
-        const editNode = editLocaleKeyMap.get(refNode.key) ?? emptyNode(refNode);
-        const isLastChild = i === refLocaleNodes.length - 1;
+    for (let i = 0; i < refLocaleNode.value.length; i++) {
+        const refNode = refLocaleNode.value[i];
+        const editNode = editLocaleKeyMap.get(refNode.key) ?? {
+            key: refNode.key,
+            ...emptyNode(refNode),
+        };
+        const isLastChild = i === refLocaleNode.value.length - 1;
 
         if (refNode.type === "object" && editNode.type === "object") {
             items.push({
@@ -63,7 +67,7 @@ export function flattenLocaleEntries(
                 path: [...parentPath, refNode.key],
             });
 
-            const childItems = flattenLocaleEntries(refNode.value, editNode.value, depth + 1, [
+            const childItems = flattenLocaleEntries(refNode, editNode, depth + 1, [
                 ...parentPath,
                 refNode.key,
             ]);
@@ -83,21 +87,14 @@ export function flattenLocaleEntries(
                 key: refNode.key,
                 depth,
                 isLastChild,
-                refNode: nodeWithoutKey(refNode),
-                editNode: nodeWithoutKey(editNode),
+                refNode,
+                editNode,
                 path: [...parentPath, refNode.key],
             });
         }
     }
 
     return items;
-}
-
-function nodeWithoutKey(node: TranslationNode | TranslationNode): TranslationNode {
-    if (!("key" in node)) return node;
-
-    const { key, ...rest } = node;
-    return rest;
 }
 
 function emptyNode(refNode: TranslationNode): TranslationNode {
