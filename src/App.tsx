@@ -1,38 +1,89 @@
-import { createResource, Show } from "solid-js";
+import { createResource, Match, Show, Switch } from "solid-js";
 import Navbar from "~/components/layout/navbar";
 import { getFileContents } from "~/lib/gh_api";
 import { extractTranslationsFromObject, getDefaultExportObject } from "~/lib/parser";
 import "./App.css";
 import Editor from "./components/ui/editor";
-import type { ObjectNode } from "./lib/types";
+import { updateNodeValue } from "./components/ui/node-updater";
+import type { node_OnChangeHandler } from "./components/ui/renderers/types";
+import type { ObjectNode, TranslationNode } from "./lib/types";
 
 export default function App() {
-    const [refParsed] = createResource(() => {
+    const [refLocale] = createResource((): Promise<ObjectNode> => {
         return getTranslationNodes("", "", "");
     });
+    const [translatingLocale] = createResource(refLocale, (): ObjectNode => {
+        // return getTranslationNodes("", "", "");
+        return {
+            type: "object",
+            value: [],
+        };
+    });
+    const [editedLocale, { mutate: setEditedLocale }] = createResource(
+        translatingLocale,
+        (): ObjectNode => {
+            const translating = translatingLocale();
+            if (!translating) {
+                return {
+                    type: "object",
+                    value: [],
+                };
+            }
+            return translating;
+        },
+    );
+
+    const handleTranslatingLocaleChange: node_OnChangeHandler = (
+        path: string[],
+        node: TranslationNode,
+    ) => {
+        const oldEditedState = editedLocale();
+        if (!oldEditedState) return;
+
+        setEditedLocale(updateNodeValue(path, oldEditedState, node));
+
+        console.log({
+            path,
+            node,
+
+            oldRoot: oldEditedState,
+            newRoot: updateNodeValue(path, oldEditedState, node),
+        });
+    };
 
     return (
         <main class="main-wrapper">
             <Navbar />
 
-            <Show when={refParsed.loading}>
-                <p>Loading...</p>
-            </Show>
+            <Switch>
+                <Match when={refLocale.loading || translatingLocale.loading}>
+                    <p>Loading...</p>
+                </Match>
 
-            <Show when={refParsed.error}>
-                <p>Error: {refParsed.error?.message}</p>
-            </Show>
+                <Match when={refLocale.error}>
+                    <p>Error: {refLocale.error?.message}</p>
+                </Match>
 
-            <Show when={!refParsed.loading && !refParsed.error && refParsed()}>
-                {(data) => {
-                    const refNode = { type: "object", value: data() } satisfies ObjectNode;
-                    // const editNode = { type: "object", value: data() } satisfies ObjectNode;
+                <Match when={translatingLocale.error}>
+                    <p>Error: {translatingLocale.error?.message}</p>
+                </Match>
 
-                    return (
-                        <Editor refLocale={refNode} editLocale={{ type: "object", value: [] }} />
-                    );
-                }}
-            </Show>
+                <Match keyed when={refLocale()}>
+                    {(_ref) => (
+                        <Show keyed when={translatingLocale()}>
+                            {(_translating) => {
+                                return (
+                                    <Editor
+                                        refLocale={_ref}
+                                        editLocale={_translating}
+                                        onChange={handleTranslatingLocaleChange}
+                                    />
+                                );
+                            }}
+                        </Show>
+                    )}
+                </Match>
+            </Switch>
         </main>
     );
 }

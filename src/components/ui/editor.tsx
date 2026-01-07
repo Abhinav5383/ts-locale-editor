@@ -3,10 +3,12 @@ import { NodeRenderer } from "~/components/ui/renderers/node";
 import { flattenLocaleEntries, IterationItemType } from "~/components/ui/utils";
 import type { ObjectNode } from "~/lib/types";
 import "./editor.css";
+import type { node_OnChangeHandler } from "./renderers/types";
 
 interface EditorProps {
     refLocale: ObjectNode; // the base reference locale
     editLocale: ObjectNode; // the locale being edited
+    onChange: node_OnChangeHandler;
 }
 
 export default function Editor(props: EditorProps) {
@@ -17,7 +19,11 @@ export default function Editor(props: EditorProps) {
                 <div class="header-column">Reference Locale</div>
                 <div class="header-column">Edit Locale</div>
             </div>
-            <EditorContent refLocale={props.refLocale} editLocale={props.editLocale} />
+            <EditorContent
+                refLocale={props.refLocale}
+                editLocale={props.editLocale}
+                onChange={props.onChange}
+            />
         </div>
     );
 }
@@ -25,6 +31,7 @@ export default function Editor(props: EditorProps) {
 interface EditorContentProps {
     refLocale: ObjectNode;
     editLocale: ObjectNode;
+    onChange: node_OnChangeHandler;
 }
 
 function EditorContent(props: EditorContentProps) {
@@ -50,10 +57,20 @@ function EditorContent(props: EditorContentProps) {
                                         <span class="token">{": "}</span>
                                     </div>
                                     <div class="node-value-ref">
-                                        <NodeRenderer node={item.refNode} isEditable={false} />
+                                        <NodeRenderer
+                                            node={item.refNode}
+                                            isEditable={false}
+                                            path={item.path}
+                                            onChange={props.onChange}
+                                        />
                                     </div>
                                     <div class="node-value-edit">
-                                        <NodeRenderer node={item.editNode} isEditable={true} />
+                                        <NodeRenderer
+                                            node={item.editNode}
+                                            isEditable={true}
+                                            path={item.path}
+                                            onChange={props.onChange}
+                                        />
                                     </div>
                                 </div>
                             )}

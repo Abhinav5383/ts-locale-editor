@@ -21,7 +21,6 @@ export type VariableNode = {
 export type ArrayNode = {
     type: "array";
     value: (StringNode | VariableNode)[];
-    length: number;
 };
 
 // Functions
@@ -38,17 +37,20 @@ export type TranslationFn_Body =
     | VariableNode
     | ArrayNode
     | TranslationFn_BlockExprBody; // raw code string of the function body
-export type FunctionNode = {
+
+export type FunctionNode<T extends TranslationFn_Body = TranslationFn_Body> = {
     type: "function";
     params: TranslationFn_Params[];
-    body: TranslationFn_Body;
+    body: T;
 };
 
 // Objects
 export type ObjectNode = {
     type: "object";
-    value: TranslationNode[];
+    value: KeyedTranslationNode[];
 };
+
+export type WithKey<T extends TranslationNodeUnion> = NodeBase & T;
 
 export type TranslationNodeUnion =
     | StringNode
@@ -58,4 +60,5 @@ export type TranslationNodeUnion =
     | FunctionNode;
 
 // Union type for all translation nodes
-export type TranslationNode = NodeBase & TranslationNodeUnion;
+export type TranslationNode = TranslationNodeUnion;
+export type KeyedTranslationNode = WithKey<TranslationNode>;

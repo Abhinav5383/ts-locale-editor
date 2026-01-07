@@ -5,15 +5,15 @@ import * as t from "@babel/types";
 import type {
     ArrayNode,
     FunctionNode,
+    ObjectNode,
     StringNode,
     TranslationFn_Body,
     TranslationFn_Params,
-    TranslationNode,
     VariableNode,
 } from "./types";
 
-export function extractTranslationsFromObject(obj: t.ObjectExpression): TranslationNode[] {
-    const nodes: TranslationNode[] = [];
+export function extractTranslationsFromObject(obj: t.ObjectExpression): ObjectNode {
+    const nodeList: ObjectNode["value"] = [];
 
     for (const prop of obj.properties) {
         if (!t.isObjectProperty(prop)) continue;
@@ -27,19 +27,16 @@ export function extractTranslationsFromObject(obj: t.ObjectExpression): Translat
         const expr = prop.value;
 
         if (t.isObjectExpression(expr)) {
-            const children = extractTranslationsFromObject(expr);
-            const node: TranslationNode = {
+            nodeList.push({
                 key,
-                type: "object",
-                value: children,
-            };
-            nodes.push(node);
+                ...extractTranslationsFromObject(expr),
+            });
             continue;
         }
 
         if (isFunctionLike(expr)) {
             const fnNode = extractFunctionNode(expr);
-            nodes.push({
+            nodeList.push({
                 key,
                 ...fnNode,
             });
@@ -48,23 +45,28 @@ export function extractTranslationsFromObject(obj: t.ObjectExpression): Translat
 
         const arrayNode = extractArrayNode(expr);
         if (arrayNode) {
-            nodes.push({ key, ...arrayNode });
+            nodeList.push({ key, ...arrayNode });
             continue;
         }
 
         const stringNode = extractStringNode(expr);
         if (stringNode) {
-            nodes.push({ key, ...stringNode });
+            nodeList.push({ key, ...stringNode });
             continue;
         }
 
         const variableNode = extractVariableNode(expr);
         if (variableNode) {
-            nodes.push({ key, ...variableNode });
+            nodeList.push({ key, ...variableNode });
         }
     }
 
-    return nodes;
+    const objNode: ObjectNode = {
+        type: "object",
+        value: nodeList,
+    };
+
+    return objNode;
 }
 
 export function getDefaultExportObject(code: string): t.ObjectExpression | null {
@@ -171,7 +173,6 @@ function extractArrayNode(expr: t.Expression): ArrayNode | null {
     return {
         type: "array",
         value: items,
-        length: items.length,
     };
 }
 

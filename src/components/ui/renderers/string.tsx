@@ -1,10 +1,17 @@
-import { createEffect, createSignal, Show } from "solid-js";
+import { createEffect, Show } from "solid-js";
 import type { StringNode } from "~/lib/types";
 import type { NodeRendererProps } from "./types";
 
 export function StringRenderer(props: NodeRendererProps<StringNode>) {
-    const [value, setValue] = createSignal(props.node.value);
+    // const [value, setValue] = createSignal(props.node.value);
     const isTemplate = props.node.type === "string_template";
+
+    function handleChange(newValue: string) {
+        props.onChange(props.path, {
+            ...props.node,
+            value: newValue,
+        });
+    }
 
     return (
         <div class="node-string">
@@ -20,15 +27,15 @@ export function StringRenderer(props: NodeRendererProps<StringNode>) {
                         class="token token-string-content"
                     >
                         <span class="token no-select">{isTemplate ? "`" : '"'}</span>
-                        {value()}
+                        {props.node.value}
                         <span class="token no-select">{isTemplate ? "`" : '"'}</span>
                         {props.postInlineContent}
                     </pre>
                 }
             >
                 <ContentEditable
-                    value={value()}
-                    onChange={setValue}
+                    value={props.node.value}
+                    onChange={handleChange}
                     className="string-editable token token-string-content"
                 />
                 {props.postInlineContent}

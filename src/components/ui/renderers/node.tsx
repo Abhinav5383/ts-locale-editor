@@ -19,6 +19,8 @@ export function NodeRenderer(props: NodeRendererProps) {
                 {(node) => (
                     <StringRenderer
                         node={node}
+                        path={props.path}
+                        onChange={props.onChange}
                         isEditable={props.isEditable}
                         postInlineContent={props.postInlineContent}
                     />
@@ -29,6 +31,8 @@ export function NodeRenderer(props: NodeRendererProps) {
                 {(node) => (
                     <VariableRenderer
                         node={node}
+                        path={props.path}
+                        onChange={props.onChange}
                         isEditable={props.isEditable}
                         postInlineContent={props.postInlineContent}
                     />
@@ -39,6 +43,8 @@ export function NodeRenderer(props: NodeRendererProps) {
                 {(node) => (
                     <ArrayRenderer
                         node={node}
+                        path={props.path}
+                        onChange={props.onChange}
                         isEditable={props.isEditable}
                         postInlineContent={props.postInlineContent}
                     />
@@ -53,6 +59,8 @@ export function NodeRenderer(props: NodeRendererProps) {
                 {(node) => (
                     <FunctionRenderer
                         node={node}
+                        path={props.path}
+                        onChange={props.onChange}
                         isEditable={props.isEditable}
                         postInlineContent={props.postInlineContent}
                     />

@@ -1,85 +1,120 @@
-import { createSignal, For, Show } from "solid-js";
-import type { FunctionNode, TranslationNode } from "~/lib/types";
+import { For, Match, Show, Switch } from "solid-js";
+import type { FunctionNode, TranslationFn_BlockExprBody, TranslationNode } from "~/lib/types";
 import { NodeRenderer } from "./node";
 import { ContentEditable } from "./string";
 import type { NodeRendererProps } from "./types";
 
 export function FunctionRenderer(props: NodeRendererProps<FunctionNode>) {
-    const [editorBodyTxt, setEditorBodyTxt] = createSignal(
-        props.node.body.type === "BlockExpression" ? props.node.body.value : "",
-    );
-    const isBlockExpression = props.node.body.type === "BlockExpression";
+    function handleBlockFnChange(newValue: string) {
+        props.onChange(props.path, {
+            ...props.node,
+            body: {
+                type: "BlockExpression",
+                value: newValue,
+            },
+        } satisfies FunctionNode<TranslationFn_BlockExprBody>);
+    }
+
+    function handleArrowFnChange(path: string[], bodyNode: TranslationNode) {
+        const updatedBody = updateFnBody(props.node, bodyNode);
+        if (!updatedBody) return;
+
+        props.onChange(path, updatedBody);
+    }
 
     return (
-        <Show
-            when={isBlockExpression}
-            fallback={
-                <div class="node-function inline-func">
-                    <div class="function-signature">
-                        <span class="token token-punctuation">{"("}</span>
-                        <For each={props.node.params}>
-                            {(param, index) => (
-                                <>
-                                    <span class="token token-parameter">
-                                        {param.name}
+        <Switch>
+            <Match keyed when={props.node.body.type === "BlockExpression" && props.node.body}>
+                {(fnBody) => (
+                    <div class="node-function block-func">
+                        <div class="function-signature">
+                            <span class="token token-keyword">function</span>
+                            <span class="token token-punctuation">&nbsp;{"("}</span>
+                            <For each={props.node.params}>
+                                {(param, index) => (
+                                    <>
+                                        <span class="token token-parameter">{param.name}</span>
                                         <span class="token token-punctuation">:&nbsp;</span>
-                                    </span>
-                                    <span class="token token-type">
-                                        {param.type}
+                                        <span class="token token-type">{param.type}</span>
                                         <Show when={index() < props.node.params.length - 1}>
                                             <span class="token token-punctuation">,&nbsp;</span>
                                         </Show>
-                                    </span>
-                                </>
-                            )}
-                        </For>
-                        <span class="token token-punctuation">{") =>"}&nbsp;</span>
-                    </div>
-
-                    <NodeRenderer
-                        node={props.node.body as TranslationNode}
-                        isEditable={props.isEditable}
-                    />
-                </div>
-            }
-        >
-            <div class="node-function block-func">
-                <div class="function-signature">
-                    <span class="token token-keyword">function</span>
-                    <span class="token token-punctuation">&nbsp;{"("}</span>
-                    <For each={props.node.params}>
-                        {(param, index) => (
-                            <>
-                                <span class="token token-parameter">{param.name}</span>
-                                <span class="token token-punctuation">:&nbsp;</span>
-                                <span class="token token-type">{param.type}</span>
-                                <Show when={index() < props.node.params.length - 1}>
-                                    <span class="token token-punctuation">,&nbsp;</span>
-                                </Show>
-                            </>
-                        )}
-                    </For>
-                    <span class="token token-punctuation">{") {"}</span>
-                </div>
-                <Show
-                    when={props.isEditable}
-                    fallback={
-                        <div class="code-block">
-                            <code class="token token-code">{editorBodyTxt()}</code>
+                                    </>
+                                )}
+                            </For>
+                            <span class="token token-punctuation">{") {"}</span>
                         </div>
-                    }
-                >
-                    <ContentEditable
-                        value={editorBodyTxt()}
-                        onChange={setEditorBodyTxt}
-                        className="code-editable"
-                    />
-                </Show>
-                <div>
-                    <span class="token token-punctuation">{"}"}</span>
-                    {props.postInlineContent}
-                </div>
-            </div>
-        </Show>
+                        <Show
+                            when={props.isEditable}
+                            fallback={
+                                <div class="code-block">
+                                    <code class="token token-code">{fnBody.value}</code>
+                                </div>
+                            }
+                        >
+                            <ContentEditable
+                                value={fnBody.value}
+                                onChange={handleBlockFnChange}
+                                className="code-editable"
+                            />
+                        </Show>
+                        <div>
+                            <span class="token token-punctuation">{"}"}</span>
+                            {props.postInlineContent}
+                        </div>
+                    </div>
+                )}
+            </Match>
+
+            <Match keyed when={props.node.body.type !== "BlockExpression" && props.node.body}>
+                {(fnBody) => (
+                    <div class="node-function inline-func">
+                        <div class="function-signature">
+                            <span class="token token-punctuation">{"("}</span>
+                            <For each={props.node.params}>
+                                {(param, index) => (
+                                    <>
+                                        <span class="token token-parameter">
+                                            {param.name}
+                                            <span class="token token-punctuation">:&nbsp;</span>
+                                        </span>
+                                        <span class="token token-type">
+                                            {param.type}
+                                            <Show when={index() < props.node.params.length - 1}>
+                                                <span class="token token-punctuation">,&nbsp;</span>
+                                            </Show>
+                                        </span>
+                                    </>
+                                )}
+                            </For>
+                            <span class="token token-punctuation">{") =>"}&nbsp;</span>
+                        </div>
+
+                        <NodeRenderer
+                            node={fnBody}
+                            path={props.path}
+                            onChange={handleArrowFnChange}
+                            isEditable={props.isEditable}
+                        />
+                    </div>
+                )}
+            </Match>
+        </Switch>
     );
+}
+
+function updateFnBody(oldNode: FunctionNode, newBody: TranslationNode) {
+    switch (newBody.type) {
+        case "string":
+        case "string_template":
+        case "variable":
+        case "array":
+            return {
+                ...oldNode,
+                body: newBody,
+            } satisfies FunctionNode<typeof newBody>;
+
+        default:
+            return null;
+    }
 }

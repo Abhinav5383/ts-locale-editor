@@ -5,7 +5,6 @@ import type {
     StringNode,
     TranslationFn_BlockExprBody,
     TranslationNode,
-    TranslationNodeUnion,
     VariableNode,
 } from "~/lib/types";
 
@@ -16,6 +15,7 @@ export enum IterationItemType {
 }
 
 type IterationItem_Base = {
+    path: string[];
     key: string;
     depth: number;
     isLastChild: boolean;
@@ -40,7 +40,8 @@ export function flattenLocaleEntries(
     refLocaleNodes: TranslationNode[],
     editLocaleNodes: TranslationNode[],
     depth = 0,
-) {
+    parentPath: string[] = [],
+): IterationItem[] {
     const items: IterationItem[] = [];
 
     const editLocaleKeyMap = new Map<string, TranslationNode>();
@@ -50,10 +51,7 @@ export function flattenLocaleEntries(
 
     for (let i = 0; i < refLocaleNodes.length; i++) {
         const refNode = refLocaleNodes[i];
-        const editNode = editLocaleKeyMap.get(refNode.key) ?? {
-            ...emptyNode(refNode),
-            key: refNode.key,
-        };
+        const editNode = editLocaleKeyMap.get(refNode.key) ?? emptyNode(refNode);
         const isLastChild = i === refLocaleNodes.length - 1;
 
         if (refNode.type === "object" && editNode.type === "object") {
@@ -62,9 +60,13 @@ export function flattenLocaleEntries(
                 key: refNode.key,
                 depth: depth,
                 isLastChild,
+                path: [...parentPath, refNode.key],
             });
 
-            const childItems = flattenLocaleEntries(refNode.value, editNode.value, depth + 1);
+            const childItems = flattenLocaleEntries(refNode.value, editNode.value, depth + 1, [
+                ...parentPath,
+                refNode.key,
+            ]);
 
             items.push(...childItems);
 
@@ -73,6 +75,7 @@ export function flattenLocaleEntries(
                 key: refNode.key,
                 depth,
                 isLastChild,
+                path: [...parentPath, refNode.key],
             });
         } else {
             items.push({
@@ -80,8 +83,9 @@ export function flattenLocaleEntries(
                 key: refNode.key,
                 depth,
                 isLastChild,
-                refNode,
-                editNode,
+                refNode: nodeWithoutKey(refNode),
+                editNode: nodeWithoutKey(editNode),
+                path: [...parentPath, refNode.key],
             });
         }
     }
@@ -89,7 +93,14 @@ export function flattenLocaleEntries(
     return items;
 }
 
-function emptyNode(refNode: TranslationNodeUnion): TranslationNodeUnion {
+function nodeWithoutKey(node: TranslationNode | TranslationNode): TranslationNode {
+    if (!("key" in node)) return node;
+
+    const { key, ...rest } = node;
+    return rest;
+}
+
+function emptyNode(refNode: TranslationNode): TranslationNode {
     switch (refNode.type) {
         case "string":
         case "string_template":
@@ -162,7 +173,6 @@ function emptyArrayNode(refNode: ArrayNode): ArrayNode {
                     return val;
             }
         }),
-        length: refNode.length,
     };
 }
 function emptyStringNode(refNode: StringNode): StringNode {
