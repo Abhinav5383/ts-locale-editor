@@ -167,9 +167,9 @@
         transition: background-color 0.3s, translate 0.3s;
         background-color: transparent;
 
-        &.dragging,
-        &:has(.drag-handle:hover) {
+        &.dragging {
             background-color: var(--gh-bg-tertiary);
+            outline: 1px solid var(--gh-border);
         }
 
         &.dragging {
@@ -178,16 +178,19 @@
         }
     }
 
+    .drop-location {
+        opacity: 0.7;
+        background-color: var(--gh-bg-primary);
+    }
+
     .drag-handle {
         cursor: grab;
         user-select: none;
         color: var(--gh-text-secondary);
         display: flex;
         align-items: center;
-        border: transparent;
-        background-color: transparent;
-        outline: none;
         opacity: 0;
+        padding: 0 0.3em;
         transition: opacity 0.3s;
         padding-inline-start: calc(var(--indent-size) - 3ch);
     }
