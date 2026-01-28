@@ -1,6 +1,6 @@
 import { For, Match, Switch } from "solid-js";
 import { NodeRenderer } from "~/components/ui/renderers/node";
-import { flattenLocaleEntries, IterationItemType } from "~/components/ui/utils";
+import { IterationItemType, flattenLocaleEntries } from "~/components/ui/utils";
 import type { ObjectNode } from "~/lib/types";
 import "./editor.css";
 import type { node_OnChangeHandler } from "./renderers/types";
@@ -51,25 +51,33 @@ function EditorContent(props: EditorContentProps) {
                                     class={`node-row ${item.isLastChild ? "last-entry" : ""}`}
                                     style={{ "--depth": `${item.depth}` }}
                                 >
-                                    <div class="node-key">
-                                        {item.key}
-                                        <span class="token">{": "}</span>
+                                    <div class="cell-wrapper">
+                                        <div class="node-key">
+                                            {item.key}
+                                            <span class="token">{": "}</span>
+                                        </div>
                                     </div>
-                                    <div class="node-value-ref">
-                                        <NodeRenderer
-                                            node={item.refNode}
-                                            isEditable={false}
-                                            path={item.path}
-                                            onChange={props.onChange}
-                                        />
+
+                                    <div class="cell-wrapper">
+                                        <div class="node-value-ref">
+                                            <NodeRenderer
+                                                node={item.refNode}
+                                                isEditable={false}
+                                                path={item.path}
+                                                onChange={props.onChange}
+                                            />
+                                        </div>
                                     </div>
-                                    <div class="node-value-edit">
-                                        <NodeRenderer
-                                            node={item.editNode}
-                                            isEditable={true}
-                                            path={item.path}
-                                            onChange={props.onChange}
-                                        />
+
+                                    <div class="cell-wrapper">
+                                        <div class="node-value-edit">
+                                            <NodeRenderer
+                                                node={item.editNode}
+                                                isEditable={true}
+                                                path={item.path}
+                                                onChange={props.onChange}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             )}

@@ -1,7 +1,7 @@
-import { createResource, Match, Show, Switch } from "solid-js";
+import { Match, Show, Switch, createResource } from "solid-js";
 import Navbar from "~/components/layout/navbar";
 import { getFileContents } from "~/lib/gh_api";
-import { extractTranslationsFromObject, getDefaultExportObject } from "~/lib/parser";
+import { getTranslationNodesFromTxtFile } from "~/lib/parser";
 import "./App.css";
 import Editor from "./components/ui/editor";
 import { updateNodeValue } from "./components/ui/node-updater";
@@ -41,14 +41,6 @@ export default function App() {
         if (!oldEditedState) return;
 
         setEditedLocale(updateNodeValue(path, oldEditedState, node));
-
-        console.log({
-            path,
-            node,
-
-            oldRoot: oldEditedState,
-            newRoot: updateNodeValue(path, oldEditedState, node),
-        });
     };
 
     return (
@@ -92,8 +84,5 @@ async function getTranslationNodes(repo: string, path: string, ref: string) {
     let fileContents = await getFileContents(repo, path, ref);
     if (!fileContents) fileContents = "export default {};";
 
-    const defaultExportObject = getDefaultExportObject(fileContents);
-    if (!defaultExportObject) throw new Error(`No default export found in the file at ${path}!`);
-
-    return extractTranslationsFromObject(defaultExportObject);
+    return getTranslationNodesFromTxtFile(fileContents);
 }

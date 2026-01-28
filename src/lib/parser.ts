@@ -12,70 +12,57 @@ import type {
     VariableNode,
 } from "./types";
 
-export function extractTranslationsFromObject(obj: t.ObjectExpression): ObjectNode {
-    const nodeList: ObjectNode["value"] = [];
+export function getTranslationNodesFromTxtFile(code: string): ObjectNode {
+    const ast = getExportsAST(code);
+    return getTranslationNodesFromAST(ast);
+}
 
-    for (const prop of obj.properties) {
-        if (!t.isObjectProperty(prop)) continue;
-        if (!t.isExpression(prop.value)) continue;
+function getTranslationNodesFromAST(exports: ReturnType<typeof getExportsAST>): ObjectNode {
+    const result: ObjectNode = {
+        type: "object",
+        value: [],
+    };
+    if (!exports) return result;
 
-        let key: string | null = null;
-        if (t.isIdentifier(prop.key)) key = prop.key.name;
-        else if (t.isStringLiteral(prop.key)) key = prop.key.value;
-        if (!key) continue;
+    if (Array.isArray(exports)) {
+        for (const fnDecl of exports) {
+            if (!t.isFunctionDeclaration(fnDecl) || !fnDecl.id) continue;
 
-        const expr = prop.value;
-
-        if (t.isObjectExpression(expr)) {
-            nodeList.push({
-                key,
-                ...extractTranslationsFromObject(expr),
-            });
-            continue;
-        }
-
-        if (isFunctionLike(expr)) {
-            const fnNode = extractFunctionNode(expr);
-            nodeList.push({
-                key,
+            const fnNode = extractFunctionNode(fnDecl);
+            result.value.push({
+                key: fnDecl.id.name,
                 ...fnNode,
             });
-            continue;
         }
+    } else {
+        const obj = exports;
 
-        const arrayNode = extractArrayNode(expr);
-        if (arrayNode) {
-            nodeList.push({ key, ...arrayNode });
-            continue;
-        }
+        for (const prop of obj.properties) {
+            if (!t.isObjectProperty(prop)) continue;
+            if (!t.isExpression(prop.value)) continue;
 
-        const stringNode = extractStringNode(expr);
-        if (stringNode) {
-            nodeList.push({ key, ...stringNode });
-            continue;
-        }
+            let key: string | null = null;
+            if (t.isIdentifier(prop.key)) key = prop.key.name;
+            else if (t.isStringLiteral(prop.key)) key = prop.key.value;
+            if (!key) continue;
 
-        const variableNode = extractVariableNode(expr);
-        if (variableNode) {
-            nodeList.push({ key, ...variableNode });
+            const extractedNode = mapExpressionToNode(key, prop.value);
+            if (extractedNode) result.value.push(extractedNode);
         }
     }
 
-    const objNode: ObjectNode = {
-        type: "object",
-        value: nodeList,
-    };
-
-    return objNode;
+    return result;
 }
 
-export function getDefaultExportObject(code: string): t.ObjectExpression | null {
+function getExportsAST(code: string): t.ObjectExpression | t.FunctionDeclaration[] | null {
     const ast = parse(code, {
         sourceType: "module",
         plugins: ["typescript"],
     });
 
     let defaultExportObject: t.ObjectExpression | null = null;
+    const exportedFunctionExpressions: t.FunctionDeclaration[] = [];
+
     traverse(ast, {
         // I'm just gonna assume all default exports are gonna be object literals for translation files
         // If something breaks we can "Fix it later"(TM) :D
@@ -88,9 +75,21 @@ export function getDefaultExportObject(code: string): t.ObjectExpression | null 
                 defaultExportObject = unwrapped;
             }
         },
+
+        ExportNamedDeclaration(path) {
+            const decl = path.node.declaration;
+            if (!decl) return;
+
+            if (t.isFunctionDeclaration(decl)) {
+                exportedFunctionExpressions.push(decl);
+            }
+        },
     });
 
-    return defaultExportObject;
+    if (defaultExportObject) return defaultExportObject;
+    if (exportedFunctionExpressions.length > 0) return exportedFunctionExpressions;
+
+    return null;
 }
 
 // unwrap the real value from TS wrappers
@@ -105,6 +104,40 @@ function unwrapExpression(expr: t.Expression): t.Expression {
         return unwrapExpression(expr.expression as t.Expression);
     }
     return expr;
+}
+
+function mapExpressionToNode(key: string, expr: t.Expression): ObjectNode["value"][number] | null {
+    if (t.isObjectExpression(expr)) {
+        return {
+            key,
+            ...getTranslationNodesFromAST(expr),
+        };
+    }
+
+    if (isFunctionLike(expr)) {
+        const fnNode = extractFunctionNode(expr);
+        return {
+            key,
+            ...fnNode,
+        };
+    }
+
+    const arrayNode = extractArrayNode(expr);
+    if (arrayNode) {
+        return { key, ...arrayNode };
+    }
+
+    const stringNode = extractStringNode(expr);
+    if (stringNode) {
+        return { key, ...stringNode };
+    }
+
+    const variableNode = extractVariableNode(expr);
+    if (variableNode) {
+        return { key, ...variableNode };
+    }
+
+    return null;
 }
 
 function extractStringNode(expr: t.Expression): StringNode | null {
@@ -180,7 +213,8 @@ function isFunctionLike(expr: t.Expression) {
     return t.isFunctionExpression(expr) || t.isArrowFunctionExpression(expr);
 }
 
-function extractFunctionNode(expr: t.FunctionExpression | t.ArrowFunctionExpression): FunctionNode {
+type AST_FnTypes = t.FunctionExpression | t.ArrowFunctionExpression | t.FunctionDeclaration;
+function extractFunctionNode(expr: AST_FnTypes): FunctionNode {
     const params = extractFnParams(expr);
     const body = extractFnBody(expr);
 
@@ -191,9 +225,7 @@ function extractFunctionNode(expr: t.FunctionExpression | t.ArrowFunctionExpress
     } satisfies FunctionNode;
 }
 
-function extractFnParams(
-    fn: t.FunctionExpression | t.ArrowFunctionExpression,
-): TranslationFn_Params[] {
+function extractFnParams(fn: AST_FnTypes): TranslationFn_Params[] {
     return fn.params.map((p) => {
         // shouldn't really happen in our case
         // only happens if using destructuring or rest params
@@ -213,7 +245,7 @@ function extractFnParams(
     });
 }
 
-function extractFnBody(fn: t.FunctionExpression | t.ArrowFunctionExpression): TranslationFn_Body {
+function extractFnBody(fn: AST_FnTypes): TranslationFn_Body {
     if (t.isArrowFunctionExpression(fn) && !t.isBlockStatement(fn.body)) {
         const arr = extractArrayNode(fn.body);
         if (arr) return arr;
@@ -228,7 +260,7 @@ function extractFnBody(fn: t.FunctionExpression | t.ArrowFunctionExpression): Tr
     };
 }
 
-function extractFnCode(fn: t.FunctionExpression | t.ArrowFunctionExpression): string {
+function extractFnCode(fn: AST_FnTypes): string {
     if (t.isBlockStatement(fn.body)) {
         return fn.body.body.map((stmt) => generate(stmt).code).join("\n");
     }
