@@ -34,8 +34,12 @@ export function FunctionRenderer(props: NodeRendererProps<FunctionNode>) {
                                 {(param, index) => (
                                     <>
                                         <span class="token token-parameter">{param.name}</span>
-                                        <span class="token token-punctuation">:&nbsp;</span>
-                                        <span class="token token-type">{param.type}</span>
+
+                                        <Show when={!props.isEditable}>
+                                            <span class="token token-punctuation">:&nbsp;</span>
+                                            <span class="token token-type">{param.type}</span>
+                                        </Show>
+
                                         <Show when={index() < props.node.params.length - 1}>
                                             <span class="token token-punctuation">,&nbsp;</span>
                                         </Show>
@@ -76,14 +80,19 @@ export function FunctionRenderer(props: NodeRendererProps<FunctionNode>) {
                                     <>
                                         <span class="token token-parameter">
                                             {param.name}
-                                            <span class="token token-punctuation">:&nbsp;</span>
-                                        </span>
-                                        <span class="token token-type">
-                                            {param.type}
-                                            <Show when={index() < props.node.params.length - 1}>
-                                                <span class="token token-punctuation">,&nbsp;</span>
+
+                                            <Show when={!props.isEditable}>
+                                                <span class="token token-punctuation">:&nbsp;</span>
                                             </Show>
                                         </span>
+
+                                        <Show when={!props.isEditable}>
+                                            <span class="token token-type">{param.type}</span>
+                                        </Show>
+
+                                        <Show when={index() < props.node.params.length - 1}>
+                                            <span class="token token-punctuation">,&nbsp;</span>
+                                        </Show>
                                     </>
                                 )}
                             </For>

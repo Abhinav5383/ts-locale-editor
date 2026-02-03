@@ -54,7 +54,7 @@ function getTranslationNodesFromAST(exports: ReturnType<typeof getExportsAST>): 
     return result;
 }
 
-function getExportsAST(code: string): t.ObjectExpression | t.FunctionDeclaration[] | null {
+export function getExportsAST(code: string): t.ObjectExpression | t.FunctionDeclaration[] | null {
     const ast = parse(code, {
         sourceType: "module",
         plugins: ["typescript"],

@@ -8,17 +8,30 @@ import { updateNodeValue } from "./components/ui/node-updater";
 import type { node_OnChangeHandler } from "./components/ui/renderers/types";
 import type { ObjectNode, TranslationNode } from "./lib/types";
 
+interface TranslationNodesResult {
+    src: string;
+    nodes: ObjectNode;
+}
+
 export default function App() {
-    const [refLocale] = createResource((): Promise<ObjectNode> => {
+    const [refLocale] = createResource((): Promise<TranslationNodesResult> => {
         return getTranslationNodes("", "", "");
     });
-    const [translatingLocale] = createResource(refLocale, (): ObjectNode => {
+
+    const [translatingLocale] = createResource(refLocale, (): TranslationNodesResult => {
         // return getTranslationNodes("", "", "");
+        // return {
+        //     type: "object",
+        //     value: [],
+        // };
+
+        const src = "export default {};";
         return {
-            type: "object",
-            value: [],
+            src: src,
+            nodes: getTranslationNodesFromTxtFile(src),
         };
     });
+
     const [editedLocale, { mutate: setEditedLocale }] = createResource(
         translatingLocale,
         (): ObjectNode => {
@@ -29,7 +42,7 @@ export default function App() {
                     value: [],
                 };
             }
-            return translating;
+            return translating.nodes;
         },
     );
 
@@ -66,8 +79,10 @@ export default function App() {
                             {(_translating) => {
                                 return (
                                     <Editor
-                                        refLocale={_ref}
-                                        editLocale={_translating}
+                                        refLocaleSrc={_ref.src}
+                                        refLocale={_ref.nodes}
+                                        editingLocaleSrc={_translating.src}
+                                        editLocale={_translating.nodes}
                                         onChange={handleTranslatingLocaleChange}
                                     />
                                 );
@@ -84,5 +99,8 @@ async function getTranslationNodes(repo: string, path: string, ref: string) {
     let fileContents = await getFileContents(repo, path, ref);
     if (!fileContents) fileContents = "export default {};";
 
-    return getTranslationNodesFromTxtFile(fileContents);
+    return {
+        src: fileContents,
+        nodes: getTranslationNodesFromTxtFile(fileContents),
+    };
 }
