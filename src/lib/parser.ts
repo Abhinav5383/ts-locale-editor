@@ -2,66 +2,35 @@ import generate from "@babel/generator";
 import { parse } from "@babel/parser";
 import traverse from "@babel/traverse";
 import * as t from "@babel/types";
-import type {
-    ArrayNode,
-    FunctionNode,
-    ObjectNode,
-    StringNode,
-    TranslationFn_Body,
-    TranslationFn_Params,
-    VariableNode,
+import {
+    type ArrayNode,
+    ExportType,
+    type FunctionNode,
+    type ObjectNode,
+    type StringNode,
+    type TranslationFn_Body,
+    type TranslationFn_Params,
+    type VariableNode,
 } from "./types";
 
-export function getTranslationNodesFromTxtFile(code: string): ObjectNode {
-    const ast = getExportsAST(code);
-    return getTranslationNodesFromAST(ast);
-}
+type AST_Result =
+    | {
+          exportType: ExportType.Default;
+          value: t.ObjectExpression;
+      }
+    | {
+          exportType: ExportType.Named;
+          value: t.VariableDeclarator[];
+      };
 
-function getTranslationNodesFromAST(exports: ReturnType<typeof getExportsAST>): ObjectNode {
-    const result: ObjectNode = {
-        type: "object",
-        value: [],
-    };
-    if (!exports) return result;
-
-    if (Array.isArray(exports)) {
-        for (const fnDecl of exports) {
-            if (!t.isFunctionDeclaration(fnDecl) || !fnDecl.id) continue;
-
-            const fnNode = extractFunctionNode(fnDecl);
-            result.value.push({
-                key: fnDecl.id.name,
-                ...fnNode,
-            });
-        }
-    } else {
-        const obj = exports;
-
-        for (const prop of obj.properties) {
-            if (!t.isObjectProperty(prop)) continue;
-            if (!t.isExpression(prop.value)) continue;
-
-            let key: string | null = null;
-            if (t.isIdentifier(prop.key)) key = prop.key.name;
-            else if (t.isStringLiteral(prop.key)) key = prop.key.value;
-            if (!key) continue;
-
-            const extractedNode = mapExpressionToNode(key, prop.value);
-            if (extractedNode) result.value.push(extractedNode);
-        }
-    }
-
-    return result;
-}
-
-export function getExportsAST(code: string): t.ObjectExpression | t.FunctionDeclaration[] | null {
+export function getExportsAST(code: string): AST_Result | null {
     const ast = parse(code, {
         sourceType: "module",
         plugins: ["typescript"],
     });
 
     let defaultExportObject: t.ObjectExpression | null = null;
-    const exportedFunctionExpressions: t.FunctionDeclaration[] = [];
+    const namedExports: t.VariableDeclarator[] = [];
 
     traverse(ast, {
         // I'm just gonna assume all default exports are gonna be object literals for translation files
@@ -78,16 +47,25 @@ export function getExportsAST(code: string): t.ObjectExpression | t.FunctionDecl
 
         ExportNamedDeclaration(path) {
             const decl = path.node.declaration;
-            if (!decl) return;
+            if (!t.isVariableDeclaration(decl)) return;
 
-            if (t.isFunctionDeclaration(decl)) {
-                exportedFunctionExpressions.push(decl);
-            }
+            const declarator = decl.declarations[0];
+            namedExports.push(declarator);
         },
     });
 
-    if (defaultExportObject) return defaultExportObject;
-    if (exportedFunctionExpressions.length > 0) return exportedFunctionExpressions;
+    if (defaultExportObject) {
+        return {
+            exportType: ExportType.Default,
+            value: defaultExportObject,
+        };
+    }
+    if (namedExports.length > 0) {
+        return {
+            exportType: ExportType.Named,
+            value: namedExports,
+        };
+    }
 
     return null;
 }
@@ -106,11 +84,67 @@ function unwrapExpression(expr: t.Expression): t.Expression {
     return expr;
 }
 
+export function getTranslationNodesFromTxtFile(code: string): ObjectNode {
+    const exports = getExportsAST(code);
+
+    if (!exports) {
+        return {
+            type: "object",
+            value: [],
+        };
+    }
+
+    if (exports.exportType === ExportType.Named) {
+        return extractFromVarDecls(exports.value);
+    } else {
+        return extractObjectNode(exports.value);
+    }
+}
+
+function extractFromVarDecls(decls: t.VariableDeclarator[]): ObjectNode {
+    const result: ObjectNode = {
+        type: "object",
+        value: [],
+    };
+
+    for (const decl of decls) {
+        if (!t.isIdentifier(decl.id)) continue;
+        if (!decl.init) continue;
+
+        const mappedNode = mapExpressionToNode(decl.id.name, decl.init);
+        if (mappedNode) result.value.push(mappedNode);
+    }
+
+    return result;
+}
+
+function extractObjectNode(expr: t.ObjectExpression): ObjectNode {
+    const result: ObjectNode = {
+        type: "object",
+        value: [],
+    };
+
+    for (const prop of expr.properties) {
+        if (!t.isObjectProperty(prop)) continue;
+        if (!t.isExpression(prop.value)) continue;
+
+        let key: string | null = null;
+        if (t.isIdentifier(prop.key)) key = prop.key.name;
+        else if (t.isStringLiteral(prop.key)) key = prop.key.value;
+        if (!key) continue;
+
+        const extractedNode = mapExpressionToNode(key, prop.value);
+        if (extractedNode) result.value.push(extractedNode);
+    }
+
+    return result;
+}
+
 function mapExpressionToNode(key: string, expr: t.Expression): ObjectNode["value"][number] | null {
     if (t.isObjectExpression(expr)) {
         return {
             key,
-            ...getTranslationNodesFromAST(expr),
+            ...extractObjectNode(expr),
         };
     }
 

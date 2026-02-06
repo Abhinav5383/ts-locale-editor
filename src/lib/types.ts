@@ -61,3 +61,10 @@ export type TranslationNodeUnion =
 
 // Union type for all translation nodes
 export type TranslationNode = TranslationNodeUnion;
+
+// ========== Other things ===========
+
+export enum ExportType {
+    Named = "named",
+    Default = "default",
+}

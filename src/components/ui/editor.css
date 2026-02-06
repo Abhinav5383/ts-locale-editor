@@ -9,7 +9,7 @@
     height: fit-content;
     display: grid;
     gap: var(--gap);
-    grid-template-columns: 1fr 2fr 2fr;
+    grid-template-columns: minmax(min-content, 1fr) 5fr 5fr;
 }
 
 .editor-header {
@@ -240,6 +240,11 @@
 .node-function.inline-func {
     display: flex;
     flex-wrap: wrap;
+}
+
+.cell-wrapper:has(.node-string.full-width)+.cell-wrapper .inline-func .node-string {
+    flex-basis: 100%;
+    display: grid;
 }
 
 .function-signature {

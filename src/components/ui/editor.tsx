@@ -1,15 +1,16 @@
 import { For, Match, Switch } from "solid-js";
 import { NodeRenderer } from "~/components/ui/renderers/node";
-import { IterationItemType, flattenLocaleEntries } from "~/components/ui/utils";
+import { flattenLocaleEntries, IterationItemType } from "~/components/ui/utils";
 import { AssembleTranslation } from "~/lib/assembler";
 import type { ObjectNode } from "~/lib/types";
 import "./editor.css";
 import type { node_OnChangeHandler } from "./renderers/types";
+import { Select } from "./select";
 
 interface EditorProps {
-    refLocaleSrc: string;
+    refLocaleSrc: string | undefined;
     refLocale: ObjectNode; // the base reference locale
-    editingLocaleSrc: string;
+    editingLocaleSrc: string | undefined;
     editLocale: ObjectNode; // the locale being edited
     onChange: node_OnChangeHandler;
 }
@@ -20,9 +21,14 @@ export default function Editor(props: EditorProps) {
             <div class="editor-wrapper">
                 <div class="editor-header">
                     <div class="header-column"> </div>
-                    <div class="header-column">Reference Locale</div>
+                    <div class="header-column">
+                        <span>Reference Locale</span>
+
+                        <Select />
+                    </div>
                     <div class="header-column">Edit Locale</div>
                 </div>
+
                 <EditorContent
                     refLocale={props.refLocale}
                     editLocale={props.editLocale}
@@ -35,7 +41,7 @@ export default function Editor(props: EditorProps) {
                     type="button"
                     onClick={() => {
                         const assembled = AssembleTranslation({
-                            fileName: "",
+                            fileName: "about",
                             refLocaleCode: props.refLocaleSrc,
                             translatingLocaleCode: props.editingLocaleSrc,
                             translatingLocale: props.editLocale,

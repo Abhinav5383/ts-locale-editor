@@ -6,11 +6,11 @@ export default {} satisfies Locale;`,
 
     tags: `import type tags from "~/locales/en/tags";
 
-export default {} as typeof tags;`,
+export default {} satisfies typeof tags;`,
 
     about: `import type { AboutUsProps } from "~/locales/en/about";
 
-export function AboutUs(props: AboutUsProps) { }`,
+export const AboutUs = (props: AboutUsProps) => { };`,
 };
 
 export function getAssemblingTemplate(

@@ -1,4 +1,4 @@
-import { Match, Show, Switch, createResource } from "solid-js";
+import { createResource, Match, Show, Switch } from "solid-js";
 import Navbar from "~/components/layout/navbar";
 import { getFileContents } from "~/lib/gh_api";
 import { getTranslationNodesFromTxtFile } from "~/lib/parser";
@@ -9,7 +9,7 @@ import type { node_OnChangeHandler } from "./components/ui/renderers/types";
 import type { ObjectNode, TranslationNode } from "./lib/types";
 
 interface TranslationNodesResult {
-    src: string;
+    src: string | undefined;
     nodes: ObjectNode;
 }
 
@@ -27,7 +27,7 @@ export default function App() {
 
         const src = "export default {};";
         return {
-            src: src,
+            src: undefined,
             nodes: getTranslationNodesFromTxtFile(src),
         };
     });

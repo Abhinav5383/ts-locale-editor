@@ -13,8 +13,10 @@ export function StringRenderer(props: NodeRendererProps<StringNode>) {
         });
     }
 
+    const isFullWidth = props.node.value.includes("\n") || props.node.value.length > 60;
+
     return (
-        <div class="node-string">
+        <div class={`node-string ${isFullWidth ? "full-width" : ""}`}>
             <Show
                 when={props.isEditable}
                 fallback={
@@ -49,6 +51,7 @@ interface ContentEditableProps {
     onChange: (newValue: string) => void;
     className?: string;
 }
+
 type EditElem = HTMLDivElement;
 
 export function ContentEditable(props: ContentEditableProps) {
@@ -56,7 +59,7 @@ export function ContentEditable(props: ContentEditableProps) {
 
     function handleInput(e: InputEvent & { currentTarget: EditElem }) {
         const target = e.currentTarget;
-        props.onChange(target.innerText);
+        props.onChange(target.textContent);
     }
 
     function handlePaste(e: ClipboardEvent & { currentTarget: EditElem }) {
@@ -96,7 +99,7 @@ export function ContentEditable(props: ContentEditableProps) {
         <div
             ref={divRef}
             class={props.className}
-            contenteditable="true"
+            contenteditable="plaintext-only"
             spellcheck="false"
             onInput={handleInput}
             onPaste={handlePaste}
