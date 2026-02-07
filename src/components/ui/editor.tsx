@@ -319,6 +319,7 @@ function BottomBar(props: ExportActionsProps) {
                     <a
                         href={`https://github.com/${props.preferences.repo}/${props.preferences.localesDir}/${props.translatingFrom}/${props.selectedFile}`}
                         target="_blank"
+                        title="Goto reference file on github"
                     >
                         <span>
                             {props.translatingFrom}/{props.selectedFile}
@@ -326,13 +327,14 @@ function BottomBar(props: ExportActionsProps) {
 
                         <ExternalLinkIcon />
                     </a>
-
                     <button type="button" onClick={handleCopy}>
                         Copy
                     </button>
+                    or
                     <button type="button" onClick={handleDownload}>
                         Download
                     </button>
+                    translation
                 </div>
             </div>
         </div>
