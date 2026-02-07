@@ -6,6 +6,16 @@ export default defineConfig({
 
     server: {
         port: 3000,
+
+        proxy: {
+            "/PuzzlesHQ": {
+                target: "https://raw.githubusercontent.com",
+                changeOrigin: true,
+                headers: {
+                    Accept: "application/vnd.github.v3+json",
+                },
+            },
+        },
     },
 
     resolve: {

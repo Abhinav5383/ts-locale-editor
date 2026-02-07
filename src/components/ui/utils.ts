@@ -45,56 +45,92 @@ export function flattenLocaleEntries(
 ): IterationItem[] {
     const items: IterationItem[] = [];
 
-    const editLocaleKeyMap = new Map<string, WithKey<TranslationNode>>();
-    for (const node of translatingLocaleNode.value) {
-        editLocaleKeyMap.set(node.key, node);
+    const _uniqueKeys = new Set<string>();
+    const orderedKeys: string[] = [];
+
+    const refLocaleIndex = new Map<string, number>();
+    for (let i = 0; i < refLocaleNode.value.length; i++) {
+        const node = refLocaleNode.value[i];
+        if (node) refLocaleIndex.set(node.key, i);
+
+        if (!_uniqueKeys.has(node.key)) {
+            _uniqueKeys.add(node.key);
+            orderedKeys.push(node.key);
+        }
     }
 
-    for (let i = 0; i < refLocaleNode.value.length; i++) {
-        const refNode = refLocaleNode.value[i];
-        const editNode = editLocaleKeyMap.get(refNode.key) ?? {
-            key: refNode.key,
-            ...emptyNode(refNode),
-        };
-        const isLastChild = i === refLocaleNode.value.length - 1;
+    const editLocaleIndex = new Map<string, number>();
+    for (let i = 0; i < translatingLocaleNode.value.length; i++) {
+        const node = translatingLocaleNode.value[i];
+        if (node) editLocaleIndex.set(node.key, i);
 
+        if (!_uniqueKeys.has(node.key)) {
+            _uniqueKeys.add(node.key);
+            orderedKeys.push(node.key);
+        }
+    }
+
+    for (let i = 0; i < orderedKeys.length; i++) {
+        const key = orderedKeys[i];
+        const refNodeIndex = refLocaleIndex.get(key);
+        const editNodeIndex = editLocaleIndex.get(key);
+
+        let refNode = refNodeIndex !== undefined ? refLocaleNode.value[refNodeIndex] : undefined;
+        let editNode =
+            editNodeIndex !== undefined ? translatingLocaleNode.value[editNodeIndex] : undefined;
+
+        if (editNode && refNode) {
+            // nothing to do
+        } else if (refNode && !editNode) {
+            editNode = emptyKeyedNode(key, refNode);
+        } else if (editNode && !refNode) {
+            refNode = emptyKeyedNode(key, editNode);
+        } else {
+            continue;
+        }
+
+        const isLastChild = i === orderedKeys.length - 1;
         if (refNode.type === "object" && editNode.type === "object") {
             items.push({
                 type: IterationItemType.OBJ_START,
-                key: refNode.key,
+                key: key,
                 depth: depth,
                 isLastChild,
-                path: [...parentPath, refNode.key],
+                path: [...parentPath, key],
             });
 
             const childItems = flattenLocaleEntries(refNode, editNode, depth + 1, [
                 ...parentPath,
-                refNode.key,
+                key,
             ]);
 
             items.push(...childItems);
 
             items.push({
                 type: IterationItemType.OBJ_END,
-                key: refNode.key,
+                key: key,
                 depth,
                 isLastChild,
-                path: [...parentPath, refNode.key],
+                path: [...parentPath, key],
             });
         } else {
             items.push({
                 type: IterationItemType.OBJ_ENTRY,
-                key: refNode.key,
+                key: key,
                 depth,
                 isLastChild,
                 refNode,
                 editNode,
-                path: [...parentPath, refNode.key],
+                path: [...parentPath, key],
             });
         }
     }
 
     return items;
+}
+
+function emptyKeyedNode(key: string, refNode: TranslationNode): WithKey<TranslationNode> {
+    return { key: key, ...emptyNode(refNode) };
 }
 
 function emptyNode(refNode: TranslationNode): TranslationNode {
@@ -178,5 +214,5 @@ function emptyStringNode(refNode: StringNode): StringNode {
 
 // NOTE: Variables don't change in translation, so they can be the same as the reference.
 function emptyVariableNode(refNode: VariableNode): VariableNode {
-    return refNode;
+    return { ...refNode };
 }

@@ -91,7 +91,7 @@ export function ContentEditable(props: ContentEditableProps) {
 
     createEffect(() => {
         if (divRef && divRef.textContent !== props.value) {
-            divRef.textContent = props.value;
+            divRef.textContent = props.value || "";
         }
     });
 
@@ -99,6 +99,9 @@ export function ContentEditable(props: ContentEditableProps) {
         <div
             ref={divRef}
             class={props.className}
+            style={{
+                "min-height": "1.3rem",
+            }}
             contenteditable="plaintext-only"
             spellcheck="false"
             onInput={handleInput}

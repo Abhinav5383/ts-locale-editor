@@ -12,19 +12,17 @@ import { getAssemblingTemplate } from "./templates";
 
 interface AssembleTranslationProps {
     fileName: string;
-    refLocaleCode: string | undefined;
     translatingLocaleCode: string | undefined;
     translatingLocale: ObjectNode;
 }
 
 export function AssembleTranslation(props: AssembleTranslationProps): string | null {
-    if (!props.refLocaleCode) return null;
+    const template = getAssemblingTemplate(props.fileName, props.translatingLocaleCode);
+    if (!template) {
+        console.error(`No assembling template found for file ${props.fileName}`);
+        return null;
+    }
 
-    const template = getAssemblingTemplate(
-        props.fileName,
-        props.refLocaleCode,
-        props.translatingLocaleCode,
-    );
     const templateAST = getExportsAST(template);
     if (!templateAST) {
         console.error("Failed to parse template AST. Cannot assemble translation.");

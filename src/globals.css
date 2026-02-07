@@ -29,4 +29,22 @@ html {
     color-scheme: dark;
     font-family: "Space Grotesk", system-ui;
     scrollbar-gutter: stable;
+    interpolate-size: allow-keywords;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0;
+    padding: 0;
+}
+
+button,
+a,
+input {
+    font-family: inherit;
+    font-size: inherit;
 }

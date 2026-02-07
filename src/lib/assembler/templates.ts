@@ -13,16 +13,10 @@ export default {} satisfies typeof tags;`,
 export const AboutUs = (props: AboutUsProps) => { };`,
 };
 
-export function getAssemblingTemplate(
-    fileName: string,
-    refLocaleCode: string | undefined,
-    translatingLocaleCode: string | undefined,
-) {
+export function getAssemblingTemplate(fileName: string, translatingLocaleCode: string | undefined) {
     if (translatingLocaleCode) return translatingLocaleCode;
 
-    return (
-        ASSEMBLING_TEMPLATE_DEFAULTS[fileName as keyof typeof ASSEMBLING_TEMPLATE_DEFAULTS] ||
-        refLocaleCode ||
-        "export default {};"
-    );
+    return ASSEMBLING_TEMPLATE_DEFAULTS[
+        fileName.split(".")[0] as keyof typeof ASSEMBLING_TEMPLATE_DEFAULTS
+    ];
 }

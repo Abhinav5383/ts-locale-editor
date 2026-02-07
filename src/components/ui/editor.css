@@ -1,3 +1,7 @@
+.editor {
+    padding-block-end: 12rem;
+}
+
 .editor-wrapper {
     background-color: var(--gh-bg-primary);
     color: var(--gh-text-primary);
@@ -21,10 +25,10 @@
     padding: 12px 16px;
 }
 
-.header-column {
-    font-size: 13px;
+.header-column label {
+    font-size: 0.95em;
     font-weight: 600;
-    color: var(--gh-text-primary);
+    color: var(--gh-text-secondary);
 }
 
 .object-renderer,
@@ -41,7 +45,6 @@
 .node-row {
     border-bottom: 1px solid var(--gh-bg-tertiary);
     padding-block: var(--gap);
-    /* align-items: center; */
     display: grid;
 }
 
@@ -64,9 +67,6 @@
     font-weight: 600;
     font-style: italic;
     font-size: 1.05em;
-    /* text-decoration: dotted underline;
-    text-underline-offset: 0.2em;
-    text-decoration-color: var(--gh-text-secondary); */
 }
 
 .cell-wrapper {
@@ -307,4 +307,74 @@
 
 .no-select {
     user-select: none;
+}
+
+
+/* ---- */
+
+.bottom-bar {
+    display: grid;
+    font-family: monospace;
+
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--gh-bg-secondary);
+    border-top: 1px solid var(--gh-border);
+    transition: transform 0.35s ease-in-out;
+    transform: translateY(0);
+
+    &.hidden {
+        transform: translateY(100%);
+    }
+}
+
+.bottom-bar .contents {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 2rem;
+
+
+
+    a {
+        color: var(--gh-text-secondary);
+        font-size: 1.15em;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    svg {
+        color: var(--gh-text-secondary);
+        height: 1.2em;
+        width: 1.2em;
+    }
+}
+
+.bottom-bar .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+
+    button {
+        outline: none;
+        background-color: var(--gh-bg-primary);
+        color: var(--gh-text-primary);
+        border: 1px solid var(--gh-border);
+        padding: 0rem 0.87rem;
+        min-height: 2.35rem;
+        border-radius: 0.4rem;
+        font-weight: 600;
+        font-size: 1.1em;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s;
+
+        &:where(:hover, :focus-visible) {
+            background-color: var(--gh-text-primary);
+            color: var(--gh-bg-primary);
+        }
+    }
 }

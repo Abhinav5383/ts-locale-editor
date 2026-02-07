@@ -12,6 +12,7 @@
         "@babel/parser": "^7.28.5",
         "@babel/traverse": "^7.28.5",
         "@formkit/drag-and-drop": "^0.5.3",
+        "@solidjs/router": "^0.15.4",
         "solid-js": "^1.9.10"
     },
     "devDependencies": {
