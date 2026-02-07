@@ -243,8 +243,6 @@ function BottomBar(props: ExportActionsProps) {
             return;
         }
 
-        console.log(assembled);
-
         navigator.clipboard
             .writeText(assembled)
             .then(() => {
@@ -266,10 +264,7 @@ function BottomBar(props: ExportActionsProps) {
             return;
         }
 
-        if (Math.abs(currentScrollY - prevScrollY) < 60) {
-            // ignore small scrolls to prevent flickering
-            return;
-        }
+        if (Math.abs(currentScrollY - prevScrollY) < 60) return;
 
         if (currentScrollY < prevScrollY && !barVisible) {
             setBottomBarVisible(true);

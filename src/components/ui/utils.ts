@@ -133,7 +133,7 @@ function emptyKeyedNode(key: string, refNode: TranslationNode): WithKey<Translat
     return { key: key, ...emptyNode(refNode) };
 }
 
-function emptyNode(refNode: TranslationNode): TranslationNode {
+export function emptyNode(refNode: TranslationNode): TranslationNode {
     switch (refNode.type) {
         case "string":
         case "string_template":
@@ -151,7 +151,7 @@ function emptyNode(refNode: TranslationNode): TranslationNode {
     }
 }
 
-function emptyFunctionNode(refNode: FunctionNode): FunctionNode {
+export function emptyFunctionNode(refNode: FunctionNode): FunctionNode {
     const base = {
         type: refNode.type,
         params: refNode.params.map((p) => ({ ...p })),
@@ -188,10 +188,10 @@ function emptyFunctionNode(refNode: FunctionNode): FunctionNode {
     }
 }
 
-function emptyObjectNode(refNode: ObjectNode): ObjectNode {
+export function emptyObjectNode(refNode: ObjectNode): ObjectNode {
     return { ...refNode, value: [] };
 }
-function emptyArrayNode(refNode: ArrayNode): ArrayNode {
+export function emptyArrayNode(refNode: ArrayNode): ArrayNode {
     return {
         type: refNode.type,
         value: refNode.value.map((val) => {
@@ -208,11 +208,11 @@ function emptyArrayNode(refNode: ArrayNode): ArrayNode {
         }),
     };
 }
-function emptyStringNode(refNode: StringNode): StringNode {
+export function emptyStringNode(refNode: StringNode): StringNode {
     return { ...refNode, value: "" };
 }
 
 // NOTE: Variables don't change in translation, so they can be the same as the reference.
-function emptyVariableNode(refNode: VariableNode): VariableNode {
+export function emptyVariableNode(refNode: VariableNode): VariableNode {
     return { ...refNode };
 }

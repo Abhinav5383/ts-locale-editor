@@ -1,46 +1,116 @@
-import type { ObjectNode, TranslationNode, WithKey } from "~/lib/types";
+import type {
+    ArrayNode,
+    FunctionNode,
+    ObjectNode,
+    StringNode,
+    TranslationNode,
+    VariableNode,
+    WithKey,
+} from "~/lib/types";
 
 export function updateNodeValue(
     path: string[],
     root: ObjectNode,
-    value: TranslationNode,
+    value: TranslationNode | null,
 ): ObjectNode {
     if (path.length === 0) {
-        if (root.type === "object" && value.type === "object") return value;
+        if (root.type === "object" && value?.type === "object") return value;
         return root;
     }
 
-    let ref: ObjectNode = root;
+    let curr: ObjectNode = root;
 
     for (let i = 0; i < path.length; i++) {
         const key = path[i];
 
-        const childIndex = ref.value.findIndex((child) => child.key === key);
+        const childIndex = curr.value.findIndex((child) => child.key === key);
 
+        // if we're at the end of the path, update the node
         if (i === path.length - 1) {
-            let childToUpdate = ref.value[childIndex];
-            if (!childToUpdate) {
-                childToUpdate = { key, ...value };
-                ref.value.push(childToUpdate);
+            let targetNode = curr.value[childIndex];
+
+            if (!value || (isEmptyNode(value) && targetNode)) {
+                curr.value.splice(childIndex, 1);
+
+                if (curr.value.length === 0) {
+                    // delete the parent node if it has no more children
+                    return updateNodeValue(path.slice(0, -1), root, null);
+                }
+            } else if (!targetNode) {
+                targetNode = { key, ...value };
+                curr.value.push(targetNode);
             } else {
-                ref.value[childIndex] = { key, ...value };
+                curr.value[childIndex] = { key, ...value };
             }
-        } else {
-            let childObj = ref.value[childIndex];
+        }
+
+        // update the ref to nested object for next iteration
+        else {
+            let childObj = curr.value[childIndex];
             if (!childObj) {
                 const newObj: WithKey<ObjectNode> = {
                     key: key,
                     type: "object",
                     value: [],
                 };
-                ref.value.push(newObj);
+                curr.value.push(newObj);
                 childObj = newObj;
             }
 
             if (childObj.type !== "object") break;
-            ref = childObj;
+            curr = childObj;
         }
     }
 
     return root;
+}
+
+function isEmptyNode(node: TranslationNode, isFnReturn = false): boolean {
+    switch (node.type) {
+        case "object":
+            return isEmptyObjectNode(node);
+        case "array":
+            return isEmptyArrayNode(node);
+        case "function":
+            return isEmptyFunctionNode(node);
+        case "string_template":
+        case "string":
+            return isEmptyStringNode(node, isFnReturn);
+        case "variable":
+            return isEmptyVariableNode(node);
+    }
+}
+
+function isEmptyObjectNode(node: ObjectNode): boolean {
+    for (const child of node.value) {
+        if (!isEmptyNode(child)) return false;
+    }
+
+    return true;
+}
+
+function isEmptyArrayNode(node: ArrayNode): boolean {
+    for (const child of node.value) {
+        if (child.type === "variable") continue;
+        if (!isEmptyNode(child)) return false;
+    }
+
+    return true;
+}
+
+function isEmptyFunctionNode(node: FunctionNode): boolean {
+    if (node.body.type === "BlockExpression") {
+        return !node.body.value.trim();
+    } else {
+        return isEmptyNode(node.body, true);
+    }
+}
+
+function isEmptyStringNode(node: StringNode, isFnReturn = false): boolean {
+    if (isFnReturn) return !node.value.trim();
+    return !node.value;
+}
+
+function isEmptyVariableNode(node: VariableNode): boolean {
+    return !node.name;
 }
