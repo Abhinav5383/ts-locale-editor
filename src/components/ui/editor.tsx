@@ -334,7 +334,7 @@ function BottomBar(props: ExportActionsProps) {
                     <button type="button" onClick={handleDownload}>
                         Download
                     </button>
-                    translation
+                    <span onclick={() => console.log(assembledNodes())}>translation</span>
                 </div>
             </div>
         </div>
