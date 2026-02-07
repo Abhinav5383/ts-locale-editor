@@ -126,9 +126,9 @@ export default function App() {
                 }
             >
                 <Editor
-                    refLocale={refLocale()!.nodes}
+                    refNodes={refLocale()!.nodes}
                     editingLocaleSrc={translatingLocale()!.src}
-                    editLocale={translatingLocale()!.nodes}
+                    editedNodes={translatingLocale()!.nodes}
                     onChange={handleTranslatingLocaleChange}
                     preferences={preferences()}
                     // select controls

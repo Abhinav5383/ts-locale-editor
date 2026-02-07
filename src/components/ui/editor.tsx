@@ -11,9 +11,9 @@ import type { node_OnChangeHandler } from "./renderers/types";
 import { Select } from "./select";
 
 interface EditorProps {
-    refLocale: ObjectNode; // the base reference locale
+    refNodes: ObjectNode; // the base reference locale
     editingLocaleSrc: string | undefined;
-    editLocale: ObjectNode; // the locale being edited
+    editedNodes: ObjectNode; // the locale being edited
     onChange: node_OnChangeHandler;
     preferences: PrefsObj;
 
@@ -88,8 +88,8 @@ export default function Editor(props: EditorProps) {
                 </div>
 
                 <EditorContent
-                    refLocale={props.refLocale}
-                    editLocale={props.editLocale}
+                    refLocale={props.refNodes}
+                    editLocale={props.editedNodes}
                     onChange={props.onChange}
                 />
             </div>
@@ -100,7 +100,8 @@ export default function Editor(props: EditorProps) {
                 translatingTo={props.translatingTo}
                 selectedFile={props.selectedFile}
                 editingLocaleSrc={props.editingLocaleSrc}
-                editLocale={props.editLocale}
+                refNodes={props.refNodes}
+                editedNodes={props.editedNodes}
             />
         </div>
     );
@@ -203,7 +204,8 @@ interface ExportActionsProps {
     translatingTo: string;
     selectedFile: string;
     editingLocaleSrc: string | undefined;
-    editLocale: ObjectNode;
+    refNodes: ObjectNode;
+    editedNodes: ObjectNode;
 }
 
 function BottomBar(props: ExportActionsProps) {
@@ -214,7 +216,8 @@ function BottomBar(props: ExportActionsProps) {
         return AssembleTranslation({
             fileName: props.selectedFile,
             translatingLocaleCode: props.editingLocaleSrc,
-            translatingLocale: props.editLocale,
+            refNodes: props.refNodes,
+            translatedNodes: props.editedNodes,
         });
     }
 

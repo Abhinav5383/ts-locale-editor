@@ -13,7 +13,8 @@ import { getAssemblingTemplate } from "./templates";
 interface AssembleTranslationProps {
     fileName: string;
     translatingLocaleCode: string | undefined;
-    translatingLocale: ObjectNode;
+    refNodes: ObjectNode;
+    translatedNodes: ObjectNode;
 }
 
 export function AssembleTranslation(props: AssembleTranslationProps): string | null {
@@ -29,6 +30,8 @@ export function AssembleTranslation(props: AssembleTranslationProps): string | n
         return null;
     }
 
+    const sortedTranslatedNodes = sortNodes(props.translatedNodes, props.refNodes);
+
     if (templateAST.exportType === ExportType.Named) {
         let finalCode = "";
 
@@ -40,7 +43,7 @@ export function AssembleTranslation(props: AssembleTranslationProps): string | n
                 continue;
             }
 
-            const declTranslated = props.translatingLocale.value.find(
+            const declTranslated = sortedTranslatedNodes.value.find(
                 (node) => node.key === nodeId.name,
             );
             if (!declTranslated) {
@@ -67,7 +70,7 @@ export function AssembleTranslation(props: AssembleTranslationProps): string | n
 
     //
     else if (templateAST.exportType === ExportType.Default) {
-        const assembled = stringifyNode(props.translatingLocale);
+        const assembled = stringifyNode(sortedTranslatedNodes);
         const startIndex = templateAST.value.start ?? 0;
         const endIndex = templateAST.value.end ?? template.length;
 
@@ -75,6 +78,38 @@ export function AssembleTranslation(props: AssembleTranslationProps): string | n
     }
 
     return null;
+}
+
+export function sortNodes(node: ObjectNode, refNode: ObjectNode): ObjectNode {
+    const result: ObjectNode = {
+        type: "object",
+        value: [],
+    };
+
+    const orderedKeys = refNode.value.map((prop) => prop.key);
+    for (const item of node.value) {
+        if (!orderedKeys.includes(item.key)) {
+            orderedKeys.push(item.key);
+        }
+    }
+
+    for (const key of orderedKeys) {
+        const val = node.value.find((prop) => prop.key === key);
+        const refVal = refNode.value.find((prop) => prop.key === key);
+        if (!val) continue;
+
+        if (val.type === "object" && refVal && refVal.type === "object") {
+            const sortedChildVals = sortNodes(val, refVal);
+            result.value.push({
+                ...val,
+                value: sortedChildVals.value,
+            });
+        } else {
+            result.value.push(val);
+        }
+    }
+
+    return result;
 }
 
 function stringifyNode(
