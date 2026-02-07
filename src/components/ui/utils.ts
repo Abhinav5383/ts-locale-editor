@@ -8,6 +8,7 @@ import type {
     VariableNode,
     WithKey,
 } from "~/lib/types";
+import { isEmptyNode } from "./node-updater";
 
 export enum IterationItemType {
     OBJ_START = "obj_start",
@@ -42,6 +43,7 @@ export function flattenLocaleEntries(
     translatingLocaleNode: ObjectNode,
     depth = 0,
     parentPath: string[] = [],
+    hideTranslated = false,
 ): IterationItem[] {
     const items: IterationItem[] = [];
 
@@ -91,6 +93,15 @@ export function flattenLocaleEntries(
 
         const isLastChild = i === orderedKeys.length - 1;
         if (refNode.type === "object" && editNode.type === "object") {
+            const childItems = flattenLocaleEntries(
+                refNode,
+                editNode,
+                depth + 1,
+                [...parentPath, key],
+                hideTranslated,
+            );
+            if (!childItems.length) continue;
+
             items.push({
                 type: IterationItemType.OBJ_START,
                 key: key,
@@ -98,11 +109,6 @@ export function flattenLocaleEntries(
                 isLastChild,
                 path: [...parentPath, key],
             });
-
-            const childItems = flattenLocaleEntries(refNode, editNode, depth + 1, [
-                ...parentPath,
-                key,
-            ]);
 
             items.push(...childItems);
 
@@ -114,6 +120,8 @@ export function flattenLocaleEntries(
                 path: [...parentPath, key],
             });
         } else {
+            if (hideTranslated && !isEmptyNode(editNode)) continue;
+
             items.push({
                 type: IterationItemType.OBJ_ENTRY,
                 key: key,

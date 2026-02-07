@@ -19,7 +19,6 @@ export function updateNodeValue(
     }
 
     let curr: ObjectNode = root;
-
     for (let i = 0; i < path.length; i++) {
         const key = path[i];
 
@@ -65,7 +64,7 @@ export function updateNodeValue(
     return root;
 }
 
-function isEmptyNode(node: TranslationNode, isFnReturn = false): boolean {
+export function isEmptyNode(node: TranslationNode, isFnReturn = false): boolean {
     switch (node.type) {
         case "object":
             return isEmptyObjectNode(node);
@@ -81,7 +80,7 @@ function isEmptyNode(node: TranslationNode, isFnReturn = false): boolean {
     }
 }
 
-function isEmptyObjectNode(node: ObjectNode): boolean {
+export function isEmptyObjectNode(node: ObjectNode): boolean {
     for (const child of node.value) {
         if (!isEmptyNode(child)) return false;
     }
@@ -89,7 +88,7 @@ function isEmptyObjectNode(node: ObjectNode): boolean {
     return true;
 }
 
-function isEmptyArrayNode(node: ArrayNode): boolean {
+export function isEmptyArrayNode(node: ArrayNode): boolean {
     for (const child of node.value) {
         if (child.type === "variable") continue;
         if (!isEmptyNode(child)) return false;
@@ -98,7 +97,7 @@ function isEmptyArrayNode(node: ArrayNode): boolean {
     return true;
 }
 
-function isEmptyFunctionNode(node: FunctionNode): boolean {
+export function isEmptyFunctionNode(node: FunctionNode): boolean {
     if (node.body.type === "BlockExpression") {
         return !node.body.value.trim();
     } else {
@@ -106,11 +105,11 @@ function isEmptyFunctionNode(node: FunctionNode): boolean {
     }
 }
 
-function isEmptyStringNode(node: StringNode, isFnReturn = false): boolean {
+export function isEmptyStringNode(node: StringNode, isFnReturn = false): boolean {
     if (isFnReturn) return !node.value.trim();
     return !node.value;
 }
 
-function isEmptyVariableNode(node: VariableNode): boolean {
+export function isEmptyVariableNode(node: VariableNode): boolean {
     return !node.name;
 }

@@ -1,4 +1,4 @@
-import { createSignal, For, Match, onCleanup, onMount, Switch } from "solid-js";
+import { createSignal, For, Match, onCleanup, onMount, type Setter, Switch } from "solid-js";
 import { NodeRenderer } from "~/components/ui/renderers/node";
 import { flattenLocaleEntries, IterationItemType } from "~/components/ui/utils";
 import { AssembleTranslation } from "~/lib/assembler";
@@ -30,6 +30,8 @@ interface EditorProps {
 }
 
 export default function Editor(props: EditorProps) {
+    const [hideTranslated, setHideTranslated] = createSignal(false);
+
     return (
         <div class="editor">
             <div class="editor-wrapper">
@@ -91,6 +93,7 @@ export default function Editor(props: EditorProps) {
                     refLocale={props.refNodes}
                     editLocale={props.editedNodes}
                     onChange={props.onChange}
+                    hideTranslated={hideTranslated()}
                 />
             </div>
 
@@ -102,6 +105,8 @@ export default function Editor(props: EditorProps) {
                 editingLocaleSrc={props.editingLocaleSrc}
                 refNodes={props.refNodes}
                 editedNodes={props.editedNodes}
+                hideTranslated={hideTranslated()}
+                setHideTranslated={setHideTranslated}
             />
         </div>
     );
@@ -111,10 +116,18 @@ interface EditorContentProps {
     refLocale: ObjectNode;
     editLocale: ObjectNode;
     onChange: node_OnChangeHandler;
+    hideTranslated: boolean;
 }
 
 function EditorContent(props: EditorContentProps) {
-    const flattenedItems = () => flattenLocaleEntries(props.refLocale, props.editLocale);
+    const flattenedItems = () =>
+        flattenLocaleEntries(
+            props.refLocale,
+            props.editLocale,
+            undefined,
+            undefined,
+            props.hideTranslated,
+        );
 
     return (
         <div class="object-renderer">
@@ -206,6 +219,9 @@ interface ExportActionsProps {
     editingLocaleSrc: string | undefined;
     refNodes: ObjectNode;
     editedNodes: ObjectNode;
+
+    hideTranslated: boolean;
+    setHideTranslated: Setter<boolean>;
 }
 
 function BottomBar(props: ExportActionsProps) {
@@ -289,18 +305,28 @@ function BottomBar(props: ExportActionsProps) {
     return (
         <div class={`bottom-bar ${bottomBarVisible() ? "visible" : "hidden"}`}>
             <div class="contents">
-                <a
-                    href={`https://github.com/${props.preferences.repo}/${props.preferences.localesDir}/${props.translatingFrom}/${props.selectedFile}`}
-                    target="_blank"
-                >
-                    <span>
-                        {props.translatingFrom}/{props.selectedFile}
-                    </span>
-
-                    <ExternalLinkIcon />
-                </a>
+                <div class="checkbox-wrapper">
+                    <input
+                        type="checkbox"
+                        id="hide-translated-toggle"
+                        checked={props.hideTranslated}
+                        onChange={(e) => props.setHideTranslated(e.currentTarget.checked)}
+                    />
+                    <label for="hide-translated-toggle">Hide Translated</label>
+                </div>
 
                 <div class="actions">
+                    <a
+                        href={`https://github.com/${props.preferences.repo}/${props.preferences.localesDir}/${props.translatingFrom}/${props.selectedFile}`}
+                        target="_blank"
+                    >
+                        <span>
+                            {props.translatingFrom}/{props.selectedFile}
+                        </span>
+
+                        <ExternalLinkIcon />
+                    </a>
+
                     <button type="button" onClick={handleCopy}>
                         Copy
                     </button>
