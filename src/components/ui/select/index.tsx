@@ -16,9 +16,56 @@ interface SelectOption {
 }
 
 export function Select(props: SelectProps) {
+    const supportsFancySelect = () => CSS.supports("appearance", "base-select");
+
     return (
-        <div id={props.id} class="select-wrapper">
+        <Show
+            when={supportsFancySelect()}
+            fallback={
+                <RegularSelect
+                    id={props.id}
+                    options={props.options}
+                    value={props.value}
+                    onChange={props.onChange}
+                />
+            }
+        >
+            <FancySelect
+                id={props.id}
+                options={props.options}
+                value={props.value}
+                onChange={props.onChange}
+            />
+        </Show>
+    );
+}
+
+function RegularSelect(props: SelectProps) {
+    return (
+        <div class="select-wrapper">
             <select
+                id={props.id}
+                onChange={(e) => {
+                    props.onChange(e.currentTarget.value);
+                }}
+            >
+                <For each={props.options}>
+                    {(option) => (
+                        <option value={option.value} selected={option.value === props.value}>
+                            {option.description || option.label || option.value}
+                        </option>
+                    )}
+                </For>
+            </select>
+        </div>
+    );
+}
+
+function FancySelect(props: SelectProps) {
+    return (
+        <div class="select-wrapper">
+            <select
+                id={props.id}
                 onChange={(e) => {
                     props.onChange(e.currentTarget.value);
                 }}
