@@ -141,6 +141,14 @@ function extractObjectNode(expr: t.ObjectExpression): ObjectNode {
 }
 
 function mapExpressionToNode(key: string, expr: t.Expression): ObjectNode["value"][number] | null {
+    if (
+        t.isTSSatisfiesExpression(expr) ||
+        t.isTSAsExpression(expr) ||
+        t.isParenthesizedExpression(expr)
+    ) {
+        expr = unwrapExpression(expr);
+    }
+
     if (t.isObjectExpression(expr)) {
         return {
             key,
