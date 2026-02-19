@@ -1,28 +1,22 @@
-## Usage
+### Web editor for Typescript/Javascript based translation files
 
-```bash
-$ npm install # or pnpm install or yarn install
-```
+**Features**:
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+- Can parse and display JS/TS objects in a editor UI
+- Can assemble the edited translation back to JS/TS while preserving the structure of the file.
+- Can fetch from custom github repos
+- Supports function expressions and arrow functions
+- Allows to nicely edit functions returning arrays
 
-## Available Scripts
 
-In the project directory, you can run:
+**Built using**:
 
-### `npm run dev`
+[<img src="imgs/typescript.svg" height="48px" />](https://www.typescriptlang.org)
+[<img src="imgs/solidjs.svg" height="48px" />](https://www.solidjs.com)
+[<img src="imgs/babel.svg" height="48px" />](https://babeljs.io)
 
-Runs the app in the development mode.<br>
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
 
-### `npm run build`
+**Screenshots**:
 
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-## Deployment
-
-Learn more about deploying your application with the [documentations](https://vite.dev/guide/static-deploy.html)
+<img src="imgs/img1.png" style="max-width: 800px;" />
+<img src="imgs/img2.png" style="max-width: 800px;" />
