@@ -1,5 +1,7 @@
 ### Web editor for Typescript/Javascript based translation files
 
+#### Try it out at https://ts-locale-editor.vercel.app
+
 **Features**:
 
 - Can parse and display JS/TS objects in a editor UI

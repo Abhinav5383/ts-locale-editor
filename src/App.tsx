@@ -94,6 +94,7 @@ export default function App() {
         },
     );
 
+    // let saveTimeoutRef: number | null = null;
     const handleTranslatingLocaleChange: node_OnChangeHandler = (
         path: string[],
         node: TranslationNode,
@@ -101,7 +102,18 @@ export default function App() {
         const oldEditedState = editedLocale();
         if (!oldEditedState) return;
 
-        setEditedLocale(updateNodeValue(path, oldEditedState, node));
+        const newWorkingState = updateNodeValue(path, oldEditedState, node);
+        setEditedLocale(newWorkingState);
+
+        // if(saveTimeoutRef) clearTimeout(saveTimeoutRef);
+
+        // saveTimeoutRef = setTimeout(() => {
+        //     saveWorkToLocalStorage(
+        //         translatingTo(),
+        //         selectedFile(),
+        //         newWorkingState,
+        //     )
+        // }, 3000);
     };
 
     return (
