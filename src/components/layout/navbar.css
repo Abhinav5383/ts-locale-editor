@@ -4,6 +4,25 @@
     width: 100%;
 }
 
+.nav-header .site-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+        width: 2em;
+        height: 2em;
+        color: var(--gh-token-string);
+    }
+
+    span {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--gh-text-primary);
+        font-family: monospace;
+    }
+}
+
 .nav-header nav {
     padding-inline: 1rem;
     padding-block: 1rem;

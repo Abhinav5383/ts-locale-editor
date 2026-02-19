@@ -73,7 +73,7 @@ export default function Editor(props: EditorProps) {
                     <div class="header-column">
                         <label for="to-select">To</label>
                         <Select
-                            id="ref-select"
+                            id="to-select"
                             options={[
                                 {
                                     value: "",
