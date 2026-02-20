@@ -1,6 +1,6 @@
 ### Web editor for Typescript/Javascript based translation files
 
-#### Try it out at https://ts-locale-editor.vercel.app
+#### Try it out at https://locale-editor.devabhinav.online
 
 **Features**:
 
