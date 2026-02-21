@@ -116,7 +116,7 @@ bun install
 ```
 
 
-## Development
+### Dev server
 
 Start the development server with hot module reloading:
 
@@ -127,7 +127,7 @@ bun run dev
 The application will be available at `http://localhost:5173`.
 
 
-## Build
+### Build
 
 Create an optimized production build:
 
