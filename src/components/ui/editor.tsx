@@ -153,7 +153,7 @@ function EditorContent(props: EditorContentProps) {
                                         </div>
                                     </div>
 
-                                    <div class="cell-wrapper">
+                                    <div class="cell-wrapper scrollable">
                                         <div class="node-value-ref">
                                             <NodeRenderer
                                                 node={item.refNode}
@@ -164,7 +164,7 @@ function EditorContent(props: EditorContentProps) {
                                         </div>
                                     </div>
 
-                                    <div class="cell-wrapper">
+                                    <div class="cell-wrapper scrollable">
                                         <div class="node-value-edit">
                                             <NodeRenderer
                                                 node={item.editNode}

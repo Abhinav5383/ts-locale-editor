@@ -10,10 +10,13 @@ export function StringRenderer(props: NodeRendererProps<StringNode>) {
         });
     }
 
-    const isFullWidth = props.node.value.includes("\n") || props.node.value.length > 60;
+    const hasNewLine = () => props.node.value.includes("\n");
+    const isFullWidth = () => hasNewLine() || props.node.value.length > 60;
 
     return (
-        <div class={`node-string ${isFullWidth ? "full-width" : ""}`}>
+        <div
+            class={`node-string ${isFullWidth() ? "full-width" : ""} ${hasNewLine() ? "multiline" : ""}`}
+        >
             <Show
                 when={props.isEditable}
                 fallback={
@@ -37,7 +40,7 @@ export function StringRenderer(props: NodeRendererProps<StringNode>) {
                 <ContentEditable
                     value={props.node.value}
                     onChange={handleChange}
-                    className="string-editable token token-string-content"
+                    className="string-editable token token-string-content nowrap-on-multiline"
                 />
                 {props.postInlineContent}
             </Show>
@@ -182,10 +185,6 @@ export function ContentEditable(props: ContentEditableProps) {
         <div
             ref={divRef}
             class={props.className}
-            style={{
-                "min-height": "1.3rem",
-                "word-break": "break-word",
-            }}
             contenteditable="plaintext-only"
             spellcheck="false"
             onInput={handleInput}

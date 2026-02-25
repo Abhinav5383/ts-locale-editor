@@ -62,28 +62,33 @@
     padding-inline-start: calc(var(--depth, 0) * var(--indent-size));
 }
 
+.node-row .node-key {
+    font-size: 0.93em;
+}
+
 .node-row.obj-brace .node-key {
     font-weight: 600;
     font-style: italic;
-    font-size: 1.05em;
 }
 
 .cell-wrapper {
     position: relative;
 }
 
+.cell-wrapper.scrollable {
+    display: grid;
+}
+
 .cell-wrapper>div {
-    height: fit-content;
     position: sticky;
     top: 1rem;
     bottom: 1rem;
+    height: fit-content;
+    max-width: stretch;
+    overflow-x: auto;
+    scrollbar-width: thin;
 }
 
-
-/* .node-value-ref,
-.node-value-edit {
-    padding: 4px 0;
-} */
 
 /* tokens n stuff */
 .token {
@@ -125,31 +130,38 @@
 }
 
 /* strings */
-
-.string-editable {
-    background-color: var(--gh-bg-secondary);
-    color: var(--gh-token-string);
-    border: 1px solid var(--gh-border);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-family: inherit;
-    font-size: inherit;
-    min-width: 1ch;
-    display: inline-block;
+.nowrap-on-multiline {
     word-wrap: break-word;
     white-space: pre-wrap;
     overflow-wrap: break-word;
+}
+
+.multiline .nowrap-on-multiline {
+    white-space: pre;
+    text-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.string-editable {
+    display: inline-block;
+    min-width: 1ch;
+    min-height: 1.3rem;
+    font-family: inherit;
+    font-size: inherit;
+    border: 1px solid var(--gh-border);
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: var(--gh-token-string);
+    caret-color: var(--gh-token-keyword);
+    background-color: var(--gh-bg-secondary);
     transition: border-color 0.2s;
     outline: none;
 
-    &:focus-within {
+    &:focus {
+        border-color: var(--gh-token-string);
         background-color: var(--gh-bg-primary);
     }
-}
-
-.string-editable:focus {
-    border-color: var(--gh-token-string);
-    box-shadow: 0 0 0 2px lch(from var(--gh-token-string) l c h / 0.25);
 }
 
 .node-variable {
