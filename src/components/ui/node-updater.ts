@@ -8,6 +8,40 @@ import type {
     WithKey,
 } from "~/lib/types";
 
+export function mergeNodes(target: ObjectNode, source: ObjectNode): ObjectNode {
+    const result: ObjectNode = {
+        type: target.type,
+        value: [...target.value],
+    };
+
+    const existingKeys = new Set<string>();
+    for (const child of result.value) {
+        existingKeys.add(child.key);
+    }
+
+    for (const child of source.value) {
+        if (!existingKeys.has(child.key)) {
+            result.value.push(child);
+            existingKeys.add(child.key);
+        } else {
+            const targetChildIdx = result.value.findIndex((c) => c.key === child.key);
+            const targetChild = result.value[targetChildIdx];
+
+            if (targetChild.type === "object" && child.type === "object") {
+                result.value[targetChildIdx] = {
+                    key: child.key,
+                    type: "object",
+                    value: mergeNodes(targetChild, child).value,
+                };
+            } else {
+                result.value[targetChildIdx] = child;
+            }
+        }
+    }
+
+    return result;
+}
+
 export function updateNodeValue(
     path: string[],
     root: ObjectNode,

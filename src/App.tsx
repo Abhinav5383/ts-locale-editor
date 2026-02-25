@@ -1,16 +1,17 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: --- */
 
 import { type SearchParams, useSearchParams } from "@solidjs/router";
-import { createResource, createSignal, Show } from "solid-js";
+import { createResource, createSignal, onCleanup, onMount, Show } from "solid-js";
 import "~/App.css";
 import Navbar from "~/components/layout/navbar";
 import Editor from "~/components/ui/editor";
-import { updateNodeValue } from "~/components/ui/node-updater";
+import { mergeNodes, updateNodeValue } from "~/components/ui/node-updater";
 import type { node_OnChangeHandler } from "~/components/ui/renderers/types";
 import { getFilesListFromLocale, getLocaleFileContents, getLocalesList } from "~/lib/gh_api";
 import { getTranslationNodesFromTxtFile } from "~/lib/parser";
 import { DEFAULT_LOCALE, DEFAULT_LOCALE_FILE, loadPreferences } from "~/lib/preferences";
 import type { ObjectNode, TranslationNode } from "~/lib/types";
+import { getSavedTranslation, saveTranslationWork } from "./lib/local-store";
 
 interface TranslationNodesResult {
     src: string | undefined;
@@ -64,18 +65,28 @@ export default function App() {
     const [translatingLocale] = createResource(
         translatingTo_Deps,
         async (deps): Promise<TranslationNodesResult> => {
+            let result: TranslationNodesResult;
+
             if (deps.translatingTo) {
-                return await getTranslationNodes(
+                const fetched = await getTranslationNodes(
                     deps.prefs.repo,
                     `${deps.prefs.localesDir}/${deps.translatingTo}/${deps.selectedFile}`,
                 );
+                result = fetched;
+            } else {
+                result = {
+                    src: undefined,
+                    nodes: getTranslationNodesFromTxtFile("export default {};"),
+                };
             }
 
-            const src = "export default {};";
-            return {
-                src: undefined,
-                nodes: getTranslationNodesFromTxtFile(src),
-            };
+            const saved = await getSavedTranslation(deps.translatingTo, deps.selectedFile);
+            if (saved) {
+                result.nodes = mergeNodes(result.nodes, saved);
+                console.log("Loaded saved translations");
+            }
+
+            return result;
         },
     );
 
@@ -94,7 +105,7 @@ export default function App() {
         },
     );
 
-    // let saveTimeoutRef: number | null = null;
+    let saveTimeoutRef: number | null = null;
     const handleTranslatingLocaleChange: node_OnChangeHandler = (
         path: string[],
         node: TranslationNode,
@@ -102,19 +113,33 @@ export default function App() {
         const oldEditedState = editedLocale();
         if (!oldEditedState) return;
 
-        const newWorkingState = updateNodeValue(path, oldEditedState, node);
-        setEditedLocale(newWorkingState);
+        const updatedState = updateNodeValue(path, oldEditedState, node);
+        setEditedLocale(updatedState);
 
-        // if(saveTimeoutRef) clearTimeout(saveTimeoutRef);
+        if (saveTimeoutRef) clearTimeout(saveTimeoutRef);
 
-        // saveTimeoutRef = setTimeout(() => {
-        //     saveWorkToLocalStorage(
-        //         translatingTo(),
-        //         selectedFile(),
-        //         newWorkingState,
-        //     )
-        // }, 3000);
+        saveTimeoutRef = setTimeout(() => {
+            saveTranslationWork(updatedState, translatingTo(), selectedFile());
+            saveTimeoutRef = null;
+        }, 10_000);
     };
+
+    function handleLeavePage(ev: BeforeUnloadEvent) {
+        const _localeState = editedLocale();
+        if (saveTimeoutRef && _localeState) {
+            ev.preventDefault();
+            clearTimeout(saveTimeoutRef);
+            saveTranslationWork(_localeState, translatingTo(), selectedFile());
+        }
+    }
+
+    onMount(() => {
+        window.addEventListener("beforeunload", handleLeavePage);
+
+        onCleanup(() => {
+            window.removeEventListener("beforeunload", handleLeavePage);
+        });
+    });
 
     return (
         <main class="main-wrapper">
