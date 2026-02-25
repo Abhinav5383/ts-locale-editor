@@ -26,9 +26,7 @@ dialog {
 }
 
 ::backdrop {
-    background-image: linear-gradient(0deg,
-            #000A,
-            lch(from var(--gh-text-primary) calc(l - 90) c h / 0.7));
+    background-image: linear-gradient(0deg, lch(from var(--gh-bg-secondary) l c h / 0.7));
     backdrop-filter: blur(2px);
     opacity: 1;
     transition: opacity 0.35s ease-in-out;

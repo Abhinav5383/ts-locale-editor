@@ -1,5 +1,3 @@
-import { DEFAULT_BRANCH, DEFAULT_LOCALE } from "~/lib/preferences";
-
 let RAW_GITHUB_URL = "https://raw.githubusercontent.com";
 // CORS reasons
 if (import.meta.env.DEV === true) {
@@ -48,9 +46,7 @@ export async function getLocalesList(_repo: string, localeDir: string): Promise<
     }
 }
 
-export async function getFilesListFromLocale(_repo: string, localeDir: string, dirPath?: string) {
-    if (!dirPath) dirPath = `${localeDir}/${DEFAULT_LOCALE}`;
-
+export async function getFilesListFromLocale(_repo: string, dirPath: string) {
     try {
         const localeFiles: Dir[] = [];
         const [repo, branch] = parseRepoPath(_repo);
@@ -71,7 +67,7 @@ export async function getFilesListFromLocale(_repo: string, localeDir: string, d
             };
 
             if (item.type === "dir") {
-                const files = await getFilesListFromLocale(_repo, localeDir, item.path);
+                const files = await getFilesListFromLocale(_repo, item.path);
                 dirObj.files = files;
             }
 
@@ -141,7 +137,7 @@ async function githubFetch(url: RequestInfo | URL, options?: RequestInit) {
 }
 
 function parseRepoPath(repoStr: string) {
-    if (!repoStr.includes("/tree/")) return [repoStr, DEFAULT_BRANCH];
+    if (!repoStr.includes("/tree/")) return [repoStr, "HEAD"];
     const split = repoStr.split("/tree/");
-    return [split[0], split[1] || DEFAULT_BRANCH];
+    return [split[0], split[1] || "HEAD"];
 }

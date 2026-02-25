@@ -11,7 +11,7 @@ import {
     type TranslationFn_Body,
     type TranslationFn_Params,
     type VariableNode,
-} from "./types";
+} from "~/lib/types";
 
 type AST_Result =
     | {
@@ -84,7 +84,7 @@ function unwrapExpression(expr: t.Expression): t.Expression {
     return expr;
 }
 
-export function getTranslationNodesFromTxtFile(code: string): ObjectNode {
+export function getTranslationNodesFromTsFile(code: string): ObjectNode {
     const exports = getExportsAST(code);
 
     if (!exports) {

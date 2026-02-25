@@ -1,11 +1,8 @@
-import { createEffect, Show } from "solid-js";
+import { createEffect, For, Show } from "solid-js";
 import type { StringNode } from "~/lib/types";
 import type { NodeRendererProps } from "./types";
 
 export function StringRenderer(props: NodeRendererProps<StringNode>) {
-    // const [value, setValue] = createSignal(props.node.value);
-    const isTemplate = props.node.type === "string_template";
-
     function handleChange(newValue: string) {
         props.onChange(props.path, {
             ...props.node,
@@ -23,14 +20,15 @@ export function StringRenderer(props: NodeRendererProps<StringNode>) {
                     <pre
                         style={{
                             "text-wrap": "wrap",
+                            "word-break": "break-word",
                             margin: 0,
                             padding: 0,
                         }}
                         class="token token-string-content"
                     >
-                        <span class="token no-select">{isTemplate ? "`" : '"'}</span>
-                        {props.node.value}
-                        <span class="token no-select">{isTemplate ? "`" : '"'}</span>
+                        {/* <span class="token no-select">{isTemplate ? "`" : '"'}</span> */}
+                        <StringPreview value={props.node.value} />
+                        {/* <span class="token no-select">{isTemplate ? "`" : '"'}</span> */}
                         {props.postInlineContent}
                     </pre>
                 }
@@ -43,6 +41,86 @@ export function StringRenderer(props: NodeRendererProps<StringNode>) {
                 {props.postInlineContent}
             </Show>
         </div>
+    );
+}
+
+function StringPreview(props: { value: string }) {
+    return (
+        <Show when={props.value.includes("\n")} fallback={props.value}>
+            <For each={props.value.split("\n")}>
+                {(line, index) => {
+                    const leadingWhitespace = line.match(/^[\t ]+/)?.[0] ?? "";
+                    const restOfLine = line.slice(leadingWhitespace.length);
+                    const isLastLine = index() === props.value.split("\n").length - 1;
+
+                    return (
+                        <span>
+                            <Show when={leadingWhitespace.length > 0}>
+                                <span
+                                    class="whitespace-wrap"
+                                    style={{
+                                        position: "relative",
+                                        display: "inline-block",
+                                    }}
+                                >
+                                    <span
+                                        class="whitespace-raw"
+                                        style={{
+                                            color: "transparent",
+                                            "user-select": "text",
+                                            "white-space": "pre",
+                                        }}
+                                    >
+                                        {leadingWhitespace}
+                                    </span>
+                                    <span
+                                        class="whitespace-indicator"
+                                        style={{
+                                            position: "absolute",
+                                            left: 0,
+                                            top: 0,
+                                            color: "var(--gh-text-secondary)",
+                                            opacity: 0.5,
+                                            "user-select": "none",
+                                            "white-space": "pre",
+                                            "pointer-events": "none",
+                                        }}
+                                    >
+                                        {leadingWhitespace
+                                            .split("")
+                                            .map((ch) => (ch === "\t" ? "→" : "␣"))
+                                            .join("")}
+                                    </span>
+                                </span>
+                            </Show>
+                            <span
+                                style={{
+                                    "background-color": "var(--gh-bg-tertiary)",
+                                }}
+                            >
+                                {restOfLine}
+                            </span>
+
+                            <Show when={!isLastLine}>
+                                <span
+                                    class="newline-indicator"
+                                    style={{
+                                        opacity: 0.5,
+                                        color: "var(--gh-text-secondary)",
+                                        "user-select": "none",
+                                        "margin-left": "2px",
+                                        "margin-right": "2px",
+                                    }}
+                                >
+                                    ↵
+                                </span>
+                                <br />
+                            </Show>
+                        </span>
+                    );
+                }}
+            </For>
+        </Show>
     );
 }
 
@@ -101,6 +179,7 @@ export function ContentEditable(props: ContentEditableProps) {
             class={props.className}
             style={{
                 "min-height": "1.3rem",
+                "word-break": "break-word",
             }}
             contenteditable="plaintext-only"
             spellcheck="false"

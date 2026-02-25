@@ -1,11 +1,13 @@
 export interface PrefsObj {
     repo: string;
     localesDir: string;
+    defaultLocale: string;
 }
 
 const DEFAULTS = {
     repo: "PuzzlesHQ/cosmic-mod-manager/tree/main",
     localesDir: "apps/frontend/app/locales",
+    defaultLocale: "en",
 } satisfies PrefsObj;
 
 const STORAGE_KEY = "prefs";
@@ -32,6 +34,13 @@ export function loadPreferences(): PrefsObj {
     return DEFAULTS;
 }
 
-export const DEFAULT_BRANCH = "main";
-export const DEFAULT_LOCALE = "en";
-export const DEFAULT_LOCALE_FILE = "translation.ts";
+const preferredNames = ["translation.ts", "game.json"];
+export function getDefaultLocaleFile(files: string[]): string {
+    for (const file of files) {
+        if (preferredNames.includes(file.toLowerCase())) {
+            return file;
+        }
+    }
+
+    return files[0];
+}

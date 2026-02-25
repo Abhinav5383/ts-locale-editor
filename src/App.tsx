@@ -8,8 +8,8 @@ import Editor from "~/components/ui/editor";
 import { mergeNodes, updateNodeValue } from "~/components/ui/node-updater";
 import type { node_OnChangeHandler } from "~/components/ui/renderers/types";
 import { getFilesListFromLocale, getLocaleFileContents, getLocalesList } from "~/lib/gh_api";
-import { getTranslationNodesFromTxtFile } from "~/lib/parser";
-import { DEFAULT_LOCALE, DEFAULT_LOCALE_FILE, loadPreferences } from "~/lib/preferences";
+import { EMPTY_OBJECT_NODE, getTranslationNodesFromTxtFile } from "~/lib/parser";
+import { getDefaultLocaleFile, loadPreferences } from "~/lib/preferences";
 import type { ObjectNode, TranslationNode } from "~/lib/types";
 import { getSavedTranslation, saveTranslationWork } from "./lib/local-store";
 
@@ -24,17 +24,25 @@ export default function App() {
         return await getLocalesList(prefs.repo, prefs.localesDir);
     });
     const [localeFilesList] = createResource(preferences, async (prefs) => {
-        return await getFilesListFromLocale(prefs.repo, prefs.localesDir);
+        return await getFilesListFromLocale(
+            prefs.repo,
+            `${prefs.localesDir}/${prefs.defaultLocale}`,
+        );
     });
 
     const [searchParams, setSearchParams] = useSearchParams();
-    const selectedFile = () => getSearchParam(searchParams, "file", DEFAULT_LOCALE_FILE);
+    const selectedFile = () =>
+        getSearchParam(
+            searchParams,
+            "file",
+            getDefaultLocaleFile((localeFilesList() ?? []).map((file) => file.name)),
+        );
     function setSelectedFile(file: string) {
         saveToLocalStorage(editedLocale()!);
         setSearchParams({ file });
     }
 
-    const translatingFrom = () => getSearchParam(searchParams, "from", DEFAULT_LOCALE);
+    const translatingFrom = () => getSearchParam(searchParams, "from", preferences().defaultLocale);
     function setTranslatingFrom(locale: string) {
         setSearchParams({ from: locale });
     }
@@ -51,8 +59,15 @@ export default function App() {
         translatingFrom: translatingFrom(),
     });
 
-    const [refLocale] = createResource(refDeps, (deps): Promise<TranslationNodesResult> => {
-        return getTranslationNodes(
+    const [refLocale] = createResource(refDeps, async (deps): Promise<TranslationNodesResult> => {
+        if (!deps.selectedFile) {
+            return {
+                src: undefined,
+                nodes: EMPTY_OBJECT_NODE,
+            };
+        }
+
+        return await getTranslationNodes(
             deps.prefs.repo,
             `${deps.prefs.localesDir}/${deps.translatingFrom}/${deps.selectedFile}`,
         );
@@ -78,7 +93,7 @@ export default function App() {
             } else {
                 result = {
                     src: undefined,
-                    nodes: getTranslationNodesFromTxtFile("export default {};"),
+                    nodes: EMPTY_OBJECT_NODE,
                 };
             }
 
@@ -210,15 +225,15 @@ export default function App() {
 }
 
 async function getTranslationNodes(repo: string, localeFile: string) {
-    let fileContents = await getLocaleFileContents(repo, localeFile).catch((error) => {
-        console.error(error);
-        return null;
-    });
-    if (!fileContents) fileContents = "export default {};";
+    const fileContents =
+        (await getLocaleFileContents(repo, localeFile).catch((error) => {
+            console.error(error);
+            return null;
+        })) ?? undefined;
 
     return {
         src: fileContents,
-        nodes: getTranslationNodesFromTxtFile(fileContents),
+        nodes: getTranslationNodesFromTxtFile(localeFile, fileContents),
     };
 }
 

@@ -6,7 +6,6 @@
     background-color: var(--gh-bg-primary);
     color: var(--gh-text-primary);
     font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, monospace;
-    font-size: 14px;
     line-height: 1.6;
 
     --gap: 18px;
@@ -128,7 +127,7 @@
 /* strings */
 
 .string-editable {
-    background-color: var(--gh-bg-secondary);
+    background-color: var(--gh-bg-primary);
     color: var(--gh-token-string);
     border: 1px solid var(--gh-border);
     padding: 4px 8px;

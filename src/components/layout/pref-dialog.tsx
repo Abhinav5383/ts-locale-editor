@@ -12,11 +12,13 @@ export function PreferenceDialog(props: PreferenceDialogProps) {
     const [open, setOpen] = createSignal(false);
     const [repo, setRepo] = createSignal(props.currPrefs.repo);
     const [localesDir, setLocalesDir] = createSignal(props.currPrefs.localesDir);
+    const [defaultLocale, setDefaultLocale] = createSignal(props.currPrefs.defaultLocale);
 
     function handleSave() {
         const newPrefs = {
             repo: repo(),
             localesDir: localesDir(),
+            defaultLocale: defaultLocale(),
         };
 
         batch(() => {
@@ -32,9 +34,9 @@ export function PreferenceDialog(props: PreferenceDialogProps) {
         batch(() => {
             setRepo(defaults.repo);
             setLocalesDir(defaults.localesDir);
+            setDefaultLocale(defaults.defaultLocale);
 
             props.setPrefs(defaults);
-            setRepo(props.currPrefs.repo);
         });
     }
 
@@ -67,6 +69,18 @@ export function PreferenceDialog(props: PreferenceDialogProps) {
                             value={localesDir()}
                             onInput={(e) => {
                                 setLocalesDir(e.currentTarget.value);
+                            }}
+                        />
+                    </div>
+
+                    <div class="input-row">
+                        <label for="localesDir">Default Locale Directory</label>
+                        <input
+                            id="defaultLocaleDir"
+                            type="text"
+                            value={defaultLocale()}
+                            onInput={(e) => {
+                                setDefaultLocale(e.currentTarget.value);
                             }}
                         />
                     </div>

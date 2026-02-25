@@ -15,6 +15,13 @@ export default defineConfig({
                     Accept: "application/vnd.github.v3+json",
                 },
             },
+            "/FinalForEach": {
+                target: "https://raw.githubusercontent.com",
+                changeOrigin: true,
+                headers: {
+                    Accept: "application/vnd.github.v3+json",
+                },
+            },
         },
     },
 
