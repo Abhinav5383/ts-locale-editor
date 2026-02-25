@@ -127,7 +127,7 @@
 /* strings */
 
 .string-editable {
-    background-color: var(--gh-bg-primary);
+    background-color: var(--gh-bg-secondary);
     color: var(--gh-token-string);
     border: 1px solid var(--gh-border);
     padding: 4px 8px;
@@ -141,11 +141,15 @@
     overflow-wrap: break-word;
     transition: border-color 0.2s;
     outline: none;
+
+    &:focus-within {
+        background-color: var(--gh-bg-primary);
+    }
 }
 
 .string-editable:focus {
     border-color: var(--gh-token-string);
-    box-shadow: 0 0 0 2px rgba(165, 214, 255, 0.2);
+    box-shadow: 0 0 0 2px lch(from var(--gh-token-string) l c h / 0.25);
 }
 
 .node-variable {
@@ -294,7 +298,7 @@
 
 .code-editable:focus {
     border-color: var(--gh-token-string);
-    box-shadow: 0 0 0 2px rgba(165, 214, 255, 0.2);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gh-token-string) 25%, transparent);
 }
 
 .node-unknown {

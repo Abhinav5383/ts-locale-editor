@@ -6,7 +6,6 @@
     --gh-text-secondary: #8b949e;
     --gh-border: #30363d;
 
-    /* github dark */
     --gh-token-keyword: #ff7b72;
     --gh-token-string: #a5d6ff;
     --gh-token-variable: #ffa657;
@@ -17,6 +16,29 @@
     --gh-token-parameter: #ffa657;
 
     --indent-size: 4ch;
+    --gh-border-hover: #444c56;
+    color-scheme: dark;
+}
+
+[data-theme="light"] {
+    --gh-bg-primary: #ffffff;
+    --gh-bg-secondary: #f6f8fa;
+    --gh-bg-tertiary: #eaeef2;
+    --gh-text-primary: #24292f;
+    --gh-text-secondary: #57606a;
+    --gh-border: #d0d7de;
+    --gh-border-hover: #9ca5af;
+
+    --gh-token-keyword: #cf222e;
+    --gh-token-string: #0a3069;
+    --gh-token-variable: #953800;
+    --gh-token-punctuation: #24292f;
+    --gh-token-type: #0550ae;
+    --gh-token-comment: #57606a;
+    --gh-token-bracket: #24292f;
+    --gh-token-parameter: #953800;
+
+    color-scheme: light;
 }
 
 body,
@@ -25,8 +47,7 @@ html {
     padding: 0;
     box-sizing: border-box;
     background-color: var(--gh-bg-primary);
-    color: lch(from var(--gh-bg-primary) 92% c h);
-    color-scheme: dark;
+    color: var(--gh-text-primary);
     font-family: "Space Grotesk", system-ui;
     scrollbar-gutter: stable;
     interpolate-size: allow-keywords;
@@ -47,4 +68,8 @@ a,
 input {
     font-family: inherit;
     font-size: inherit;
+}
+
+button {
+    cursor: pointer;
 }

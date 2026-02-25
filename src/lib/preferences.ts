@@ -4,13 +4,34 @@ export interface PrefsObj {
     defaultLocale: string;
 }
 
-const DEFAULTS = {
-    repo: "PuzzlesHQ/cosmic-mod-manager/tree/main",
-    localesDir: "apps/frontend/app/locales",
-    defaultLocale: "en",
-} satisfies PrefsObj;
+const config = (() => {
+    const domain = window.location.hostname;
+    const preset = new URLSearchParams(window.location.search).get("preset");
 
+    if (domain.startsWith("cr-translator") || preset?.toLowerCase() === "cr") {
+        return {
+            defaultFile: "game.json",
+            prefs: {
+                repo: "FinalForEach/Cosmic-Reach-Localization/tree/master",
+                localesDir: "assets/base/lang",
+                defaultLocale: "en_us",
+            } satisfies PrefsObj,
+        };
+    }
+
+    return {
+        defaultFile: "translation.ts",
+        prefs: {
+            repo: "PuzzlesHQ/cosmic-mod-manager/tree/main",
+            localesDir: "apps/frontend/app/locales",
+            defaultLocale: "en",
+        } satisfies PrefsObj,
+    };
+})();
+
+const DEFAULTS = config.prefs;
 const STORAGE_KEY = "prefs";
+
 export function savePreferences(preferences: PrefsObj) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
 }
@@ -34,10 +55,9 @@ export function loadPreferences(): PrefsObj {
     return DEFAULTS;
 }
 
-const preferredNames = ["translation.ts", "game.json"];
 export function getDefaultLocaleFile(files: string[]): string {
     for (const file of files) {
-        if (preferredNames.includes(file.toLowerCase())) {
+        if (config.defaultFile === file.toLowerCase()) {
             return file;
         }
     }

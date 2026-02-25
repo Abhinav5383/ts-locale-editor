@@ -17,7 +17,7 @@ select * {
 
     &:where(:focus, :hover) {
         background-color: var(--gh-bg-tertiary);
-        border-color: lch(from var(--gh-border) calc(l * 1.7) c h);
+        border-color: var(--gh-border-hover);
     }
 
     @supports (appearance: base-select) {
@@ -100,8 +100,7 @@ select * {
             }
 
             &:focus {
-                color: white;
-                background-color: #ffffff18;
+                background-color: lch(from var(--gh-text-primary) l c h / 0.15);
             }
 
             .opt-content {

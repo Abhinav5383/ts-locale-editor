@@ -26,9 +26,10 @@ export function StringRenderer(props: NodeRendererProps<StringNode>) {
                         }}
                         class="token token-string-content"
                     >
-                        {/* <span class="token no-select">{isTemplate ? "`" : '"'}</span> */}
-                        <StringPreview value={props.node.value} />
-                        {/* <span class="token no-select">{isTemplate ? "`" : '"'}</span> */}
+                        <StringPreview
+                            value={props.node.value}
+                            isStrTemplate={props.node.type === "string_template"}
+                        />
                         {props.postInlineContent}
                     </pre>
                 }
@@ -44,9 +45,18 @@ export function StringRenderer(props: NodeRendererProps<StringNode>) {
     );
 }
 
-function StringPreview(props: { value: string }) {
+function StringPreview(props: { value: string; isStrTemplate: boolean }) {
     return (
-        <Show when={props.value.includes("\n")} fallback={props.value}>
+        <Show
+            when={props.value.includes("\n")}
+            fallback={
+                <>
+                    <span class="token no-select">{props.isStrTemplate ? "`" : '"'}</span>
+                    {props.value}
+                    <span class="token no-select">{props.isStrTemplate ? "`" : '"'}</span>
+                </>
+            }
+        >
             <For each={props.value.split("\n")}>
                 {(line, index) => {
                     const leadingWhitespace = line.match(/^[\t ]+/)?.[0] ?? "";
@@ -93,13 +103,7 @@ function StringPreview(props: { value: string }) {
                                     </span>
                                 </span>
                             </Show>
-                            <span
-                                style={{
-                                    "background-color": "var(--gh-bg-tertiary)",
-                                }}
-                            >
-                                {restOfLine}
-                            </span>
+                            {restOfLine}
 
                             <Show when={!isLastLine}>
                                 <span
@@ -111,6 +115,7 @@ function StringPreview(props: { value: string }) {
                                         "margin-left": "2px",
                                         "margin-right": "2px",
                                     }}
+                                    title="Newline (\n)"
                                 >
                                     ↵
                                 </span>

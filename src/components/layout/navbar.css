@@ -36,58 +36,48 @@
         gap: 0.5rem;
     }
 
-    .github-link {
+
+    .github-link,
+    .theme-toggle,
+    .preference-dialog .trigger {
         display: flex;
         align-items: center;
         justify-content: center;
         width: 2.5rem;
         height: 2.5rem;
         border-radius: 0.5rem;
+        background-color: transparent;
         border: 1px solid transparent;
-        background-color: var(--gh-bg-tertiary);
         outline: transparent;
 
 
         svg {
-            fill: var(--gh-text-primary);
+            color: var(--gh-text-primary);
             width: 1.3em;
             height: 1.3em;
         }
 
 
         &:where(:hover, :focus-visible) {
-            border-color: lch(from var(--gh-border) calc(l * 1.7) c h);
+            background-color: var(--gh-bg-tertiary);
+            border-color: var(--gh-border-hover);
+        }
+    }
+
+    .theme-toggle {
+        color: var(--gh-text-secondary);
+
+        svg {
+            width: 75%;
+            height: 75%;
         }
     }
 }
 
-.preference-dialog .trigger {
-    outline: none;
-    border: 1px solid var(--gh-border);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 2.5rem;
-    min-width: 2.5rem;
-    background-color: var(--gh-bg-secondary);
-    transition: all 0.2s ease;
-    border-radius: 0.5rem;
-    color: var(--gh-text-primary);
-
-    &:where(:hover, :focus-visible) {
-        background-color: var(--gh-bg-tertiary);
-        border-color: lch(from var(--gh-border) calc(l * 1.7) c h);
+.preference-dialog {
+    dialog {
+        border-radius: 1rem;
     }
-
-    svg {
-        width: 1.3em;
-        height: 1.3em;
-    }
-}
-
-.preference-dialog dialog {
-    border-radius: 1rem;
 }
 
 .pref-settings {
@@ -128,7 +118,7 @@
         }
 
         &:focus-visible {
-            border-color: lch(from var(--gh-border) calc(l * 1.7) c h);
+            border-color: var(--gh-border-hover);
         }
     }
 }
@@ -155,7 +145,7 @@
 
         &:where(:hover, :focus-visible) {
             background-color: var(--gh-bg-tertiary);
-            border-color: lch(from var(--gh-border) calc(l * 1.7) c h);
+            border-color: var(--gh-border-hover);
         }
     }
 
