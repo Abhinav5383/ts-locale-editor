@@ -30,6 +30,7 @@ export default function App() {
     const [searchParams, setSearchParams] = useSearchParams();
     const selectedFile = () => getSearchParam(searchParams, "file", DEFAULT_LOCALE_FILE);
     function setSelectedFile(file: string) {
+        saveToLocalStorage(editedLocale()!);
         setSearchParams({ file });
     }
 
@@ -40,6 +41,7 @@ export default function App() {
 
     const translatingTo = () => getSearchParam(searchParams, "to", "");
     function setTranslatingTo(locale: string) {
+        saveToLocalStorage(editedLocale()!);
         setSearchParams({ to: locale });
     }
 
@@ -105,13 +107,29 @@ export default function App() {
         },
     );
 
+    function saveToLocalStorage(data: ObjectNode) {
+        if (saveTimeoutRef) {
+            clearTimeout(saveTimeoutRef);
+            saveTimeoutRef = null;
+        }
+
+        if (data) {
+            saveTranslationWork(data, translatingTo(), selectedFile());
+        }
+    }
+
     let saveTimeoutRef: number | null = null;
     const handleTranslatingLocaleChange: node_OnChangeHandler = (
         path: string[],
         node: TranslationNode,
     ) => {
-        const oldEditedState = editedLocale();
-        if (!oldEditedState) return;
+        let oldEditedState = editedLocale();
+        if (!oldEditedState) {
+            oldEditedState = {
+                type: "object",
+                value: [],
+            };
+        }
 
         const updatedState = updateNodeValue(path, oldEditedState, node);
         setEditedLocale(updatedState);
@@ -125,14 +143,10 @@ export default function App() {
     };
 
     function handleLeavePage(ev: BeforeUnloadEvent) {
-        const _localeState = editedLocale();
-        if (saveTimeoutRef && _localeState) {
+        const editedState = editedLocale();
+        if (saveTimeoutRef && editedState) {
             ev.preventDefault();
-
-            clearTimeout(saveTimeoutRef);
-            saveTimeoutRef = null;
-
-            saveTranslationWork(_localeState, translatingTo(), selectedFile());
+            saveToLocalStorage(editedState);
         }
     }
 

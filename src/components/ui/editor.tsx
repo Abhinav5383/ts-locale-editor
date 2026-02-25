@@ -3,7 +3,7 @@ import { NodeRenderer } from "~/components/ui/renderers/node";
 import { flattenLocaleEntries, IterationItemType } from "~/components/ui/utils";
 import { AssembleTranslation } from "~/lib/assembler";
 import { type Dir, flattenDirs } from "~/lib/gh_api";
-import { deleteSavedTranslation } from "~/lib/local-store";
+import { deleteAllSaves, deleteSavedTranslation } from "~/lib/local-store";
 import type { PrefsObj } from "~/lib/preferences";
 import type { ObjectNode } from "~/lib/types";
 import ThreeDotsVerticalIcon from "../icons/dots-vertical";
@@ -360,11 +360,7 @@ function BottomBar(props: ExportActionsProps) {
                                                 setDialogOpen(false);
                                                 alert("Saved translation deleted successfully.");
                                             })
-                                            .catch((err) => {
-                                                console.error(
-                                                    "Failed to delete saved translation:",
-                                                    err,
-                                                );
+                                            .catch(() => {
                                                 alert(
                                                     "Failed to delete saved translation. See console for details.",
                                                 );
@@ -376,6 +372,32 @@ function BottomBar(props: ExportActionsProps) {
                                 <span>
                                     saved translation of currently selected file (
                                     <strong>{props.selectedFile}</strong>).
+                                </span>
+                            </div>
+
+                            <div class="row">
+                                <button
+                                    type="button"
+                                    onclick={() => {
+                                        deleteAllSaves()
+                                            .then(() => {
+                                                setDialogOpen(false);
+                                                alert(
+                                                    "Deleted all saved translations successfully.",
+                                                );
+                                                window.location.reload();
+                                            })
+                                            .catch(() => {
+                                                alert(
+                                                    "Failed to delete translations. See browser console for details.",
+                                                );
+                                            });
+                                    }}
+                                >
+                                    Delete
+                                </button>{" "}
+                                <span>
+                                    <strong>all</strong> saved translations. Use with caution!
                                 </span>
                             </div>
 

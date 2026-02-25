@@ -88,6 +88,33 @@ export function deleteSavedTranslation(locale: string, fileName: string): Promis
     });
 }
 
+export function deleteAllSaves(): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const db = dbInstance;
+        if (!db) {
+            reject(new Error("Database not initialized"));
+            return;
+        }
+
+        const transaction = db.transaction(TRANSLATIONS_STORE, "readwrite");
+        const store = transaction.objectStore(TRANSLATIONS_STORE);
+
+        const req = store.clear();
+        req.onsuccess = () => {
+            resolve();
+        };
+
+        req.onerror = () => {
+            console.error("Error clearing translations!");
+            if (req.error) {
+                console.error(req.error.name);
+                console.error(req.error.message);
+            }
+            reject(new Error("Failed to clear translations"));
+        };
+    });
+}
+
 function getDbInstance(): Promise<IDBDatabase | null> {
     return new Promise((resolve) => {
         const openReq = indexedDB.open(DB_NAME, DB_VERSION);

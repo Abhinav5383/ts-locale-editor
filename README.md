@@ -24,6 +24,7 @@ Try it here https://locale-editor.devabhinav.online
 - **GitHub Integration** - Fetch and work with translation files directly from your GitHub repositories
 - **Function Support** - View function signatures and edit function body code for complex dynamic translations
 - **Named & Default Exports** - Works with both `export default` and `export const` style translation files
+- **Local Saves** - Autosaves your work so you don't need to worry about losing work (You can delete saved data from the three dots on the bottom bar)
 - Reconstructs translations back into valid JS/TS code, replacing only the export expressions while leaving everything else untouched
 
 
