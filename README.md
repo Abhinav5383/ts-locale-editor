@@ -1,15 +1,16 @@
 # Locale Editor for JS/TS Translation Files
 
-A web-based editor for managing TypeScript/JavaScript translation (i18n) files. Parse complex translation object structures, edit string values in an intuitive UI, and reassemble the modified code back into valid TS/JS while preserving your existing code structure.
+A web-based editor for TypeScript/JavaScript/JSON based translation (i18n) files. Parse complex translation object structures, edit string values in an intuitive UI, and reassemble the modified code back into valid TS/JS/JSON while preserving your existing code structure.
 
 Try it here https://locale-editor.devabhinav.online
-
 
 ## Usage
 
 1. **Configure your repository** in the preferences (gear icon in the navbar):
    - Set the GitHub repository (format: `owner/repo` or `owner/repo/tree/dev` for custom branch)
    - Specify the directory containing your translation files (e.g., `src/locales`)
+   - Finally enter your default locale's folder name (eg, "en" or "en-US" etc)
+
 2. **Select a translation file** to edit from the file selector
 3. **Choose reference and target locales**
 4. **Edit translations** in the UI
@@ -18,6 +19,12 @@ Try it here https://locale-editor.devabhinav.online
 
 ## Features
 
+- **Suported Languages:**
+  - Javascript
+  - Typescript
+  - JSON
+
+- **Themes** - Light and dark theme support
 - **Parse Complex Structures** - Converts JS/TS translation objects into an interactive editor UI, handling nested objects, functions, arrays, and more
 - **Edit Strings Directly** - Modify translation strings without touching the underlying code structure
 - **Drag-and-Drop Arrays** - Reorder array items through the UI
@@ -69,32 +76,42 @@ When done editing, use the `Copy` or `Download` button to export your work. \
 
 
 ### Supported Translation Structures
-
-```typescript
-// default exports
-export default {
-    greeting: "Hello",
-    nested: {
-        greetUser: (name: string) => `Hello, ${name}!`,
-        authoredBy: (authorLink: React.ReactNode) => ["Authored by ", authorLink, "."]
+1. JSON
+    ```json
+    {
+        "greet": "hi",
+        "nested": {
+            "fallbacks": ["en-US"]
+        }
     }
-}
+    ```
 
-// named exports
-export const AboutPage = (props: AboutPageProps) => `
-# About Us
-...
+2. Typescript/Javascript
+    ```typescript
+    // default exports
+    export default {
+        greeting: "Hello",
+        nested: {
+            greetUser: (name: string) => `Hello, ${name}!`,
+            authoredBy: (authorLink: React.ReactNode) => ["Authored by ", authorLink, "."]
+        }
+    }
 
-Visit our [GitHub page](${props.repoUrl}) for setup instructions.
-`;
+    // named exports
+    export const AboutPage = (props: AboutPageProps) => `
+    # About Us
+    ...
 
-export const en = {
-    name: "English",
-    code: "en",
-}
-```
+    Visit our [GitHub page](${props.repoUrl}) for setup instructions.
+    `;
 
-_In its current state, it doesn't support referenced exports. So defining the object somewhere else and then exporting a variable won't work._
+    export const en = {
+        name: "English",
+        code: "en",
+    }
+    ```
+
+    _In its current state, it doesn't support referenced exports. So defining the object somewhere else and then exporting a variable won't work._
 
 
 
