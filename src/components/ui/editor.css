@@ -257,7 +257,7 @@
     flex-wrap: wrap;
 }
 
-.cell-wrapper:has(.node-string.full-width)+.cell-wrapper .inline-func .node-string {
+.cell-wrapper:has(.node-string.full-width)+.cell-wrapper .node-string {
     flex-basis: 100%;
     display: grid;
 }
