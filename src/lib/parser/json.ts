@@ -1,7 +1,8 @@
+import JSON5 from "json5";
 import type { ArrayNode, ObjectNode, StringNode, WithKey } from "~/lib/types";
 
 export function getTranslationNodesFromJSONFile(str: string): ObjectNode {
-    const json = JSON.parse(str);
+    const json = JSON5.parse(str);
 
     if (typeof json !== "object") {
         return {
