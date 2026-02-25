@@ -11,13 +11,13 @@ dialog {
     min-width: min(100%, 32rem);
     max-width: min(calc(100% - 3rem), 72rem);
     max-height: calc(100% - max(4rem, 5vh));
-    border: none;
+    border: 2px solid var(--gh-border);
     outline: none;
     background-color: var(--gh-bg-primary);
 
     opacity: 1;
     transform: translateY(0);
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
 
     @starting-style {
         opacity: 0;
@@ -31,7 +31,7 @@ dialog {
             lch(from var(--gh-text-primary) calc(l - 90) c h / 0.7));
     backdrop-filter: blur(2px);
     opacity: 1;
-    transition: opacity 0.5s ease-in-out;
+    transition: opacity 0.35s ease-in-out;
 
     @starting-style {
         opacity: 0;

@@ -128,7 +128,10 @@ export default function App() {
         const _localeState = editedLocale();
         if (saveTimeoutRef && _localeState) {
             ev.preventDefault();
+
             clearTimeout(saveTimeoutRef);
+            saveTimeoutRef = null;
+
             saveTranslationWork(_localeState, translatingTo(), selectedFile());
         }
     }

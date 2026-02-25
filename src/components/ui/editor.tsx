@@ -3,9 +3,12 @@ import { NodeRenderer } from "~/components/ui/renderers/node";
 import { flattenLocaleEntries, IterationItemType } from "~/components/ui/utils";
 import { AssembleTranslation } from "~/lib/assembler";
 import { type Dir, flattenDirs } from "~/lib/gh_api";
+import { deleteSavedTranslation } from "~/lib/local-store";
 import type { PrefsObj } from "~/lib/preferences";
 import type { ObjectNode } from "~/lib/types";
+import ThreeDotsVerticalIcon from "../icons/dots-vertical";
 import { ExternalLinkIcon } from "../icons/external-link";
+import Dialog from "./dialog";
 import "./editor.css";
 import type { node_OnChangeHandler } from "./renderers/types";
 import { Select } from "./select";
@@ -227,6 +230,7 @@ interface ExportActionsProps {
 function BottomBar(props: ExportActionsProps) {
     let prevScrollY = window.scrollY;
     const [bottomBarVisible, setBottomBarVisible] = createSignal(true);
+    const [dialogOpen, setDialogOpen] = createSignal(false);
 
     function assembledNodes() {
         return AssembleTranslation({
@@ -320,21 +324,71 @@ function BottomBar(props: ExportActionsProps) {
                         href={`https://github.com/${props.preferences.repo}/${props.preferences.localesDir}/${props.translatingFrom}/${props.selectedFile}`}
                         target="_blank"
                         title="Goto reference file on github"
+                        class="external-link"
                     >
                         <span>
-                            {props.translatingFrom}/{props.selectedFile}
+                            {props.translatingFrom}/{props.selectedFile} <ExternalLinkIcon />
                         </span>
-
-                        <ExternalLinkIcon />
                     </a>
                     <button type="button" onClick={handleCopy}>
                         Copy
                     </button>
-                    or
+
                     <button type="button" onClick={handleDownload}>
                         Download
                     </button>
-                    <span onclick={() => console.log(assembledNodes())}>translation</span>
+
+                    <button
+                        class="icon-btn"
+                        type="button"
+                        onClick={() => setDialogOpen(true)}
+                        title="More Options"
+                    >
+                        <ThreeDotsVerticalIcon />
+                    </button>
+                    <Dialog open={dialogOpen()} onOpenChange={setDialogOpen}>
+                        <div class="dialog-content">
+                            <div class="row">
+                                <button
+                                    type="button"
+                                    onclick={() => {
+                                        deleteSavedTranslation(
+                                            props.translatingTo,
+                                            props.selectedFile,
+                                        )
+                                            .then(() => {
+                                                setDialogOpen(false);
+                                                alert("Saved translation deleted successfully.");
+                                            })
+                                            .catch((err) => {
+                                                console.error(
+                                                    "Failed to delete saved translation:",
+                                                    err,
+                                                );
+                                                alert(
+                                                    "Failed to delete saved translation. See console for details.",
+                                                );
+                                            });
+                                    }}
+                                >
+                                    Delete
+                                </button>{" "}
+                                <span>
+                                    saved translation of currently selected file (
+                                    <strong>{props.selectedFile}</strong>).
+                                </span>
+                            </div>
+
+                            <hr />
+
+                            <div class="row">
+                                <button type="button" onclick={() => console.log(assembledNodes())}>
+                                    Log
+                                </button>{" "}
+                                <span>Assembled translation code to console.</span>
+                            </div>
+                        </div>
+                    </Dialog>
                 </div>
             </div>
         </div>

@@ -61,6 +61,33 @@ export function getSavedTranslation(locale: string, fileName: string): Promise<O
     });
 }
 
+export function deleteSavedTranslation(locale: string, fileName: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const db = dbInstance;
+        if (!db) {
+            reject(new Error("Database not initialized"));
+            return;
+        }
+
+        const transaction = db.transaction(TRANSLATIONS_STORE, "readwrite");
+        const store = transaction.objectStore(TRANSLATIONS_STORE);
+
+        const req = store.delete(key(locale, fileName));
+        req.onsuccess = () => {
+            resolve();
+        };
+
+        req.onerror = () => {
+            console.error("Error deleting translation!");
+            if (req.error) {
+                console.error(req.error.name);
+                console.error(req.error.message);
+            }
+            reject(new Error("Failed to delete translation"));
+        };
+    });
+}
+
 function getDbInstance(): Promise<IDBDatabase | null> {
     return new Promise((resolve) => {
         const openReq = indexedDB.open(DB_NAME, DB_VERSION);
