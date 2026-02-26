@@ -67,6 +67,7 @@ select * {
             opacity: 1;
             transition: opacity 0.25s ease-in-out, transform 0.3s, display 1s;
             box-shadow: 2px 6px 8px #0006;
+            scrollbar-width: thin;
 
             @starting-style {
                 opacity: 0;
