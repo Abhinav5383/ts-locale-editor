@@ -1,5 +1,10 @@
 import { For, Match, Show, Switch } from "solid-js";
-import type { FunctionNode, TranslationFn_BlockExprBody, TranslationNode } from "~/lib/types";
+import {
+    type FunctionNode,
+    NodeType,
+    type TranslationFn_BlockExprBody,
+    type TranslationNode,
+} from "~/lib/types";
 import { NodeRenderer } from "./node";
 import { ContentEditable } from "./string";
 import type { NodeRendererProps } from "./types";
@@ -9,7 +14,7 @@ export function FunctionRenderer(props: NodeRendererProps<FunctionNode>) {
         props.onChange(props.path, {
             ...props.node,
             body: {
-                type: "BlockExpression",
+                type: NodeType.BlockExpression,
                 value: newValue,
             },
         } satisfies FunctionNode<TranslationFn_BlockExprBody>);
@@ -24,7 +29,10 @@ export function FunctionRenderer(props: NodeRendererProps<FunctionNode>) {
 
     return (
         <Switch>
-            <Match keyed when={props.node.body.type === "BlockExpression" && props.node.body}>
+            <Match
+                keyed
+                when={props.node.body.type === NodeType.BlockExpression && props.node.body}
+            >
                 {(fnBody) => (
                     <div class="node-function block-func">
                         <div class="function-signature">
@@ -70,7 +78,10 @@ export function FunctionRenderer(props: NodeRendererProps<FunctionNode>) {
                 )}
             </Match>
 
-            <Match keyed when={props.node.body.type !== "BlockExpression" && props.node.body}>
+            <Match
+                keyed
+                when={props.node.body.type !== NodeType.BlockExpression && props.node.body}
+            >
                 {(fnBody) => (
                     <div class="node-function inline-func">
                         <div class="function-signature">
@@ -114,10 +125,10 @@ export function FunctionRenderer(props: NodeRendererProps<FunctionNode>) {
 
 function updateFnBody(oldNode: FunctionNode, newBody: TranslationNode) {
     switch (newBody.type) {
-        case "string":
-        case "string_template":
-        case "variable":
-        case "array":
+        case NodeType.String:
+        case NodeType.StringTemplate:
+        case NodeType.Variable:
+        case NodeType.Array:
             return {
                 ...oldNode,
                 body: newBody,

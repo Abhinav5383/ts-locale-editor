@@ -1,4 +1,5 @@
 import { Match, Switch } from "solid-js";
+import { NodeType } from "~/lib/types";
 import { ArrayRenderer } from "./array";
 import { FunctionRenderer } from "./function";
 import { StringRenderer } from "./string";
@@ -11,7 +12,8 @@ export function NodeRenderer(props: NodeRendererProps) {
             <Match
                 keyed
                 when={
-                    props.node.type === "string" || props.node.type === "string_template"
+                    props.node.type === NodeType.String ||
+                    props.node.type === NodeType.StringTemplate
                         ? props.node
                         : false
                 }
@@ -27,7 +29,7 @@ export function NodeRenderer(props: NodeRendererProps) {
                 )}
             </Match>
 
-            <Match keyed when={props.node.type === "variable" ? props.node : false}>
+            <Match keyed when={props.node.type === NodeType.Variable ? props.node : false}>
                 {(node) => (
                     <VariableRenderer
                         node={node}
@@ -39,7 +41,7 @@ export function NodeRenderer(props: NodeRendererProps) {
                 )}
             </Match>
 
-            <Match keyed when={props.node.type === "array" ? props.node : false}>
+            <Match keyed when={props.node.type === NodeType.Array ? props.node : false}>
                 {(node) => (
                     <ArrayRenderer
                         node={node}
@@ -51,11 +53,11 @@ export function NodeRenderer(props: NodeRendererProps) {
                 )}
             </Match>
 
-            <Match when={props.node.type === "object" ? props.node : false}>
+            <Match when={props.node.type === NodeType.Object ? props.node : false}>
                 <span> </span>
             </Match>
 
-            <Match keyed when={props.node.type === "function" ? props.node : false}>
+            <Match keyed when={props.node.type === NodeType.Function ? props.node : false}>
                 {(node) => (
                     <FunctionRenderer
                         node={node}

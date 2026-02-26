@@ -6,6 +6,7 @@ import {
     type ArrayNode,
     ExportType,
     type FunctionNode,
+    NodeType,
     type ObjectNode,
     type StringNode,
     type TranslationFn_Body,
@@ -89,7 +90,7 @@ export function getTranslationNodesFromTsFile(code: string): ObjectNode {
 
     if (!exports) {
         return {
-            type: "object",
+            type: NodeType.Object,
             value: [],
         };
     }
@@ -103,7 +104,7 @@ export function getTranslationNodesFromTsFile(code: string): ObjectNode {
 
 function extractFromVarDecls(decls: t.VariableDeclarator[]): ObjectNode {
     const result: ObjectNode = {
-        type: "object",
+        type: NodeType.Object,
         value: [],
     };
 
@@ -120,7 +121,7 @@ function extractFromVarDecls(decls: t.VariableDeclarator[]): ObjectNode {
 
 function extractObjectNode(expr: t.ObjectExpression): ObjectNode {
     const result: ObjectNode = {
-        type: "object",
+        type: NodeType.Object,
         value: [],
     };
 
@@ -185,14 +186,14 @@ function mapExpressionToNode(key: string, expr: t.Expression): ObjectNode["value
 function extractStringNode(expr: t.Expression): StringNode | null {
     const pure = tryExtractStringLiteral(expr);
     if (pure != null) {
-        return { type: "string", value: pure };
+        return { type: NodeType.String, value: pure };
     }
 
     if (t.isTemplateLiteral(expr)) {
         // keep full template source as-is, e.g. `A template literal ${SOME_CONST}`
         let template = generate(expr).code;
         template = template.slice(1, -1);
-        return { type: "string_template", value: template };
+        return { type: NodeType.StringTemplate, value: template };
     }
 
     return null;
@@ -220,7 +221,7 @@ function extractVariableNode(expr: t.Expression): VariableNode | null {
     if (!t.isIdentifier(expr)) return null;
 
     return {
-        type: "variable",
+        type: NodeType.Variable,
         name: expr.name,
     };
 }
@@ -246,7 +247,7 @@ function extractArrayNode(expr: t.Expression): ArrayNode | null {
     }
 
     return {
-        type: "array",
+        type: NodeType.Array,
         value: items,
     };
 }
@@ -261,7 +262,7 @@ function extractFunctionNode(expr: AST_FnTypes): FunctionNode {
     const body = extractFnBody(expr);
 
     return {
-        type: "function",
+        type: NodeType.Function,
         params,
         body,
     } satisfies FunctionNode;
@@ -272,7 +273,7 @@ function extractFnParams(fn: AST_FnTypes): TranslationFn_Params[] {
         // shouldn't really happen in our case
         // only happens if using destructuring or rest params
         if (!t.isIdentifier(p)) {
-            return { name: "[unknown]", type: "string" };
+            return { name: "[unknown]", type: NodeType.String };
         }
 
         let typeCode = "unknown";
@@ -297,7 +298,7 @@ function extractFnBody(fn: AST_FnTypes): TranslationFn_Body {
     }
 
     return {
-        type: "BlockExpression",
+        type: NodeType.BlockExpression,
         value: extractFnCode(fn),
     };
 }

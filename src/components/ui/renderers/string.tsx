@@ -1,5 +1,5 @@
 import { createEffect, For, Show } from "solid-js";
-import type { StringNode } from "~/lib/types";
+import { NodeType, type StringNode } from "~/lib/types";
 import type { NodeRendererProps } from "./types";
 
 export function StringRenderer(props: NodeRendererProps<StringNode>) {
@@ -31,7 +31,7 @@ export function StringRenderer(props: NodeRendererProps<StringNode>) {
                     >
                         <StringPreview
                             value={props.node.value}
-                            isStrTemplate={props.node.type === "string_template"}
+                            isStrTemplate={props.node.type === NodeType.StringTemplate}
                         />
                         {props.postInlineContent}
                     </pre>

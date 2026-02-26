@@ -10,7 +10,7 @@ import type { node_OnChangeHandler } from "~/components/ui/renderers/types";
 import { getFilesListFromLocale, getLocaleFileContents, getLocalesList } from "~/lib/gh_api";
 import { EMPTY_OBJECT_NODE, getTranslationNodesFromTxtFile } from "~/lib/parser";
 import { getDefaultLocaleFile, loadPreferences } from "~/lib/preferences";
-import type { ObjectNode, TranslationNode } from "~/lib/types";
+import { NodeType, type ObjectNode, type TranslationNode } from "~/lib/types";
 import { getSavedTranslation, saveTranslationWork } from "./lib/local-store";
 
 interface TranslationNodesResult {
@@ -113,7 +113,7 @@ export default function App() {
             const translating = translatingLocale;
             if (!translating) {
                 return {
-                    type: "object",
+                    type: NodeType.Object,
                     value: [],
                 };
             }
@@ -141,7 +141,7 @@ export default function App() {
         let oldEditedState = editedLocale();
         if (!oldEditedState) {
             oldEditedState = {
-                type: "object",
+                type: NodeType.Object,
                 value: [],
             };
         }

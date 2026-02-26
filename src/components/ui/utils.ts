@@ -1,12 +1,13 @@
-import type {
-    ArrayNode,
-    FunctionNode,
-    ObjectNode,
-    StringNode,
-    TranslationFn_BlockExprBody,
-    TranslationNode,
-    VariableNode,
-    WithKey,
+import {
+    type ArrayNode,
+    type FunctionNode,
+    NodeType,
+    type ObjectNode,
+    type StringNode,
+    type TranslationFn_BlockExprBody,
+    type TranslationNode,
+    type VariableNode,
+    type WithKey,
 } from "~/lib/types";
 import { isEmptyNode } from "./node-updater";
 
@@ -92,7 +93,7 @@ export function flattenLocaleEntries(
         }
 
         const isLastChild = i === orderedKeys.length - 1;
-        if (refNode.type === "object" && editNode.type === "object") {
+        if (refNode.type === NodeType.Object && editNode.type === NodeType.Object) {
             const childItems = flattenLocaleEntries(
                 refNode,
                 editNode,
@@ -143,16 +144,16 @@ function emptyKeyedNode(key: string, refNode: TranslationNode): WithKey<Translat
 
 export function emptyNode(refNode: TranslationNode): TranslationNode {
     switch (refNode.type) {
-        case "string":
-        case "string_template":
+        case NodeType.String:
+        case NodeType.StringTemplate:
             return emptyStringNode(refNode);
-        case "variable":
+        case NodeType.Variable:
             return emptyVariableNode(refNode);
-        case "array":
+        case NodeType.Array:
             return emptyArrayNode(refNode);
-        case "object":
+        case NodeType.Object:
             return emptyObjectNode(refNode);
-        case "function":
+        case NodeType.Function:
             return emptyFunctionNode(refNode);
         default:
             throw new Error(`Unsupported node type`);
@@ -166,27 +167,27 @@ export function emptyFunctionNode(refNode: FunctionNode): FunctionNode {
     } satisfies Omit<FunctionNode, "body">;
 
     switch (refNode.body.type) {
-        case "string":
-        case "string_template":
+        case NodeType.String:
+        case NodeType.StringTemplate:
             return {
                 ...base,
                 body: emptyStringNode(refNode.body),
             };
-        case "variable":
+        case NodeType.Variable:
             return {
                 ...base,
                 body: emptyVariableNode(refNode.body),
             };
-        case "array":
+        case NodeType.Array:
             return {
                 ...base,
                 body: emptyArrayNode(refNode.body),
             };
-        case "BlockExpression":
+        case NodeType.BlockExpression:
             return {
                 ...base,
                 body: {
-                    type: "BlockExpression",
+                    type: NodeType.BlockExpression,
                     value: "",
                 } satisfies TranslationFn_BlockExprBody,
             };
@@ -204,10 +205,10 @@ export function emptyArrayNode(refNode: ArrayNode): ArrayNode {
         type: refNode.type,
         value: refNode.value.map((val) => {
             switch (val.type) {
-                case "string":
-                case "string_template":
+                case NodeType.String:
+                case NodeType.StringTemplate:
                     return emptyStringNode(val);
-                case "variable":
+                case NodeType.Variable:
                     return emptyVariableNode(val);
 
                 default:

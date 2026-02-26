@@ -1,6 +1,6 @@
 import { useDragAndDrop } from "@formkit/drag-and-drop/solid";
 import { batch, For, Show } from "solid-js";
-import type { ArrayNode, TranslationNode } from "~/lib/types";
+import { type ArrayNode, NodeType, type TranslationNode } from "~/lib/types";
 import { NodeRenderer } from "./node";
 import type { NodeRendererProps } from "./types";
 
@@ -25,7 +25,7 @@ export function ArrayRenderer(props: NodeRendererProps<ArrayNode>) {
     });
 
     function handleChange(index: number, newNode: TranslationNode) {
-        if (newNode.type !== "string" && newNode.type !== "string_template") return;
+        if (newNode.type !== NodeType.String && newNode.type !== NodeType.StringTemplate) return;
 
         const updatedArrayItems = items().map((item) => item.node);
         updatedArrayItems[index] = newNode;

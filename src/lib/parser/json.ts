@@ -1,12 +1,18 @@
 import JSON5 from "json5";
-import type { ArrayNode, ObjectNode, StringNode, WithKey } from "~/lib/types";
+import {
+    type ArrayNode,
+    NodeType,
+    type ObjectNode,
+    type StringNode,
+    type WithKey,
+} from "~/lib/types";
 
 export function getTranslationNodesFromJSONFile(str: string): ObjectNode {
     const json = JSON5.parse(str);
 
-    if (typeof json !== "object") {
+    if (typeof json !== NodeType.Object) {
         return {
-            type: "object",
+            type: NodeType.Object,
             value: [],
         };
     }
@@ -16,7 +22,7 @@ export function getTranslationNodesFromJSONFile(str: string): ObjectNode {
 
 function mapJsonToNode(parsedJson: Record<string, unknown>): ObjectNode {
     const result: ObjectNode = {
-        type: "object",
+        type: NodeType.Object,
         value: [],
     };
 
@@ -33,7 +39,7 @@ function mapValueToNode(key: string, value: unknown): WithKey<ObjectNode | Array
 
     if (valueType === "string" || valueType === "number" || valueType === "boolean") {
         return {
-            type: "string",
+            type: NodeType.String,
             key,
             value: String(value),
         } satisfies WithKey<StringNode>;
@@ -41,24 +47,24 @@ function mapValueToNode(key: string, value: unknown): WithKey<ObjectNode | Array
 
     if (Array.isArray(value)) {
         return {
-            type: "array",
+            type: NodeType.Array,
             key,
             value: value
                 .map((item, index) => mapValueToNode(`${index}`, item))
-                .filter((node) => node.type === "string"),
+                .filter((node) => node.type === NodeType.String),
         } satisfies WithKey<ArrayNode>;
     }
 
-    if (valueType === "object" && value) {
+    if (valueType === NodeType.Object && value) {
         return {
-            type: "object",
+            type: NodeType.Object,
             key,
             value: Object.entries(value).map(([k, v]) => mapValueToNode(k, v)),
         } satisfies WithKey<ObjectNode>;
     }
 
     return {
-        type: "string",
+        type: NodeType.String,
         key,
         value: String(value),
     } satisfies WithKey<StringNode>;

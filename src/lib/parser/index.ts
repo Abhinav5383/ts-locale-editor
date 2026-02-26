@@ -1,9 +1,9 @@
 import { getTranslationNodesFromJSONFile } from "~/lib/parser/json";
 import { getTranslationNodesFromTsFile } from "~/lib/parser/typescript";
-import type { ObjectNode } from "~/lib/types";
+import { NodeType, type ObjectNode } from "~/lib/types";
 
 export const EMPTY_OBJECT_NODE: ObjectNode = {
-    type: "object",
+    type: NodeType.Object,
     value: [],
 };
 

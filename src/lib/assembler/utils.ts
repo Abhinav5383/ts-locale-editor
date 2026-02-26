@@ -1,8 +1,8 @@
-import type { ObjectNode } from "~/lib/types";
+import { NodeType, type ObjectNode } from "~/lib/types";
 
 export function sortNodes(node: ObjectNode, refNode: ObjectNode): ObjectNode {
     const result: ObjectNode = {
-        type: "object",
+        type: NodeType.Object,
         value: [],
     };
 
@@ -18,7 +18,7 @@ export function sortNodes(node: ObjectNode, refNode: ObjectNode): ObjectNode {
         const refVal = refNode.value.find((prop) => prop.key === key);
         if (!val) continue;
 
-        if (val.type === "object" && refVal && refVal.type === "object") {
+        if (val.type === NodeType.Object && refVal && refVal.type === NodeType.Object) {
             const sortedChildVals = sortNodes(val, refVal);
             result.value.push({
                 ...val,

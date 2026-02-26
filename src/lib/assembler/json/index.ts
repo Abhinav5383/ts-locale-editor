@@ -1,6 +1,12 @@
 import type { AssembleTranslationProps } from "~/lib/assembler/utils";
 import { sortNodes } from "~/lib/assembler/utils";
-import type { ArrayNode, ObjectNode, StringNode, VariableNode } from "~/lib/types";
+import {
+    type ArrayNode,
+    NodeType,
+    type ObjectNode,
+    type StringNode,
+    type VariableNode,
+} from "~/lib/types";
 
 export function AssembleJsonTranslation(props: AssembleTranslationProps): string | null {
     const sortedTranslatedNodes = sortNodes(props.translatedNodes, props.refNodes);
@@ -17,14 +23,14 @@ function nodeToJsonValue(
     node: ObjectNode | ArrayNode | StringNode | VariableNode,
 ): Record<string, unknown> | unknown[] | string | null {
     switch (node.type) {
-        case "object":
+        case NodeType.Object:
             return nodeToJsonObject(node);
-        case "array":
+        case NodeType.Array:
             return nodeToJsonArray(node);
-        case "string":
-        case "string_template":
+        case NodeType.String:
+        case NodeType.StringTemplate:
             return node.value;
-        case "variable":
+        case NodeType.Variable:
             return node.name;
         default:
             return null;
@@ -35,7 +41,7 @@ function nodeToJsonObject(node: ObjectNode): Record<string, unknown> {
     const result: Record<string, unknown> = {};
 
     for (const prop of node.value) {
-        if (prop.type === "function") continue;
+        if (prop.type === NodeType.Function) continue;
 
         const val = nodeToJsonValue(prop);
         result[prop.key] = val;

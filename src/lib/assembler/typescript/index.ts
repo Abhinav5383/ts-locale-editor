@@ -5,6 +5,7 @@ import {
     type ArrayNode,
     ExportType,
     type FunctionNode,
+    NodeType,
     type ObjectNode,
     type StringNode,
     type VariableNode,
@@ -76,7 +77,7 @@ export function AssembleTsTranslation(props: AssembleTranslationProps): string |
 
 export function sortNodes(node: ObjectNode, refNode: ObjectNode): ObjectNode {
     const result: ObjectNode = {
-        type: "object",
+        type: NodeType.Object,
         value: [],
     };
 
@@ -92,7 +93,7 @@ export function sortNodes(node: ObjectNode, refNode: ObjectNode): ObjectNode {
         const refVal = refNode.value.find((prop) => prop.key === key);
         if (!val) continue;
 
-        if (val.type === "object" && refVal && refVal.type === "object") {
+        if (val.type === NodeType.Object && refVal && refVal.type === NodeType.Object) {
             const sortedChildVals = sortNodes(val, refVal);
             result.value.push({
                 ...val,
@@ -112,16 +113,16 @@ function stringifyNode(
     exportType = ExportType.Default,
 ): string {
     switch (node.type) {
-        case "object":
+        case NodeType.Object:
             return stringifyObjectNode(node, indent);
-        case "array":
+        case NodeType.Array:
             return stringifyArrayNode(node, indent);
-        case "function":
+        case NodeType.Function:
             return stringifyFunctionNode(node, indent, exportType);
-        case "string":
-        case "string_template":
+        case NodeType.String:
+        case NodeType.StringTemplate:
             return stringifyStringNode(node);
-        case "variable":
+        case NodeType.Variable:
             return stringifyVariableNode(node);
         default:
             return "";
@@ -167,7 +168,7 @@ function stringifyFunctionNode(
     paramStr = paramStr.slice(0, -2);
 
     let fnBody = "";
-    if (node.body.type === "BlockExpression") {
+    if (node.body.type === NodeType.BlockExpression) {
         fnBody += "{\n";
 
         let insideTemplateString = false;
@@ -194,7 +195,7 @@ function stringifyFunctionNode(
 }
 
 function stringifyStringNode(node: StringNode): string {
-    if (node.type === "string_template") {
+    if (node.type === NodeType.StringTemplate) {
         return `\`${node.value}\``;
     } else {
         return `"${node.value}"`;

@@ -1,11 +1,12 @@
-import type {
-    ArrayNode,
-    FunctionNode,
-    ObjectNode,
-    StringNode,
-    TranslationNode,
-    VariableNode,
-    WithKey,
+import {
+    type ArrayNode,
+    type FunctionNode,
+    NodeType,
+    type ObjectNode,
+    type StringNode,
+    type TranslationNode,
+    type VariableNode,
+    type WithKey,
 } from "~/lib/types";
 
 export function mergeNodes(target: ObjectNode, source: ObjectNode): ObjectNode {
@@ -27,10 +28,10 @@ export function mergeNodes(target: ObjectNode, source: ObjectNode): ObjectNode {
             const targetChildIdx = result.value.findIndex((c) => c.key === child.key);
             const targetChild = result.value[targetChildIdx];
 
-            if (targetChild.type === "object" && child.type === "object") {
+            if (targetChild.type === NodeType.Object && child.type === NodeType.Object) {
                 result.value[targetChildIdx] = {
                     key: child.key,
-                    type: "object",
+                    type: NodeType.Object,
                     value: mergeNodes(targetChild, child).value,
                 };
             } else {
@@ -48,7 +49,7 @@ export function updateNodeValue(
     value: TranslationNode | null,
 ): ObjectNode {
     if (path.length === 0) {
-        if (root.type === "object" && value?.type === "object") return value;
+        if (root.type === NodeType.Object && value?.type === NodeType.Object) return value;
         return root;
     }
 
@@ -83,14 +84,14 @@ export function updateNodeValue(
             if (!childObj) {
                 const newObj: WithKey<ObjectNode> = {
                     key: key,
-                    type: "object",
+                    type: NodeType.Object,
                     value: [],
                 };
                 curr.value.push(newObj);
                 childObj = newObj;
             }
 
-            if (childObj.type !== "object") break;
+            if (childObj.type !== NodeType.Object) break;
             curr = childObj;
         }
     }
@@ -100,17 +101,19 @@ export function updateNodeValue(
 
 export function isEmptyNode(node: TranslationNode, isFnReturn = false): boolean {
     switch (node.type) {
-        case "object":
+        case NodeType.Object:
             return isEmptyObjectNode(node);
-        case "array":
+        case NodeType.Array:
             return isEmptyArrayNode(node);
-        case "function":
+        case NodeType.Function:
             return isEmptyFunctionNode(node);
-        case "string_template":
-        case "string":
+        case NodeType.String:
+        case NodeType.StringTemplate:
             return isEmptyStringNode(node, isFnReturn);
-        case "variable":
+        case NodeType.Variable:
             return isEmptyVariableNode(node);
+        default:
+            return false;
     }
 }
 
@@ -124,7 +127,7 @@ export function isEmptyObjectNode(node: ObjectNode): boolean {
 
 export function isEmptyArrayNode(node: ArrayNode): boolean {
     for (const child of node.value) {
-        if (child.type === "variable") continue;
+        if (child.type === NodeType.Variable) continue;
         if (!isEmptyNode(child)) return false;
     }
 
@@ -132,7 +135,7 @@ export function isEmptyArrayNode(node: ArrayNode): boolean {
 }
 
 export function isEmptyFunctionNode(node: FunctionNode): boolean {
-    if (node.body.type === "BlockExpression") {
+    if (node.body.type === NodeType.BlockExpression) {
         return !node.body.value.trim();
     } else {
         return isEmptyNode(node.body, true);
