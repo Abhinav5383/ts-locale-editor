@@ -2,24 +2,24 @@ export type NodeBase = { key: string };
 
 // Strings
 type StringLiteralNode = {
-    type: "string";
+    type: NodeType.String;
     value: string;
 };
 type StringTemplateLiteralNode = {
-    type: "string_template";
+    type: NodeType.StringTemplate;
     value: string;
 };
 export type StringNode = StringLiteralNode | StringTemplateLiteralNode;
 
 // Variables
 export type VariableNode = {
-    type: "variable";
+    type: NodeType.Variable;
     name: string;
 };
 
 // Arrays
 export type ArrayNode = {
-    type: "array";
+    type: NodeType.Array;
     value: (StringNode | VariableNode)[];
 };
 
@@ -29,7 +29,7 @@ export type TranslationFn_Params = {
     type: string;
 };
 export type TranslationFn_BlockExprBody = {
-    type: "BlockExpression"; // can't determine return types of block functions yet, so just default to unknown :))
+    type: NodeType.BlockExpression; // can't determine return types of block functions yet, so just default to unknown :))
     value: string; // raw code string of the function body
 };
 export type TranslationFn_Body =
@@ -39,14 +39,14 @@ export type TranslationFn_Body =
     | TranslationFn_BlockExprBody; // raw code string of the function body
 
 export type FunctionNode<T extends TranslationFn_Body = TranslationFn_Body> = {
-    type: "function";
+    type: NodeType.Function;
     params: TranslationFn_Params[];
     body: T;
 };
 
 // Objects
 export type ObjectNode = {
-    type: "object";
+    type: NodeType.Object;
     value: WithKey<TranslationNode>[];
 };
 
@@ -67,4 +67,14 @@ export type TranslationNode = TranslationNodeUnion;
 export enum ExportType {
     Named = "named",
     Default = "default",
+}
+
+export enum NodeType {
+    String = "string",
+    StringTemplate = "string_template",
+    Variable = "variable",
+    Array = "array",
+    Object = "object",
+    Function = "function",
+    BlockExpression = "BlockExpression",
 }
