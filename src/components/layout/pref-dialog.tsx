@@ -74,7 +74,7 @@ export function PreferenceDialog(props: PreferenceDialogProps) {
                     </div>
 
                     <div class="input-row">
-                        <label for="localesDir">Default Locale Directory</label>
+                        <label for="defaultLocaleDir">Default Locale Directory</label>
                         <input
                             id="defaultLocaleDir"
                             type="text"
