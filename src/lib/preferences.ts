@@ -24,7 +24,7 @@ const config = (() => {
         prefs: {
             repo: "PuzzlesHQ/cosmic-mod-manager/tree/main",
             localesDir: "apps/frontend/app/locales",
-            defaultLocale: "en",
+            defaultLocale: "en-US",
         } satisfies PrefsObj,
     };
 })();
