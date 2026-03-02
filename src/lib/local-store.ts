@@ -1,3 +1,4 @@
+import { unwrap } from "solid-js/store";
 import { isEmptyNode } from "~/components/ui/node-updater";
 import type { ObjectNode } from "./types";
 
@@ -7,21 +8,22 @@ const TRANSLATIONS_STORE = "translations";
 
 const dbInstance = await getDbInstance();
 
-export function saveTranslationWork(obj: ObjectNode, locale: string, fileName: string) {
+export function saveTranslationWork(_obj: ObjectNode, locale: string, fileName: string) {
     const db = dbInstance;
     if (!db) {
         console.error("Database not initialized");
         return;
     }
 
-    const isEmpty = isEmptyNode(obj);
+    const plainObj = unwrap(_obj);
 
+    const isEmpty = isEmptyNode(plainObj);
     const transaction = db.transaction(TRANSLATIONS_STORE, "readwrite");
     const store = transaction.objectStore(TRANSLATIONS_STORE);
 
     const res = isEmpty
         ? store.delete(key(locale, fileName))
-        : store.put(obj, key(locale, fileName));
+        : store.put(plainObj, key(locale, fileName));
 
     res.onsuccess = () => {
         console.log("Translation saved successfully");
