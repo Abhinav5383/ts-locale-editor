@@ -134,11 +134,20 @@ function stringifyObjectNode(node: ObjectNode, indent = 0): string {
 
     for (const prop of node.value) {
         const val = stringifyNode(prop, indent + 1);
-        result += `${spaceIndent(indent + 1)}${prop.key}: ${val},\n`;
+        const keyStr = stringifyObjectKey(prop.key);
+        result += `${spaceIndent(indent + 1)}${keyStr}: ${val},\n`;
     }
 
     result += `${spaceIndent(indent)}}`;
     return result;
+}
+
+function stringifyObjectKey(key: string): string {
+    if (/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key)) {
+        return key;
+    } else {
+        return `"${key}"`;
+    }
 }
 
 function stringifyArrayNode(node: ArrayNode, indent = 0): string {
