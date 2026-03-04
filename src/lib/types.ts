@@ -42,6 +42,8 @@ export type FunctionNode<T extends TranslationFn_Body = TranslationFn_Body> = {
     type: NodeType.Function;
     params: TranslationFn_Params[];
     body: T;
+    isAsync?: boolean;
+    isArrowFn?: boolean;
 };
 
 // Objects
