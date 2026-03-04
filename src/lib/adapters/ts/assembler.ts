@@ -1,5 +1,4 @@
-import * as t from "@babel/types";
-import type { AssembleTranslationProps } from "~/lib/adapters/utils";
+import { type AssembleTranslationProps, sortNodes } from "~/lib/adapters/utils";
 import {
     type ArrayNode,
     ExportType,
@@ -9,98 +8,71 @@ import {
     type StringNode,
     type VariableNode,
 } from "~/lib/types";
-import { getExportsAST } from "./parser";
+import { getExportItemIdentifier } from "./common";
+import { getExportsAST, unwrapExpression } from "./parser";
 import { getAssemblingTemplate } from "./templates";
 
 export function AssembleTsTranslation(props: AssembleTranslationProps): string | null {
     const template = getAssemblingTemplate(props.fileName, props.translatingLocaleCode);
-    const templateAST = getExportsAST(template);
-
-    if (!templateAST) {
-        console.error("Failed to parse template AST. Cannot assemble translation.");
-        return null;
-    }
+    const templateExports = getExportsAST(template) ?? [];
 
     const sortedTranslatedNodes = sortNodes(props.translatedNodes, props.refNodes);
+    const sortedExports = templateExports.sort((a, b) => {
+        return (a.decl.start ?? 0) - (b.decl.start ?? 0);
+    });
 
-    if (templateAST.exportType === ExportType.Named) {
-        let finalCode = "";
+    let finalCode = "";
+    let lastEndIndex = 0;
+    const assembledTranslationNodes: string[] = [];
 
-        let lastEndIndex = 0;
-        for (const exportNode of templateAST.value) {
-            const nodeId = exportNode.id;
-            if (!t.isIdentifier(nodeId) || !exportNode.init) {
-                console.warn("Skipping non-standard export node:", exportNode);
-                continue;
-            }
+    for (const exportItem of sortedExports) {
+        const unwrappedDecl = unwrapExpression(exportItem.decl);
+        const identifier = getExportItemIdentifier(exportItem);
 
-            const declTranslated = sortedTranslatedNodes.value.find(
-                (node) => node.key === nodeId.name,
+        if (!identifier) {
+            console.warn(
+                "Could not determine export identifier for export item. Skipping.",
+                exportItem,
             );
-            if (!declTranslated) {
-                console.warn(`No translation found for exported node ${nodeId.name}. Skipping.`);
-                continue;
-            }
-
-            const assembled = stringifyNode(declTranslated, undefined, templateAST.exportType);
-            const startIndex = exportNode.init.start ?? null;
-            const endIndex = exportNode.init.end ?? null;
-
-            if (startIndex === null || endIndex === null) {
-                console.error("Export node is missing start and/or end position:", exportNode);
-                continue;
-            }
-
-            finalCode += template.slice(lastEndIndex, startIndex) + assembled;
-            lastEndIndex = endIndex;
+            continue;
         }
-        finalCode += template.slice(lastEndIndex);
 
-        return finalCode;
-    }
-
-    //
-    else if (templateAST.exportType === ExportType.Default) {
-        const assembled = stringifyNode(sortedTranslatedNodes);
-        const startIndex = templateAST.value.start ?? 0;
-        const endIndex = templateAST.value.end ?? template.length;
-
-        return template.slice(0, startIndex) + assembled + template.slice(endIndex);
-    }
-
-    return null;
-}
-
-export function sortNodes(node: ObjectNode, refNode: ObjectNode): ObjectNode {
-    const result: ObjectNode = {
-        type: NodeType.Object,
-        value: [],
-    };
-
-    const orderedKeys = refNode.value.map((prop) => prop.key);
-    for (const item of node.value) {
-        if (!orderedKeys.includes(item.key)) {
-            orderedKeys.push(item.key);
+        const translatedNode = sortedTranslatedNodes.value.find((node) => node.key === identifier);
+        if (!translatedNode) {
+            console.warn(`No translation found for exported node ${identifier}. Skipping.`);
+            continue;
         }
+
+        const startIdx = unwrappedDecl.start ?? null;
+        const endIdx = unwrappedDecl.end ?? null;
+
+        if (startIdx === null || endIdx === null) {
+            console.error("Export node is missing start and/or end position:", exportItem);
+            continue;
+        }
+
+        const assembled = stringifyNode(translatedNode, 0, exportItem.type);
+        finalCode += template.slice(lastEndIndex, startIdx) + assembled;
+
+        lastEndIndex = endIdx;
+        assembledTranslationNodes.push(translatedNode.key);
     }
+    finalCode += template.slice(lastEndIndex);
 
-    for (const key of orderedKeys) {
-        const val = node.value.find((prop) => prop.key === key);
-        const refVal = refNode.value.find((prop) => prop.key === key);
-        if (!val) continue;
+    // append any remaining nodes that were not part of the original template exports
+    const remainingNodes = sortedTranslatedNodes.value.filter(
+        (node) => !assembledTranslationNodes.includes(node.key),
+    );
 
-        if (val.type === NodeType.Object && refVal && refVal.type === NodeType.Object) {
-            const sortedChildVals = sortNodes(val, refVal);
-            result.value.push({
-                ...val,
-                value: sortedChildVals.value,
-            });
+    for (const node of remainingNodes) {
+        if (node.key === "default") {
+            finalCode += `export default ${stringifyNode(node)};\n`;
         } else {
-            result.value.push(val);
+            finalCode += `export const ${node.key} = ${stringifyNode(node, 0, ExportType.Named)};\n`;
         }
     }
 
-    return result;
+    return finalCode;
 }
 
 function stringifyNode(

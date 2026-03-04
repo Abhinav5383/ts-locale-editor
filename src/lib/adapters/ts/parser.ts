@@ -11,20 +11,51 @@ import {
     type StringNode,
     type TranslationFn_Body,
     type TranslationFn_Params,
+    type TranslationNode,
     type VariableNode,
 } from "~/lib/types";
+import { getExportItemIdentifier } from "./common";
 
-type AST_Result =
-    | {
-          exportType: ExportType.Default;
-          value: t.ObjectExpression;
-      }
-    | {
-          exportType: ExportType.Named;
-          value: t.VariableDeclarator[];
-      };
+type WrapperExpressions = t.ParenthesizedExpression | t.TSAsExpression | t.TSSatisfiesExpression;
+const wrapperExpressionCheckers = [
+    t.isParenthesizedExpression,
+    t.isTSAsExpression,
+    t.isTSSatisfiesExpression,
+];
+function isWrapperExpression(expr: t.Expression | t.Declaration): expr is WrapperExpressions {
+    return wrapperExpressionCheckers.some((fn) => fn(expr));
+}
 
-export function getExportsAST(code: string): AST_Result | null {
+type SupportedExpressions =
+    | t.FunctionDeclaration
+    | t.FunctionExpression
+    | t.ArrowFunctionExpression
+    | t.VariableDeclaration
+    | t.StringLiteral
+    | t.TemplateLiteral
+    | t.ObjectExpression
+    | t.ArrayExpression;
+
+const supportedExpressionCheckers = [
+    t.isFunctionDeclaration,
+    t.isFunctionExpression,
+    t.isArrowFunctionExpression,
+    t.isVariableDeclaration,
+    t.isStringLiteral,
+    t.isTemplateLiteral,
+    t.isObjectExpression,
+    t.isArrayExpression,
+];
+function isSupportedExpression(expr: t.Expression | t.Declaration): expr is SupportedExpressions {
+    return supportedExpressionCheckers.some((fn) => fn(expr));
+}
+
+export type ExportItem = {
+    type: ExportType;
+    decl: SupportedExpressions | WrapperExpressions;
+};
+
+export function getExportsAST(code: string): ExportItem[] | null {
     try {
         const ast = parse(code, {
             sourceType: "module",
@@ -32,45 +63,33 @@ export function getExportsAST(code: string): AST_Result | null {
             errorRecovery: true,
         });
 
-        let defaultExportObject: t.ObjectExpression | null = null;
-        const namedExports: t.VariableDeclarator[] = [];
+        const exports: ExportItem[] = [];
 
         traverse(ast, {
-            // I'm just gonna assume all default exports are gonna be object literals for translation files
-            // If something breaks we can "Fix it later"(TM) :D
             ExportDefaultDeclaration(path) {
                 const decl = path.node.declaration;
-                if (!t.isExpression(decl)) return;
-
-                const unwrapped = unwrapExpression(decl);
-                if (t.isObjectExpression(unwrapped)) {
-                    defaultExportObject = unwrapped;
+                if (isSupportedExpression(decl) || isWrapperExpression(decl)) {
+                    exports.push({
+                        type: ExportType.Default,
+                        decl,
+                    });
                 }
             },
 
             ExportNamedDeclaration(path) {
                 const decl = path.node.declaration;
-                if (!t.isVariableDeclaration(decl)) return;
+                if (!decl || path.node.exportKind !== "value") return;
 
-                const declarator = decl.declarations[0];
-                namedExports.push(declarator);
+                if (isSupportedExpression(decl) || isWrapperExpression(decl)) {
+                    exports.push({
+                        type: ExportType.Named,
+                        decl,
+                    });
+                }
             },
         });
 
-        if (defaultExportObject) {
-            return {
-                exportType: ExportType.Default,
-                value: defaultExportObject,
-            };
-        }
-        if (namedExports.length > 0) {
-            return {
-                exportType: ExportType.Named,
-                value: namedExports,
-            };
-        }
-
-        return null;
+        return exports.length > 0 ? exports : null;
     } catch (error) {
         console.error("Error parsing TypeScript code");
         console.trace(error);
@@ -81,12 +100,8 @@ export function getExportsAST(code: string): AST_Result | null {
 // unwrap the real value from TS wrappers
 // eg: export default { ... } satisfies Locale;
 // we need the inner object expression
-function unwrapExpression(expr: t.Expression): t.Expression {
-    if (
-        t.isTSSatisfiesExpression(expr) ||
-        t.isTSAsExpression(expr) ||
-        t.isParenthesizedExpression(expr)
-    ) {
+export function unwrapExpression<T extends t.Expression | t.Declaration>(expr: T) {
+    if (isWrapperExpression(expr)) {
         return unwrapExpression(expr.expression);
     }
 
@@ -94,34 +109,56 @@ function unwrapExpression(expr: t.Expression): t.Expression {
 }
 
 export function getTranslationNodesFromTsFile(code: string): ObjectNode {
-    const exports = getExportsAST(code);
-
-    if (!exports) {
-        return {
-            type: NodeType.Object,
-            value: [],
-        };
-    }
-
-    if (exports.exportType === ExportType.Named) {
-        return extractFromVarDecls(exports.value);
-    } else {
-        return extractObjectNode(exports.value);
-    }
-}
-
-function extractFromVarDecls(decls: t.VariableDeclarator[]): ObjectNode {
     const result: ObjectNode = {
         type: NodeType.Object,
         value: [],
     };
 
-    for (const decl of decls) {
-        if (!t.isIdentifier(decl.id)) continue;
-        if (!decl.init) continue;
+    const exports = getExportsAST(code);
+    if (!exports || exports.length === 0) return result;
 
-        const mappedNode = mapExpressionToNode(decl.id.name, decl.init);
-        if (mappedNode) result.value.push(mappedNode);
+    for (const item of exports) {
+        const decl = unwrapExpression(item.decl);
+        const identifier = getExportItemIdentifier(item);
+        if (!identifier) {
+            console.warn("Could not determine export identifier for export item. Skipping.", item);
+            continue;
+        }
+
+        if (t.isFunctionDeclaration(decl)) {
+            const fnNode = extractFunctionNode(decl);
+
+            result.value.push({
+                key: identifier,
+                ...fnNode,
+            });
+        }
+
+        //
+        else if (t.isVariableDeclaration(decl)) {
+            for (const declarator of decl.declarations) {
+                const initializer = declarator.init ? unwrapExpression(declarator.init) : null;
+                if (!initializer) continue;
+
+                const mappedNode = mapExpressionToNode(initializer);
+                if (mappedNode)
+                    result.value.push({
+                        key: identifier,
+                        ...mappedNode,
+                    });
+            }
+        }
+
+        //
+        else {
+            const mappedNode = mapExpressionToNode(decl);
+            if (mappedNode) {
+                result.value.push({
+                    key: identifier,
+                    ...mappedNode,
+                });
+            }
+        }
     }
 
     return result;
@@ -142,45 +179,36 @@ function extractObjectNode(expr: t.ObjectExpression): ObjectNode {
         else if (t.isStringLiteral(prop.key)) key = prop.key.value;
         if (!key) continue;
 
-        const extractedNode = mapExpressionToNode(key, prop.value);
-        if (extractedNode) result.value.push(extractedNode);
+        const extractedNode = mapExpressionToNode(prop.value);
+        if (extractedNode)
+            result.value.push({
+                key,
+                ...extractedNode,
+            });
     }
 
     return result;
 }
 
-function mapExpressionToNode(key: string, expr: t.Expression): ObjectNode["value"][number] | null {
+function mapExpressionToNode(expr: t.Expression): TranslationNode | null {
     expr = unwrapExpression(expr);
 
     if (t.isObjectExpression(expr)) {
-        return {
-            key,
-            ...extractObjectNode(expr),
-        };
+        return extractObjectNode(expr);
     }
 
     if (isFunctionLike(expr)) {
-        const fnNode = extractFunctionNode(expr);
-        return {
-            key,
-            ...fnNode,
-        };
+        return extractFunctionNode(expr);
     }
 
     const arrayNode = extractArrayNode(expr);
-    if (arrayNode) {
-        return { key, ...arrayNode };
-    }
+    if (arrayNode) return arrayNode;
 
     const stringNode = extractStringNode(expr);
-    if (stringNode) {
-        return { key, ...stringNode };
-    }
+    if (stringNode) return stringNode;
 
     const variableNode = extractVariableNode(expr);
-    if (variableNode) {
-        return { key, ...variableNode };
-    }
+    if (variableNode) return variableNode;
 
     return null;
 }
@@ -233,9 +261,10 @@ function extractArrayNode(expr: t.Expression): ArrayNode | null {
     if (!t.isArrayExpression(expr)) return null;
 
     const items: ArrayNode["value"] = [];
-    for (const el of expr.elements) {
+    for (let el of expr.elements) {
         if (!el || !t.isExpression(el)) return null;
 
+        el = unwrapExpression(el);
         const sNode = extractStringNode(el);
         if (sNode) {
             items.push(sNode);
@@ -267,6 +296,8 @@ function extractFunctionNode(expr: AST_FnTypes): FunctionNode {
         type: NodeType.Function,
         params,
         body,
+        isArrowFn: t.isArrowFunctionExpression(expr),
+        isAsync: expr.async,
     } satisfies FunctionNode;
 }
 
@@ -291,18 +322,20 @@ function extractFnParams(fn: AST_FnTypes): TranslationFn_Params[] {
 }
 
 function extractFnBody(fn: AST_FnTypes): TranslationFn_Body {
-    if (t.isArrowFunctionExpression(fn) && !t.isBlockStatement(fn.body)) {
-        const arr = extractArrayNode(fn.body);
-        if (arr) return arr;
+    const fnBodySrc = t.isBlockStatement(fn.body) ? fn.body : unwrapExpression(fn.body);
+    const mappedNode = t.isBlockStatement(fnBodySrc) ? null : mapExpressionToNode(fnBodySrc);
 
-        const strNode = extractStringNode(fn.body);
-        if (strNode) return strNode;
+    const isMappedNodeInvalid =
+        !mappedNode || mappedNode.type === NodeType.Object || mappedNode.type === NodeType.Function;
+
+    if (!t.isArrowFunctionExpression(fn) || isMappedNodeInvalid) {
+        return {
+            type: NodeType.BlockExpression,
+            value: extractFnCode(fn),
+        };
     }
 
-    return {
-        type: NodeType.BlockExpression,
-        value: extractFnCode(fn),
-    };
+    return mappedNode;
 }
 
 function extractFnCode(fn: AST_FnTypes): string {
