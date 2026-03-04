@@ -121,8 +121,8 @@ function stringifyObjectKey(key: string): string {
 function stringifyArrayNode(node: ArrayNode, indent = 0): string {
     let result = "[\n";
     for (const item of node.value) {
-        const _str = stringifyNode(item, indent + 1);
-        result += `${spaceIndent(indent + 1)}${_str},\n`;
+        const str = stringifyNode(item, indent + 1);
+        result += `${spaceIndent(indent + 1)}${str},\n`;
     }
 
     result += `${spaceIndent(indent)}]`;
@@ -168,7 +168,9 @@ function stringifyFunctionNode(
         fnBody = stringifyNode(node.body, indent);
     }
 
-    return `(${paramStr}) => ${fnBody}`;
+    let result = `(${paramStr}) => ${fnBody}`;
+    if (node.isAsync) result = `async ${result}`;
+    return result;
 }
 
 function stringifyStringNode(node: StringNode): string {

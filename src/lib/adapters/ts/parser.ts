@@ -138,14 +138,15 @@ export function getTranslationNodesFromTsFile(code: string): ObjectNode {
         else if (t.isVariableDeclaration(decl)) {
             for (const declarator of decl.declarations) {
                 const initializer = declarator.init ? unwrapExpression(declarator.init) : null;
-                if (!initializer) continue;
+                if (!initializer || !t.isIdentifier(declarator.id)) continue;
 
                 const mappedNode = mapExpressionToNode(initializer);
-                if (mappedNode)
+                if (mappedNode) {
                     result.value.push({
-                        key: identifier,
+                        key: declarator.id.name,
                         ...mappedNode,
                     });
+                }
             }
         }
 
@@ -274,7 +275,13 @@ function extractArrayNode(expr: t.Expression): ArrayNode | null {
         const vNode = extractVariableNode(el);
         if (vNode) {
             items.push(vNode);
+            continue;
         }
+
+        console.warn(
+            "Unsupported array item in translation array. Only strings and variable references are supported. Skipping.",
+            el,
+        );
     }
 
     return {
