@@ -9,7 +9,7 @@ Try it here https://locale-editor.devabhinav.online
 1. **Configure your repository** in the preferences (gear icon in the navbar):
    - Set the GitHub repository (format: `owner/repo` or `owner/repo/tree/dev` for custom branch)
    - Specify the directory containing your translation files (e.g., `src/locales`)
-   - Finally enter your default locale's folder name (eg, "en" or "en-US" etc)
+   - Finally enter your default locale's folder name (eg, "en" or "en-GB" etc)
 
 2. **Select a translation file** to edit from the file selector
 3. **Choose reference and target locales**
@@ -81,7 +81,7 @@ When done editing, use the `Copy` or `Download` button to export your work. \
     {
         "greet": "hi",
         "nested": {
-            "fallbacks": ["en-US"]
+            "fallbacks": ["en-GB"]
         }
     }
     ```
