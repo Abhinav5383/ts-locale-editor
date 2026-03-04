@@ -6,21 +6,17 @@ export function sortNodes(node: ObjectNode, refNode: ObjectNode): ObjectNode {
         value: [],
     };
 
-    const orderedKeys: string[] = [];
+    const orderedKeys = new Set<string>();
 
     const refNodeMap = new Map<string, WithKey<TranslationNode>>();
     for (const item of refNode.value) {
-        if (!orderedKeys.includes(item.key)) {
-            orderedKeys.push(item.key);
-        }
+        orderedKeys.add(item.key);
         refNodeMap.set(item.key, item);
     }
 
     const nodeMap = new Map<string, WithKey<TranslationNode>>();
     for (const item of node.value) {
-        if (!orderedKeys.includes(item.key)) {
-            orderedKeys.push(item.key);
-        }
+        orderedKeys.add(item.key);
         nodeMap.set(item.key, item);
     }
 
