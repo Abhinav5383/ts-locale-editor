@@ -135,80 +135,88 @@ function EditorContent(props: EditorContentProps) {
     return (
         <div class="object-renderer">
             <For each={flattenedItems()}>
-                {(item) => (
-                    <Switch>
-                        <Match
-                            keyed
-                            when={item.type === IterationItemType.OBJ_ENTRY ? item : false}
-                        >
-                            {(item) => (
-                                <div
-                                    class={`node-row ${item.isLastChild ? "last-entry" : ""}`}
-                                    style={{ "--depth": `${item.depth}` }}
-                                >
-                                    <div class="cell-wrapper">
-                                        <div class="node-key">
-                                            {item.key}
-                                            <span class="token">{": "}</span>
+                {(item) => {
+                    const adjustedDepth = Math.max(0, item.depth - 1);
+                    return (
+                        <Switch>
+                            <Match
+                                keyed
+                                when={item.type === IterationItemType.OBJ_ENTRY ? item : false}
+                            >
+                                {(item) => (
+                                    <div
+                                        class={`node-row ${item.isLastChild ? "last-entry" : ""}`}
+                                        style={{ "--depth": `${adjustedDepth}` }}
+                                    >
+                                        <div class="cell-wrapper">
+                                            <div class="node-key">
+                                                {item.key}
+                                                <span class="token">{": "}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="cell-wrapper scrollable">
+                                            <div class="node-value-ref">
+                                                <NodeRenderer
+                                                    node={item.refNode}
+                                                    isEditable={false}
+                                                    path={item.path}
+                                                    onChange={props.onChange}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div class="cell-wrapper scrollable">
+                                            <div class="node-value-edit">
+                                                <NodeRenderer
+                                                    node={item.editNode}
+                                                    isEditable={true}
+                                                    path={item.path}
+                                                    onChange={props.onChange}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
+                                )}
+                            </Match>
 
-                                    <div class="cell-wrapper scrollable">
-                                        <div class="node-value-ref">
-                                            <NodeRenderer
-                                                node={item.refNode}
-                                                isEditable={false}
-                                                path={item.path}
-                                                onChange={props.onChange}
-                                            />
+                            <Match
+                                keyed
+                                when={item.type === IterationItemType.OBJ_START ? item : false}
+                            >
+                                {(item) => (
+                                    <div
+                                        class="node-row obj-brace obj-start-brace"
+                                        style={{ "--depth": `${adjustedDepth}` }}
+                                    >
+                                        <div>
+                                            <span class="node-key">{item.key}</span>
+                                            <span class="token">{": {"}</span>
                                         </div>
                                     </div>
+                                )}
+                            </Match>
 
-                                    <div class="cell-wrapper scrollable">
-                                        <div class="node-value-edit">
-                                            <NodeRenderer
-                                                node={item.editNode}
-                                                isEditable={true}
-                                                path={item.path}
-                                                onChange={props.onChange}
-                                            />
+                            <Match
+                                keyed
+                                when={item.type === IterationItemType.OBJ_END ? item : false}
+                            >
+                                {(item) => (
+                                    <div
+                                        class="node-row obj-brace obj-end-brace"
+                                        style={{ "--depth": `${adjustedDepth}` }}
+                                    >
+                                        <div>
+                                            <span class="token">
+                                                {item.isLastChild ? "}" : "},"}
+                                            </span>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                        </Match>
-
-                        <Match
-                            keyed
-                            when={item.type === IterationItemType.OBJ_START ? item : false}
-                        >
-                            {(item) => (
-                                <div
-                                    class="node-row obj-brace obj-start-brace"
-                                    style={{ "--depth": `${item.depth}` }}
-                                >
-                                    <div>
-                                        <span class="node-key">{item.key}</span>
-                                        <span class="token">{": {"}</span>
-                                    </div>
-                                </div>
-                            )}
-                        </Match>
-
-                        <Match keyed when={item.type === IterationItemType.OBJ_END ? item : false}>
-                            {(item) => (
-                                <div
-                                    class="node-row obj-brace obj-end-brace"
-                                    style={{ "--depth": `${item.depth}` }}
-                                >
-                                    <div>
-                                        <span class="token">{item.isLastChild ? "}" : "},"}</span>
-                                    </div>
-                                </div>
-                            )}
-                        </Match>
-                    </Switch>
-                )}
+                                )}
+                            </Match>
+                        </Switch>
+                    );
+                }}
             </For>
         </div>
     );
