@@ -1,5 +1,4 @@
-import type { AssembleTranslationProps } from "~/lib/assembler/utils";
-import { sortNodes } from "~/lib/assembler/utils";
+import { type AssembleTranslationProps, sortNodes } from "~/lib/adapters/utils";
 import {
     type ArrayNode,
     NodeType,

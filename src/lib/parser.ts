@@ -1,5 +1,5 @@
-import { getTranslationNodesFromJSONFile } from "~/lib/parser/json";
-import { getTranslationNodesFromTsFile } from "~/lib/parser/typescript";
+import { getTranslationNodesFromJSONFile } from "~/lib/adapters/json/parser";
+import { getTranslationNodesFromTsFile } from "~/lib/adapters/ts/parser";
 import { NodeType, type ObjectNode } from "~/lib/types";
 
 export const EMPTY_OBJECT_NODE: ObjectNode = {

@@ -1,6 +1,5 @@
 import * as t from "@babel/types";
-import type { AssembleTranslationProps } from "~/lib/assembler/utils";
-import { getExportsAST } from "~/lib/parser/typescript";
+import type { AssembleTranslationProps } from "~/lib/adapters/utils";
 import {
     type ArrayNode,
     ExportType,
@@ -10,6 +9,7 @@ import {
     type StringNode,
     type VariableNode,
 } from "~/lib/types";
+import { getExportsAST } from "./parser";
 import { getAssemblingTemplate } from "./templates";
 
 export function AssembleTsTranslation(props: AssembleTranslationProps): string | null {

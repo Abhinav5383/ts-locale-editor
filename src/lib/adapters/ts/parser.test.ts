@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { ExportType, NodeType } from "~/lib/types";
-import { getExportsAST, getTranslationNodesFromTsFile } from "./typescript";
+import { getExportsAST, getTranslationNodesFromTsFile } from "./parser";
 
 describe("getExportsAST", () => {
     test("unwraps TS wrappers (satisfies, as, parens) on default export", () => {

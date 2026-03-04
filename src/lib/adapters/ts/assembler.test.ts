@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { NodeType, type ObjectNode } from "~/lib/types";
-import { AssembleTsTranslation } from "./typescript";
+import { AssembleTsTranslation } from "./assembler";
 
 function assemble(template: string, ref: ObjectNode, translated: ObjectNode) {
     return AssembleTsTranslation({

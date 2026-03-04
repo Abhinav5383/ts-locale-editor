@@ -1,6 +1,6 @@
-import type { AssembleTranslationProps } from "~/lib/assembler/utils";
-import { AssembleJsonTranslation } from "./json";
-import { AssembleTsTranslation } from "./typescript";
+import { AssembleJsonTranslation } from "~/lib/adapters/json/assembler";
+import { AssembleTsTranslation } from "~/lib/adapters/ts/assembler";
+import type { AssembleTranslationProps } from "~/lib/adapters/utils";
 
 export function AssembleTranslation(props: AssembleTranslationProps): string | null {
     const fileExtension = props.fileName.split(".").pop()?.toLowerCase();

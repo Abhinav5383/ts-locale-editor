@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { NodeType, type ObjectNode } from "~/lib/types";
-import { AssembleJsonTranslation } from "./json";
+import { AssembleJsonTranslation } from "./assembler";
 
 function assemble(ref: ObjectNode, translated: ObjectNode) {
     return AssembleJsonTranslation({

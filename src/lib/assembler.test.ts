@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { NodeType, type ObjectNode } from "~/lib/types";
-import { AssembleTranslation } from "./index";
+import { AssembleTranslation } from "./assembler";
 
 const nodes = (v: string): { refNodes: ObjectNode; translatedNodes: ObjectNode } => ({
     refNodes: { type: NodeType.Object, value: [{ type: NodeType.String, key: "k", value: "ref" }] },
