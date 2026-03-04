@@ -18,7 +18,7 @@ export function getTranslationNodesFromTxtFile(
         case "tsx":
         case "js":
         case "jsx":
-            return getTranslationNodesFromTsFile(code ?? "export default {};");
+            return getTranslationNodesFromTsFile(code ?? "{};");
 
         case "json":
             return getTranslationNodesFromJSONFile(code ?? "{}");
