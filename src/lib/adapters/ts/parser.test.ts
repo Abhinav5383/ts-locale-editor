@@ -3,16 +3,22 @@ import { ExportType, NodeType } from "~/lib/types";
 import { getExportsAST, getTranslationNodesFromTsFile } from "./parser";
 
 describe("getExportsAST", () => {
-    test("unwraps TS wrappers (satisfies, as, parens) on default export", () => {
-        const ast = getExportsAST('export default ({ k: "v" } as const) satisfies Locale;');
-        expect(ast?.exportType).toBe(ExportType.Default);
-        if (ast?.exportType === ExportType.Default) expect(ast.value.type).toBe("ObjectExpression");
+    test("returns raw expression for default export (no unwrapping)", () => {
+        const items = getExportsAST('export default ({ k: "v" } as const) satisfies Locale;');
+        expect(items).not.toBeNull();
+        expect(items).toHaveLength(1);
+        expect(items?.[0].type).toBe(ExportType.Default);
+        expect(items?.[0].decl.type).toBe("TSSatisfiesExpression");
     });
 
-    test("collects named export variable declarators", () => {
-        const ast = getExportsAST('export const A = 1;\nexport const B = "x";');
-        expect(ast?.exportType).toBe(ExportType.Named);
-        if (ast?.exportType === ExportType.Named) expect(ast.value).toHaveLength(2);
+    test("collects named export items", () => {
+        const items = getExportsAST('export const A = 1;\nexport const B = "x";');
+        expect(items).not.toBeNull();
+        expect(items).toHaveLength(2);
+        expect(items?.[0].type).toBe(ExportType.Named);
+        expect(items?.[0].decl.type).toBe("VariableDeclaration");
+        expect(items?.[1].type).toBe(ExportType.Named);
+        expect(items?.[1].decl.type).toBe("VariableDeclaration");
     });
 
     test("returns null when no exports exist", () => {
@@ -36,24 +42,34 @@ describe("getTranslationNodesFromTsFile", () => {
         ].join("\n");
 
         const result = getTranslationNodesFromTsFile(code);
-        const keys = result.value.map((n) => n.key);
+
+        // default export is wrapped under a "default" key
+        expect(result.value).toHaveLength(1);
+        expect(result.value[0].key).toBe("default");
+        expect(result.value[0].type).toBe(NodeType.Object);
+
+        const defaultExport = result.value[0];
+        if (defaultExport.type !== NodeType.Object) throw new Error("Expected Object");
+
+        const nodes = defaultExport.value;
+        const keys = nodes.map((n) => n.key);
         expect(keys).toEqual(["plain", "tmpl", "nested", "items", "arrow", "block", "ref"]);
 
         // string literal
-        expect(result.value[0]).toMatchObject({ type: NodeType.String, value: "Hello" });
+        expect(nodes[0]).toMatchObject({ type: NodeType.String, value: "Hello" });
         // template literal
-        expect(result.value[1]).toMatchObject({ type: NodeType.StringTemplate });
+        expect(nodes[1]).toMatchObject({ type: NodeType.StringTemplate });
         // nested object
-        expect(result.value[2].type).toBe(NodeType.Object);
+        expect(nodes[2].type).toBe(NodeType.Object);
         // array
-        expect(result.value[3].type).toBe(NodeType.Array);
+        expect(nodes[3].type).toBe(NodeType.Array);
         // arrow fn
-        expect(result.value[4].type).toBe(NodeType.Function);
+        expect(nodes[4].type).toBe(NodeType.Function);
         // block fn body
-        const block = result.value[5];
+        const block = nodes[5];
         expect(block.type === NodeType.Function && block.body.type).toBe(NodeType.BlockExpression);
         // variable ref
-        expect(result.value[6]).toMatchObject({ type: NodeType.Variable, name: "FB" });
+        expect(nodes[6]).toMatchObject({ type: NodeType.Variable, name: "FB" });
     });
 
     test("maps named exports as root-level keys", () => {
@@ -73,16 +89,17 @@ describe("getTranslationNodesFromTsFile", () => {
 
     test("template literal without interpolations becomes plain string", () => {
         const result = getTranslationNodesFromTsFile("export default { k: `plain` };");
-        expect(result.value[0]).toMatchObject({ type: NodeType.String, value: "plain" });
+        expect(result.value[0]).toMatchObject({
+            type: NodeType.Object,
+            key: "default",
+            value: [{ type: NodeType.String, key: "k", value: "plain" }],
+        });
     });
 
     test("unwraps satisfies/as on named export initializers", () => {
         const code =
             'export const meta = { title: "Hi", nested: { hi: ("Hi" satisfies string) } } satisfies Record<string, string>;';
         const result = getTranslationNodesFromTsFile(code);
-
-        console.log(JSON.stringify(result, null, 4));
-
         expect(result.value[0]).toMatchObject({
             type: NodeType.Object,
             key: "meta",
@@ -102,8 +119,14 @@ describe("getTranslationNodesFromTsFile", () => {
         const result = getTranslationNodesFromTsFile(code);
         expect(result.value[0]).toMatchObject({
             type: NodeType.Object,
-            key: "k",
-            value: [{ type: NodeType.String, key: "a", value: "v" }],
+            key: "default",
+            value: [
+                {
+                    type: NodeType.Object,
+                    key: "k",
+                    value: [{ type: NodeType.String, key: "a", value: "v" }],
+                },
+            ],
         });
     });
 

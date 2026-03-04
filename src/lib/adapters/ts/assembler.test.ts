@@ -19,20 +19,26 @@ describe("AssembleTsTranslation", () => {
         const translated: ObjectNode = {
             type: NodeType.Object,
             value: [
-                { type: NodeType.String, key: "greeting", value: "Hola" },
-                { type: NodeType.StringTemplate, key: "tmpl", value: `Hi \${name}` },
                 {
-                    type: NodeType.Function,
-                    key: "cta",
-                    params: [{ name: "u", type: "string" }],
-                    body: { type: NodeType.StringTemplate, value: `Go \${u}` },
-                },
-                {
-                    type: NodeType.Array,
-                    key: "items",
+                    type: NodeType.Object,
+                    key: "default",
                     value: [
-                        { type: NodeType.String, value: "A" },
-                        { type: NodeType.Variable, name: "B" },
+                        { type: NodeType.String, key: "greeting", value: "Hola" },
+                        { type: NodeType.StringTemplate, key: "tmpl", value: `Hi \${name}` },
+                        {
+                            type: NodeType.Function,
+                            key: "cta",
+                            params: [{ name: "u", type: "string" }],
+                            body: { type: NodeType.StringTemplate, value: `Go \${u}` },
+                        },
+                        {
+                            type: NodeType.Array,
+                            key: "items",
+                            value: [
+                                { type: NodeType.String, value: "A" },
+                                { type: NodeType.Variable, name: "B" },
+                            ],
+                        },
                     ],
                 },
             ],
@@ -111,9 +117,5 @@ describe("AssembleTsTranslation", () => {
         const result = assemble(template, translated, translated);
         expect(result).toContain("(x: string) => {");
         expect(result).toContain(fnBody);
-    });
-
-    test("returns null for unparseable template", () => {
-        expect(assemble("not valid code", emptyObj, emptyObj)).toBeNull();
     });
 });

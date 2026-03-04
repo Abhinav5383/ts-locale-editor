@@ -10,11 +10,35 @@ const nodes = (v: string): { refNodes: ObjectNode; translatedNodes: ObjectNode }
     },
 });
 
+// TS assembler resolves default exports by key "default", so wrap nodes under that key
+const tsNodes = (v: string): { refNodes: ObjectNode; translatedNodes: ObjectNode } => ({
+    refNodes: {
+        type: NodeType.Object,
+        value: [
+            {
+                type: NodeType.Object,
+                key: "default",
+                value: [{ type: NodeType.String, key: "k", value: "ref" }],
+            },
+        ],
+    },
+    translatedNodes: {
+        type: NodeType.Object,
+        value: [
+            {
+                type: NodeType.Object,
+                key: "default",
+                value: [{ type: NodeType.String, key: "k", value: v }],
+            },
+        ],
+    },
+});
+
 describe("AssembleTranslation", () => {
     test.each(["ts", "tsx", "js", "jsx"])("routes .%s to TypeScript assembler", (ext) => {
         const result = AssembleTranslation({
             fileName: `f.${ext}`,
-            ...nodes("Hola"),
+            ...tsNodes("Hola"),
         });
         expect(result).toContain('k: "Hola"');
     });
