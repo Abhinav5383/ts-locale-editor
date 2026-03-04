@@ -34,7 +34,7 @@ export function sortNodes(node: ObjectNode, refNode: ObjectNode): ObjectNode {
 
 export interface AssembleTranslationProps {
     fileName: string;
-    translatingLocaleCode: string | undefined;
+    translatingLocaleCode?: string;
     refNodes: ObjectNode;
     translatedNodes: ObjectNode;
 }

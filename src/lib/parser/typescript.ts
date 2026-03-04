@@ -25,50 +25,57 @@ type AST_Result =
       };
 
 export function getExportsAST(code: string): AST_Result | null {
-    const ast = parse(code, {
-        sourceType: "module",
-        plugins: ["typescript"],
-    });
+    try {
+        const ast = parse(code, {
+            sourceType: "module",
+            plugins: ["typescript"],
+            errorRecovery: true,
+        });
 
-    let defaultExportObject: t.ObjectExpression | null = null;
-    const namedExports: t.VariableDeclarator[] = [];
+        let defaultExportObject: t.ObjectExpression | null = null;
+        const namedExports: t.VariableDeclarator[] = [];
 
-    traverse(ast, {
-        // I'm just gonna assume all default exports are gonna be object literals for translation files
-        // If something breaks we can "Fix it later"(TM) :D
-        ExportDefaultDeclaration(path) {
-            const decl = path.node.declaration;
-            if (!t.isExpression(decl)) return;
+        traverse(ast, {
+            // I'm just gonna assume all default exports are gonna be object literals for translation files
+            // If something breaks we can "Fix it later"(TM) :D
+            ExportDefaultDeclaration(path) {
+                const decl = path.node.declaration;
+                if (!t.isExpression(decl)) return;
 
-            const unwrapped = unwrapExpression(decl);
-            if (t.isObjectExpression(unwrapped)) {
-                defaultExportObject = unwrapped;
-            }
-        },
+                const unwrapped = unwrapExpression(decl);
+                if (t.isObjectExpression(unwrapped)) {
+                    defaultExportObject = unwrapped;
+                }
+            },
 
-        ExportNamedDeclaration(path) {
-            const decl = path.node.declaration;
-            if (!t.isVariableDeclaration(decl)) return;
+            ExportNamedDeclaration(path) {
+                const decl = path.node.declaration;
+                if (!t.isVariableDeclaration(decl)) return;
 
-            const declarator = decl.declarations[0];
-            namedExports.push(declarator);
-        },
-    });
+                const declarator = decl.declarations[0];
+                namedExports.push(declarator);
+            },
+        });
 
-    if (defaultExportObject) {
-        return {
-            exportType: ExportType.Default,
-            value: defaultExportObject,
-        };
+        if (defaultExportObject) {
+            return {
+                exportType: ExportType.Default,
+                value: defaultExportObject,
+            };
+        }
+        if (namedExports.length > 0) {
+            return {
+                exportType: ExportType.Named,
+                value: namedExports,
+            };
+        }
+
+        return null;
+    } catch (error) {
+        console.error("Error parsing TypeScript code");
+        console.trace(error);
+        return null;
     }
-    if (namedExports.length > 0) {
-        return {
-            exportType: ExportType.Named,
-            value: namedExports,
-        };
-    }
-
-    return null;
 }
 
 // unwrap the real value from TS wrappers
@@ -80,8 +87,9 @@ function unwrapExpression(expr: t.Expression): t.Expression {
         t.isTSAsExpression(expr) ||
         t.isParenthesizedExpression(expr)
     ) {
-        return unwrapExpression(expr.expression as t.Expression);
+        return unwrapExpression(expr.expression);
     }
+
     return expr;
 }
 
@@ -142,13 +150,7 @@ function extractObjectNode(expr: t.ObjectExpression): ObjectNode {
 }
 
 function mapExpressionToNode(key: string, expr: t.Expression): ObjectNode["value"][number] | null {
-    if (
-        t.isTSSatisfiesExpression(expr) ||
-        t.isTSAsExpression(expr) ||
-        t.isParenthesizedExpression(expr)
-    ) {
-        expr = unwrapExpression(expr);
-    }
+    expr = unwrapExpression(expr);
 
     if (t.isObjectExpression(expr)) {
         return {

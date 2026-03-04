@@ -14,12 +14,8 @@ import { getAssemblingTemplate } from "./templates";
 
 export function AssembleTsTranslation(props: AssembleTranslationProps): string | null {
     const template = getAssemblingTemplate(props.fileName, props.translatingLocaleCode);
-    if (!template) {
-        console.error(`No assembling template found for file ${props.fileName}`);
-        return null;
-    }
-
     const templateAST = getExportsAST(template);
+
     if (!templateAST) {
         console.error("Failed to parse template AST. Cannot assemble translation.");
         return null;

@@ -10,7 +10,7 @@ import {
 export function getTranslationNodesFromJSONFile(str: string): ObjectNode {
     const json = JSON5.parse(str);
 
-    if (typeof json !== NodeType.Object) {
+    if (typeof json !== NodeType.Object || Array.isArray(json)) {
         return {
             type: NodeType.Object,
             value: [],
