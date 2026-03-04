@@ -14,7 +14,7 @@ export function getExportItemIdentifier(item: ExportItem) {
 
             return declarator.id.name;
         }
-    } else {
-        return ExportType.Default;
     }
+
+    return ExportType.Default;
 }
