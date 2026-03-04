@@ -151,7 +151,7 @@ export default function App() {
 
         if (saveTimeoutRef) clearTimeout(saveTimeoutRef);
 
-        saveTimeoutRef = setTimeout(() => {
+        saveTimeoutRef = window.setTimeout(() => {
             saveTranslationWork(updatedState, translatingTo(), selectedFile());
             saveTimeoutRef = null;
         }, 10_000);
