@@ -51,6 +51,7 @@ html {
     font-family: "Space Grotesk", system-ui;
     scrollbar-gutter: stable;
     interpolate-size: allow-keywords;
+    font-size: 14px;
 }
 
 h1,
