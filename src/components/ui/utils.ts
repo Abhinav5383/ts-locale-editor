@@ -1,5 +1,6 @@
 import {
     type ArrayNode,
+    ExportType,
     type FunctionNode,
     NodeType,
     type ObjectNode,
@@ -94,32 +95,40 @@ export function flattenLocaleEntries(
 
         const isLastChild = i === orderedKeys.length - 1;
         if (refNode.type === NodeType.Object && editNode.type === NodeType.Object) {
+            // ignore top level "default" key when there are no other entries to reduce nesting level
+            const ignoreDepth =
+                key === ExportType.Default && parentPath.length === 0 && _uniqueKeys.size === 1;
+
             const childItems = flattenLocaleEntries(
                 refNode,
                 editNode,
-                depth + 1,
+                ignoreDepth ? depth : depth + 1,
                 [...parentPath, key],
                 hideTranslated,
             );
             if (!childItems.length) continue;
 
-            items.push({
-                type: IterationItemType.OBJ_START,
-                key: key,
-                depth: depth,
-                isLastChild,
-                path: [...parentPath, key],
-            });
+            if (!ignoreDepth) {
+                items.push({
+                    type: IterationItemType.OBJ_START,
+                    key: key,
+                    depth: depth,
+                    isLastChild,
+                    path: [...parentPath, key],
+                });
+            }
 
             items.push(...childItems);
 
-            items.push({
-                type: IterationItemType.OBJ_END,
-                key: key,
-                depth,
-                isLastChild,
-                path: [...parentPath, key],
-            });
+            if (!ignoreDepth) {
+                items.push({
+                    type: IterationItemType.OBJ_END,
+                    key: key,
+                    depth,
+                    isLastChild,
+                    path: [...parentPath, key],
+                });
+            }
         } else {
             if (hideTranslated && !isEmptyNode(editNode)) continue;
 
