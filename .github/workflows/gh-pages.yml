@@ -27,7 +27,7 @@ jobs:
       - name: Install deps
         run: bun install --frozen-lockfile
       - name: Build
-        run: bun run build
+        run: BASE_PATH="/${{ github.event.repository.name }}/" bun run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
