@@ -9,7 +9,7 @@ if (!root) throw new Error("Root element not found!");
 
 const routes: RouteDefinition[] = [
     {
-        path: process.env.BASE_PATH ?? "/",
+        path: import.meta.env.BASE_URL ?? "/",
         component: App,
     },
 ];
