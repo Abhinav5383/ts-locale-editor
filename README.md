@@ -2,7 +2,7 @@
 
 A web-based editor for TypeScript/JavaScript/JSON based translation (i18n) files. Parse complex translation object structures, edit string values in an intuitive UI, and reassemble the modified code back into valid TS/JS/JSON while preserving your existing code structure.
 
-Try it here https://locale-editor.devabhinav.online
+Try it here https://abhinav5383.github.io/ts-locale-editor
 
 ## Usage
 
