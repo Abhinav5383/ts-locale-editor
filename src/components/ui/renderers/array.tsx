@@ -1,25 +1,35 @@
 import { useDragAndDrop } from "@formkit/drag-and-drop/solid";
-import { batch, For, Show } from "solid-js";
+import { batch, createSignal, For, Show } from "solid-js";
+import PlusIcon from "~/components/icons/plus-icon";
+import XIcon from "~/components/icons/x";
 import { type ArrayNode, NodeType, type TranslationNode } from "~/lib/types";
+import Dialog from "../dialog";
 import { NodeRenderer } from "./node";
 import type { NodeRendererProps } from "./types";
 
-export function ArrayRenderer(props: NodeRendererProps<ArrayNode>) {
-	const initialValues = props.node.value.map((node, index) => ({ index, node }));
+import "./array.css";
 
-	const [parentRef, items, setItems] = useDragAndDrop<HTMLDivElement, (typeof initialValues)[number]>(initialValues, {
-		dragHandle: ".drag-handle",
-		dropZoneClass: "drop-location",
-		selectedClass: "dragging",
-		draggable: () => props.isEditable,
-		onDragend: (_data) => {
-			const newOrder = _data.values as unknown as typeof initialValues;
-			props.onChange(props.path, {
-				...props.node,
-				value: newOrder.map((item) => item.node),
-			});
+export function ArrayRenderer(props: NodeRendererProps<ArrayNode>) {
+	const initialValues = () => props.node.value.map((node, index) => ({ index, node }));
+	const [addItemDialogOpen, setAddItemDialogOpen] = createSignal(false);
+	const [addItemInput, setAddItemInput] = createSignal("");
+
+	const [parentRef, items, setItems] = useDragAndDrop<HTMLDivElement, ReturnType<typeof initialValues>[number]>(
+		initialValues(),
+		{
+			dragHandle: ".drag-handle",
+			dropZoneClass: "drop-location",
+			selectedClass: "dragging",
+			draggable: () => props.isEditable,
+			onDragend: (_data) => {
+				const newOrder = _data.values as unknown as ReturnType<typeof initialValues>;
+				props.onChange(props.path, {
+					...props.node,
+					value: newOrder.map((item) => item.node),
+				});
+			},
 		},
-	});
+	);
 
 	function handleChange(index: number, newNode: TranslationNode) {
 		if (newNode.type !== NodeType.String && newNode.type !== NodeType.StringTemplate) return;
@@ -45,20 +55,43 @@ export function ArrayRenderer(props: NodeRendererProps<ArrayNode>) {
 		});
 	}
 
-	// function handleAddItem(newNode: ArrayNode["value"][number]) {
-	//     props.onChange(props.path, {
-	//         ...arrNode(),
-	//         value: [...arrNode().value, newNode],
-	//     });
-	// }
+	function handleAddItem(newNode: ArrayNode["value"][number]) {
+		const newArray = [...items().map((item) => item.node), newNode];
 
-	// function handleRemoveItem(index: number) {
-	//     const newArrayValue = arrNode().value.filter((_, i) => i !== index);
-	//     props.onChange(props.path, {
-	//         ...arrNode(),
-	//         value: newArrayValue,
-	//     });
-	// }
+		batch(() => {
+			setItems((items) => {
+				return [
+					...items,
+					{
+						index: items.length,
+						node: newNode,
+					},
+				];
+			});
+
+			props.onChange(props.path, {
+				...props.node,
+				value: newArray,
+			});
+		});
+	}
+
+	function handleRemoveItem(index: number) {
+		const newArray = items()
+			.map((item) => item.node)
+			.filter((_, i) => i !== index);
+
+		batch(() => {
+			setItems((items) => {
+				return items.filter((_, i) => i !== index);
+			});
+
+			props.onChange(props.path, {
+				...props.node,
+				value: newArray,
+			});
+		});
+	}
 
 	return (
 		<div class="node-array">
@@ -78,14 +111,77 @@ export function ArrayRenderer(props: NodeRendererProps<ArrayNode>) {
 								isEditable={props.isEditable}
 								postInlineContent={index() < items().length - 1 ? <span class="token">,</span> : null}
 							/>
+
+							<Show when={props.isEditable}>
+								<button class="remove-btn" type="button" title="Remove item" onclick={() => handleRemoveItem(index())}>
+									<XIcon />
+								</button>
+							</Show>
 						</div>
 					)}
 				</For>
 			</div>
 
-			<div>
+			<div class="array-post-content">
 				<span class="token token-bracket">{"]"}</span>
 				{props.postInlineContent}
+
+				<Show when={props.isEditable}>
+					<div class="add-item-btn">
+						<button class="add-btn" type="button" title="Add item" onclick={() => setAddItemDialogOpen(true)}>
+							<PlusIcon />
+						</button>
+					</div>
+
+					<Dialog
+						open={addItemDialogOpen()}
+						onOpenChange={() => {
+							setAddItemDialogOpen(false);
+							setAddItemInput("");
+						}}
+					>
+						<div class="dialog-content">
+							<span>Select the type of item to add:</span>
+
+							<input
+								type="text"
+								placeholder="Value"
+								value={addItemInput()}
+								onchange={(e) => {
+									setAddItemInput(e.currentTarget.value);
+								}}
+							/>
+
+							<div class="buttons">
+								<button
+									type="button"
+									onclick={() => {
+										handleAddItem({
+											type: NodeType.String,
+											value: addItemInput(),
+										});
+										setAddItemDialogOpen(false);
+									}}
+								>
+									String
+								</button>
+
+								<button
+									type="button"
+									onclick={() => {
+										handleAddItem({
+											type: NodeType.Variable,
+											name: addItemInput(),
+										});
+										setAddItemDialogOpen(false);
+									}}
+								>
+									Variable
+								</button>
+							</div>
+						</div>
+					</Dialog>
+				</Show>
 			</div>
 		</div>
 	);

@@ -4,6 +4,7 @@
 	--gh-bg-tertiary: #21262d;
 	--gh-text-primary: #d9e1e9;
 	--gh-text-secondary: #8b949e;
+	--gh-text-tertiary: #59626d;
 	--gh-border: #30363d;
 
 	--gh-token-keyword: #ff7b72;
@@ -26,6 +27,7 @@
 	--gh-bg-tertiary: #eaeef2;
 	--gh-text-primary: #24292f;
 	--gh-text-secondary: #57606a;
+	--gh-text-tertiary: #757f8a;
 	--gh-border: #d0d7de;
 	--gh-border-hover: #9ca5af;
 
@@ -39,6 +41,21 @@
 	--gh-token-parameter: #953800;
 
 	color-scheme: light;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+@layer base {
+	svg {
+		width: 1.1em;
+		height: 1.1em;
+	}
 }
 
 body,
