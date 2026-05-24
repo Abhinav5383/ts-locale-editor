@@ -1,37 +1,38 @@
 body:has(dialog[open]) {
-    overflow: hidden;
+	overflow: hidden;
 }
 
-
 dialog {
-    margin: 0;
-    padding: 0;
-    align-self: center;
-    justify-self: center;
-    min-width: min(100%, 32rem);
-    max-width: min(calc(100% - 3rem), 72rem);
-    max-height: calc(100% - max(4rem, 5vh));
-    border: 2px solid var(--gh-border);
-    outline: none;
-    background-color: var(--gh-bg-primary);
+	margin: 0;
+	padding: 0;
+	align-self: center;
+	justify-self: center;
+	min-width: min(100%, 32rem);
+	max-width: min(calc(100% - 3rem), 72rem);
+	max-height: calc(100% - max(4rem, 5vh));
+	border: 2px solid var(--gh-border);
+	outline: none;
+	background-color: var(--gh-bg-primary);
 
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+	opacity: 1;
+	transform: translateY(0);
+	transition:
+		opacity 0.25s ease-in-out,
+		transform 0.25s ease-in-out;
 
-    @starting-style {
-        opacity: 0;
-        transform: translateY(1rem);
-    }
+	@starting-style {
+		opacity: 0;
+		transform: translateY(1rem);
+	}
 }
 
 ::backdrop {
-    background-image: linear-gradient(0deg, lch(from var(--gh-bg-secondary) l c h / 0.7));
-    backdrop-filter: blur(2px);
-    opacity: 1;
-    transition: opacity 0.35s ease-in-out;
+	background-image: linear-gradient(0deg, lch(from var(--gh-bg-secondary) l c h / 0.7));
+	backdrop-filter: blur(2px);
+	opacity: 1;
+	transition: opacity 0.35s ease-in-out;
 
-    @starting-style {
-        opacity: 0;
-    }
+	@starting-style {
+		opacity: 0;
+	}
 }

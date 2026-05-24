@@ -14,413 +14,371 @@ import type { node_OnChangeHandler } from "./renderers/types";
 import { Select } from "./select";
 
 interface EditorProps {
-    refNodes: ObjectNode; // the base reference locale
-    editingLocaleSrc: string | undefined;
-    editedNodes: ObjectNode; // the locale being edited
-    onChange: node_OnChangeHandler;
-    preferences: PrefsObj;
+	refNodes: ObjectNode; // the base reference locale
+	editingLocaleSrc: string | undefined;
+	editedNodes: ObjectNode; // the locale being edited
+	onChange: node_OnChangeHandler;
+	preferences: PrefsObj;
 
-    // select controls
-    localesList: Dir[];
-    localeFilesList: Dir[];
+	// select controls
+	localesList: Dir[];
+	localeFilesList: Dir[];
 
-    selectedFile: string;
-    setSelectedFile: (val: string) => void;
-    translatingFrom: string;
-    setTranslatingFrom: (val: string) => void;
-    translatingTo: string;
-    setTranslatingTo: (val: string) => void;
+	selectedFile: string;
+	setSelectedFile: (val: string) => void;
+	translatingFrom: string;
+	setTranslatingFrom: (val: string) => void;
+	translatingTo: string;
+	setTranslatingTo: (val: string) => void;
 }
 
 export default function Editor(props: EditorProps) {
-    const [hideTranslated, setHideTranslated] = createSignal(false);
+	const [hideTranslated, setHideTranslated] = createSignal(false);
 
-    return (
-        <div class="editor">
-            <div class="editor-wrapper">
-                <div class="editor-header">
-                    <div class="header-column">
-                        <label for="file-select">Translating</label>
-                        <Select
-                            id="file-select"
-                            options={flattenDirs(props.localeFilesList).map((file) => {
-                                const relativePath =
-                                    file.parent.length > 0
-                                        ? `${file.parent.join("/")}/${file.name}`
-                                        : file.name;
+	return (
+		<div class="editor">
+			<div class="editor-wrapper">
+				<div class="editor-header">
+					<div class="header-column">
+						<label for="file-select">Translating</label>
+						<Select
+							id="file-select"
+							options={flattenDirs(props.localeFilesList).map((file) => {
+								const relativePath = file.parent.length > 0 ? `${file.parent.join("/")}/${file.name}` : file.name;
 
-                                return {
-                                    value: relativePath,
-                                    label: file.name,
-                                    description:
-                                        relativePath === file.name ? undefined : relativePath,
-                                };
-                            })}
-                            value={props.selectedFile}
-                            onChange={props.setSelectedFile}
-                        />
-                    </div>
+								return {
+									value: relativePath,
+									label: file.name,
+									description: relativePath === file.name ? undefined : relativePath,
+								};
+							})}
+							value={props.selectedFile}
+							onChange={props.setSelectedFile}
+						/>
+					</div>
 
-                    <div class="header-column">
-                        <label for="ref-select">From</label>
-                        <Select
-                            id="ref-select"
-                            options={props.localesList.map((locale) => ({
-                                value: locale.name,
-                            }))}
-                            value={props.translatingFrom}
-                            onChange={props.setTranslatingFrom}
-                        />
-                    </div>
+					<div class="header-column">
+						<label for="ref-select">From</label>
+						<Select
+							id="ref-select"
+							options={props.localesList.map((locale) => ({
+								value: locale.name,
+							}))}
+							value={props.translatingFrom}
+							onChange={props.setTranslatingFrom}
+						/>
+					</div>
 
-                    <div class="header-column">
-                        <label for="to-select">To</label>
-                        <Select
-                            id="to-select"
-                            options={[
-                                {
-                                    value: "",
-                                    label: "New Locale",
-                                },
-                                ...props.localesList.map((locale) => ({
-                                    value: locale.name,
-                                })),
-                            ]}
-                            value={props.translatingTo}
-                            onChange={props.setTranslatingTo}
-                        />
-                    </div>
-                </div>
+					<div class="header-column">
+						<label for="to-select">To</label>
+						<Select
+							id="to-select"
+							options={[
+								{
+									value: "",
+									label: "New Locale",
+								},
+								...props.localesList.map((locale) => ({
+									value: locale.name,
+								})),
+							]}
+							value={props.translatingTo}
+							onChange={props.setTranslatingTo}
+						/>
+					</div>
+				</div>
 
-                <EditorContent
-                    refLocale={props.refNodes}
-                    editLocale={props.editedNodes}
-                    onChange={props.onChange}
-                    hideTranslated={hideTranslated()}
-                />
-            </div>
+				<EditorContent
+					refLocale={props.refNodes}
+					editLocale={props.editedNodes}
+					onChange={props.onChange}
+					hideTranslated={hideTranslated()}
+				/>
+			</div>
 
-            <BottomBar
-                preferences={props.preferences}
-                translatingFrom={props.translatingFrom}
-                translatingTo={props.translatingTo}
-                selectedFile={props.selectedFile}
-                editingLocaleSrc={props.editingLocaleSrc}
-                refNodes={props.refNodes}
-                editedNodes={props.editedNodes}
-                hideTranslated={hideTranslated()}
-                setHideTranslated={setHideTranslated}
-            />
-        </div>
-    );
+			<BottomBar
+				preferences={props.preferences}
+				translatingFrom={props.translatingFrom}
+				translatingTo={props.translatingTo}
+				selectedFile={props.selectedFile}
+				editingLocaleSrc={props.editingLocaleSrc}
+				refNodes={props.refNodes}
+				editedNodes={props.editedNodes}
+				hideTranslated={hideTranslated()}
+				setHideTranslated={setHideTranslated}
+			/>
+		</div>
+	);
 }
 
 interface EditorContentProps {
-    refLocale: ObjectNode;
-    editLocale: ObjectNode;
-    onChange: node_OnChangeHandler;
-    hideTranslated: boolean;
+	refLocale: ObjectNode;
+	editLocale: ObjectNode;
+	onChange: node_OnChangeHandler;
+	hideTranslated: boolean;
 }
 
 function EditorContent(props: EditorContentProps) {
-    const flattenedItems = () =>
-        flattenLocaleEntries(
-            props.refLocale,
-            props.editLocale,
-            undefined,
-            undefined,
-            props.hideTranslated,
-        );
+	const flattenedItems = () =>
+		flattenLocaleEntries(props.refLocale, props.editLocale, undefined, undefined, props.hideTranslated);
 
-    return (
-        <div class="object-renderer">
-            <For each={flattenedItems()}>
-                {(item) => {
-                    const adjustedDepth = Math.max(0, item.depth - 1);
-                    return (
-                        <Switch>
-                            <Match
-                                keyed
-                                when={item.type === IterationItemType.OBJ_ENTRY ? item : false}
-                            >
-                                {(item) => (
-                                    <div
-                                        class={`node-row ${item.isLastChild ? "last-entry" : ""}`}
-                                        style={{ "--depth": `${adjustedDepth}` }}
-                                    >
-                                        <div class="cell-wrapper">
-                                            <div class="node-key">
-                                                {item.key}
-                                                <span class="token">{": "}</span>
-                                            </div>
-                                        </div>
+	return (
+		<div class="object-renderer">
+			<For each={flattenedItems()}>
+				{(item) => {
+					const adjustedDepth = Math.max(0, item.depth - 1);
+					return (
+						<Switch>
+							<Match keyed when={item.type === IterationItemType.OBJ_ENTRY ? item : false}>
+								{(item) => (
+									<div
+										class={`node-row ${item.isLastChild ? "last-entry" : ""}`}
+										style={{ "--depth": `${adjustedDepth}` }}
+									>
+										<div class="cell-wrapper">
+											<div class="node-key">
+												{item.key}
+												<span class="token">{": "}</span>
+											</div>
+										</div>
 
-                                        <div class="cell-wrapper scrollable">
-                                            <div class="node-value-ref">
-                                                <NodeRenderer
-                                                    node={item.refNode}
-                                                    isEditable={false}
-                                                    path={item.path}
-                                                    onChange={props.onChange}
-                                                />
-                                            </div>
-                                        </div>
+										<div class="cell-wrapper scrollable">
+											<div class="node-value-ref">
+												<NodeRenderer
+													node={item.refNode}
+													isEditable={false}
+													path={item.path}
+													onChange={props.onChange}
+												/>
+											</div>
+										</div>
 
-                                        <div class="cell-wrapper scrollable">
-                                            <div class="node-value-edit">
-                                                <NodeRenderer
-                                                    node={item.editNode}
-                                                    isEditable={true}
-                                                    path={item.path}
-                                                    onChange={props.onChange}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </Match>
+										<div class="cell-wrapper scrollable">
+											<div class="node-value-edit">
+												<NodeRenderer
+													node={item.editNode}
+													isEditable={true}
+													path={item.path}
+													onChange={props.onChange}
+												/>
+											</div>
+										</div>
+									</div>
+								)}
+							</Match>
 
-                            <Match
-                                keyed
-                                when={item.type === IterationItemType.OBJ_START ? item : false}
-                            >
-                                {(item) => (
-                                    <div
-                                        class="node-row obj-brace obj-start-brace"
-                                        style={{ "--depth": `${adjustedDepth}` }}
-                                    >
-                                        <div>
-                                            <span class="node-key">{item.key}</span>
-                                            <span class="token">{": {"}</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </Match>
+							<Match keyed when={item.type === IterationItemType.OBJ_START ? item : false}>
+								{(item) => (
+									<div class="node-row obj-brace obj-start-brace" style={{ "--depth": `${adjustedDepth}` }}>
+										<div>
+											<span class="node-key">{item.key}</span>
+											<span class="token">{": {"}</span>
+										</div>
+									</div>
+								)}
+							</Match>
 
-                            <Match
-                                keyed
-                                when={item.type === IterationItemType.OBJ_END ? item : false}
-                            >
-                                {(item) => (
-                                    <div
-                                        class="node-row obj-brace obj-end-brace"
-                                        style={{ "--depth": `${adjustedDepth}` }}
-                                    >
-                                        <div>
-                                            <span class="token">
-                                                {item.isLastChild ? "}" : "},"}
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
-                            </Match>
-                        </Switch>
-                    );
-                }}
-            </For>
-        </div>
-    );
+							<Match keyed when={item.type === IterationItemType.OBJ_END ? item : false}>
+								{(item) => (
+									<div class="node-row obj-brace obj-end-brace" style={{ "--depth": `${adjustedDepth}` }}>
+										<div>
+											<span class="token">{item.isLastChild ? "}" : "},"}</span>
+										</div>
+									</div>
+								)}
+							</Match>
+						</Switch>
+					);
+				}}
+			</For>
+		</div>
+	);
 }
 
 interface ExportActionsProps {
-    preferences: PrefsObj;
-    translatingFrom: string;
-    translatingTo: string;
-    selectedFile: string;
-    editingLocaleSrc: string | undefined;
-    refNodes: ObjectNode;
-    editedNodes: ObjectNode;
+	preferences: PrefsObj;
+	translatingFrom: string;
+	translatingTo: string;
+	selectedFile: string;
+	editingLocaleSrc: string | undefined;
+	refNodes: ObjectNode;
+	editedNodes: ObjectNode;
 
-    hideTranslated: boolean;
-    setHideTranslated: Setter<boolean>;
+	hideTranslated: boolean;
+	setHideTranslated: Setter<boolean>;
 }
 
 function BottomBar(props: ExportActionsProps) {
-    let prevScrollY = window.scrollY;
-    const [bottomBarVisible, setBottomBarVisible] = createSignal(true);
-    const [dialogOpen, setDialogOpen] = createSignal(false);
+	let prevScrollY = window.scrollY;
+	const [bottomBarVisible, setBottomBarVisible] = createSignal(true);
+	const [dialogOpen, setDialogOpen] = createSignal(false);
 
-    function assembledNodes() {
-        return AssembleTranslation({
-            fileName: props.selectedFile,
-            translatingLocaleCode: props.editingLocaleSrc,
-            refNodes: props.refNodes,
-            translatedNodes: props.editedNodes,
-        });
-    }
+	function assembledNodes() {
+		return AssembleTranslation({
+			fileName: props.selectedFile,
+			translatingLocaleCode: props.editingLocaleSrc,
+			refNodes: props.refNodes,
+			translatedNodes: props.editedNodes,
+		});
+	}
 
-    function handleDownload() {
-        const assembled = assembledNodes();
-        if (!assembled) {
-            alert("Failed to generate translation code. Download aborted.");
-            return;
-        }
+	function handleDownload() {
+		const assembled = assembledNodes();
+		if (!assembled) {
+			alert("Failed to generate translation code. Download aborted.");
+			return;
+		}
 
-        const blob = new Blob([assembled], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = props.selectedFile;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }
+		const blob = new Blob([assembled], { type: "text/plain" });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = props.selectedFile;
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(url);
+	}
 
-    function handleCopy() {
-        const assembled = assembledNodes();
-        if (!assembled) {
-            alert("Failed to generate translation code. Copying aborted.");
-            return;
-        }
+	function handleCopy() {
+		const assembled = assembledNodes();
+		if (!assembled) {
+			alert("Failed to generate translation code. Copying aborted.");
+			return;
+		}
 
-        navigator.clipboard
-            .writeText(assembled)
-            .then(() => {
-                alert("Assembled translation code copied to clipboard!");
-            })
-            .catch((err) => {
-                console.error("Failed to copy assembled code to clipboard:", err);
-                alert("Failed to copy to clipboard. See console for details.");
-            });
-    }
+		navigator.clipboard
+			.writeText(assembled)
+			.then(() => {
+				alert("Assembled translation code copied to clipboard!");
+			})
+			.catch((err) => {
+				console.error("Failed to copy assembled code to clipboard:", err);
+				alert("Failed to copy to clipboard. See console for details.");
+			});
+	}
 
-    function handleScroll() {
-        const currentScrollY = window.scrollY;
-        const barVisible = bottomBarVisible();
+	function handleScroll() {
+		const currentScrollY = window.scrollY;
+		const barVisible = bottomBarVisible();
 
-        if (currentScrollY > document.body.scrollHeight - window.innerHeight - 250) {
-            prevScrollY = currentScrollY;
-            setBottomBarVisible(true);
-            return;
-        }
+		if (currentScrollY > document.body.scrollHeight - window.innerHeight - 250) {
+			prevScrollY = currentScrollY;
+			setBottomBarVisible(true);
+			return;
+		}
 
-        if (Math.abs(currentScrollY - prevScrollY) < 60) return;
+		if (Math.abs(currentScrollY - prevScrollY) < 60) return;
 
-        if (currentScrollY < prevScrollY && !barVisible) {
-            setBottomBarVisible(true);
-        } else if (currentScrollY > prevScrollY && barVisible) {
-            setBottomBarVisible(false);
-        }
+		if (currentScrollY < prevScrollY && !barVisible) {
+			setBottomBarVisible(true);
+		} else if (currentScrollY > prevScrollY && barVisible) {
+			setBottomBarVisible(false);
+		}
 
-        prevScrollY = currentScrollY;
-    }
+		prevScrollY = currentScrollY;
+	}
 
-    onMount(() => {
-        window.addEventListener("scroll", handleScroll);
+	onMount(() => {
+		window.addEventListener("scroll", handleScroll);
 
-        onCleanup(() => {
-            window.removeEventListener("scroll", handleScroll);
-        });
-    });
+		onCleanup(() => {
+			window.removeEventListener("scroll", handleScroll);
+		});
+	});
 
-    return (
-        <div class={`bottom-bar ${bottomBarVisible() ? "visible" : "hidden"}`}>
-            <div class="contents">
-                <div class="checkbox-wrapper">
-                    <input
-                        type="checkbox"
-                        id="hide-translated-toggle"
-                        checked={props.hideTranslated}
-                        onChange={(e) => props.setHideTranslated(e.currentTarget.checked)}
-                    />
-                    <label for="hide-translated-toggle">Hide Translated</label>
-                </div>
+	return (
+		<div class={`bottom-bar ${bottomBarVisible() ? "visible" : "hidden"}`}>
+			<div class="contents">
+				<div class="checkbox-wrapper">
+					<input
+						type="checkbox"
+						id="hide-translated-toggle"
+						checked={props.hideTranslated}
+						onChange={(e) => props.setHideTranslated(e.currentTarget.checked)}
+					/>
+					<label for="hide-translated-toggle">Hide Translated</label>
+				</div>
 
-                <div class="actions">
-                    <a
-                        href={`https://github.com/${props.preferences.repo}/${props.preferences.localesDir}/${props.translatingFrom}/${props.selectedFile}`}
-                        target="_blank"
-                        title="Goto reference file on github"
-                        class="external-link"
-                    >
-                        <span>
-                            {props.translatingFrom}/{props.selectedFile} <ExternalLinkIcon />
-                        </span>
-                    </a>
-                    <button type="button" onClick={handleCopy}>
-                        Copy
-                    </button>
+				<div class="actions">
+					<a
+						href={`https://github.com/${props.preferences.repo}/${props.preferences.localesDir}/${props.translatingFrom}/${props.selectedFile}`}
+						target="_blank"
+						title="Goto reference file on github"
+						class="external-link"
+					>
+						<span>
+							{props.translatingFrom}/{props.selectedFile} <ExternalLinkIcon />
+						</span>
+					</a>
+					<button type="button" onClick={handleCopy}>
+						Copy
+					</button>
 
-                    <button type="button" onClick={handleDownload}>
-                        Download
-                    </button>
+					<button type="button" onClick={handleDownload}>
+						Download
+					</button>
 
-                    <button
-                        class="icon-btn"
-                        type="button"
-                        onClick={() => setDialogOpen(true)}
-                        title="More Options"
-                    >
-                        <ThreeDotsVerticalIcon />
-                    </button>
-                    <Dialog open={dialogOpen()} onOpenChange={setDialogOpen}>
-                        <div class="dialog-content">
-                            <div class="row">
-                                <button
-                                    type="button"
-                                    onclick={() => {
-                                        deleteSavedTranslation(
-                                            props.translatingTo,
-                                            props.selectedFile,
-                                        )
-                                            .then(() => {
-                                                setDialogOpen(false);
-                                                alert("Saved translation deleted successfully.");
-                                            })
-                                            .catch(() => {
-                                                alert(
-                                                    "Failed to delete saved translation. See console for details.",
-                                                );
-                                            });
-                                    }}
-                                >
-                                    Delete
-                                </button>{" "}
-                                <span>
-                                    saved translation of currently selected file (
-                                    <strong>{props.selectedFile}</strong>).
-                                </span>
-                            </div>
+					<button class="icon-btn" type="button" onClick={() => setDialogOpen(true)} title="More Options">
+						<ThreeDotsVerticalIcon />
+					</button>
+					<Dialog open={dialogOpen()} onOpenChange={setDialogOpen}>
+						<div class="dialog-content">
+							<div class="row">
+								<button
+									type="button"
+									onclick={() => {
+										deleteSavedTranslation(props.translatingTo, props.selectedFile)
+											.then(() => {
+												setDialogOpen(false);
+												alert("Saved translation deleted successfully.");
+											})
+											.catch(() => {
+												alert("Failed to delete saved translation. See console for details.");
+											});
+									}}
+								>
+									Delete
+								</button>{" "}
+								<span>
+									saved translation of currently selected file (<strong>{props.selectedFile}</strong>).
+								</span>
+							</div>
 
-                            <div class="row">
-                                <button
-                                    type="button"
-                                    onclick={() => {
-                                        deleteAllSaves()
-                                            .then(() => {
-                                                setDialogOpen(false);
-                                                alert(
-                                                    "Deleted all saved translations successfully.",
-                                                );
-                                                window.location.reload();
-                                            })
-                                            .catch(() => {
-                                                alert(
-                                                    "Failed to delete translations. See browser console for details.",
-                                                );
-                                            });
-                                    }}
-                                >
-                                    Delete
-                                </button>{" "}
-                                <span>
-                                    <strong>all</strong> saved translations. Use with caution!
-                                </span>
-                            </div>
+							<div class="row">
+								<button
+									type="button"
+									onclick={() => {
+										deleteAllSaves()
+											.then(() => {
+												setDialogOpen(false);
+												alert("Deleted all saved translations successfully.");
+												window.location.reload();
+											})
+											.catch(() => {
+												alert("Failed to delete translations. See browser console for details.");
+											});
+									}}
+								>
+									Delete
+								</button>{" "}
+								<span>
+									<strong>all</strong> saved translations. Use with caution!
+								</span>
+							</div>
 
-                            <hr />
+							<hr />
 
-                            <div class="row">
-                                <button type="button" onclick={() => console.log(assembledNodes())}>
-                                    Log
-                                </button>{" "}
-                                <span>Assembled translation code to console.</span>
-                            </div>
-                        </div>
-                    </Dialog>
-                </div>
-            </div>
-        </div>
-    );
+							<div class="row">
+								<button type="button" onclick={() => console.log(assembledNodes())}>
+									Log
+								</button>{" "}
+								<span>Assembled translation code to console.</span>
+							</div>
+						</div>
+					</Dialog>
+				</div>
+			</div>
+		</div>
+	);
 }

@@ -8,12 +8,12 @@ const root = document.getElementById("root");
 if (!root) throw new Error("Root element not found!");
 
 const routes: RouteDefinition[] = [
-    {
-        path: import.meta.env.BASE_URL ?? "/",
-        component: App,
-    },
+	{
+		path: import.meta.env.BASE_URL ?? "/",
+		component: App,
+	},
 ];
 
 render(() => {
-    return <Router>{routes}</Router>;
+	return <Router>{routes}</Router>;
 }, root);

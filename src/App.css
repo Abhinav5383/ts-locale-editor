@@ -1,14 +1,14 @@
 .main-wrapper {
-    display: grid;
-    min-height: 100vh;
-    grid-template-columns: 1fr;
-    grid-template-rows: min-content 1fr min-content;
+	display: grid;
+	min-height: 100vh;
+	grid-template-columns: 1fr;
+	grid-template-rows: min-content 1fr min-content;
 }
 
 .loading {
-    display: grid;
-    place-items: center;
-    font-size: 2rem;
-    padding: 2rem;
-    color: var(--gh-text-secondary);
+	display: grid;
+	place-items: center;
+	font-size: 2rem;
+	padding: 2rem;
+	color: var(--gh-text-secondary);
 }

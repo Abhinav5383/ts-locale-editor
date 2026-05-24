@@ -4,97 +4,97 @@ import Dialog from "~/components/ui/dialog";
 import { type PrefsObj, resetPreferences, savePreferences } from "~/lib/preferences";
 
 export interface PreferenceDialogProps {
-    currPrefs: PrefsObj;
-    setPrefs: (prefs: PrefsObj) => void;
+	currPrefs: PrefsObj;
+	setPrefs: (prefs: PrefsObj) => void;
 }
 
 export function PreferenceDialog(props: PreferenceDialogProps) {
-    const [open, setOpen] = createSignal(false);
-    const [repo, setRepo] = createSignal(props.currPrefs.repo);
-    const [localesDir, setLocalesDir] = createSignal(props.currPrefs.localesDir);
-    const [defaultLocale, setDefaultLocale] = createSignal(props.currPrefs.defaultLocale);
+	const [open, setOpen] = createSignal(false);
+	const [repo, setRepo] = createSignal(props.currPrefs.repo);
+	const [localesDir, setLocalesDir] = createSignal(props.currPrefs.localesDir);
+	const [defaultLocale, setDefaultLocale] = createSignal(props.currPrefs.defaultLocale);
 
-    function handleSave() {
-        const newPrefs = {
-            repo: repo(),
-            localesDir: localesDir(),
-            defaultLocale: defaultLocale(),
-        };
+	function handleSave() {
+		const newPrefs = {
+			repo: repo(),
+			localesDir: localesDir(),
+			defaultLocale: defaultLocale(),
+		};
 
-        batch(() => {
-            savePreferences(newPrefs);
-            props.setPrefs(newPrefs);
-            setOpen(false);
-        });
-    }
+		batch(() => {
+			savePreferences(newPrefs);
+			props.setPrefs(newPrefs);
+			setOpen(false);
+		});
+	}
 
-    function handleReset() {
-        const defaults = resetPreferences();
+	function handleReset() {
+		const defaults = resetPreferences();
 
-        batch(() => {
-            setRepo(defaults.repo);
-            setLocalesDir(defaults.localesDir);
-            setDefaultLocale(defaults.defaultLocale);
+		batch(() => {
+			setRepo(defaults.repo);
+			setLocalesDir(defaults.localesDir);
+			setDefaultLocale(defaults.defaultLocale);
 
-            props.setPrefs(defaults);
-        });
-    }
+			props.setPrefs(defaults);
+		});
+	}
 
-    return (
-        <div class="preference-dialog">
-            <button class="trigger" type="button" onClick={() => setOpen(true)}>
-                <GearIcon />
-            </button>
-            <Dialog open={open()} onOpenChange={setOpen}>
-                <div class="pref-settings">
-                    <h2 class="title">Preferences</h2>
+	return (
+		<div class="preference-dialog">
+			<button class="trigger" type="button" onClick={() => setOpen(true)}>
+				<GearIcon />
+			</button>
+			<Dialog open={open()} onOpenChange={setOpen}>
+				<div class="pref-settings">
+					<h2 class="title">Preferences</h2>
 
-                    <div class="input-row">
-                        <label for="repo">Repo</label>
-                        <input
-                            id="repo"
-                            type="text"
-                            value={repo()}
-                            onInput={(e) => {
-                                setRepo(e.currentTarget.value);
-                            }}
-                        />
-                    </div>
+					<div class="input-row">
+						<label for="repo">Repo</label>
+						<input
+							id="repo"
+							type="text"
+							value={repo()}
+							onInput={(e) => {
+								setRepo(e.currentTarget.value);
+							}}
+						/>
+					</div>
 
-                    <div class="input-row">
-                        <label for="localesDir">Locales Directory</label>
-                        <input
-                            id="localesDir"
-                            type="text"
-                            value={localesDir()}
-                            onInput={(e) => {
-                                setLocalesDir(e.currentTarget.value);
-                            }}
-                        />
-                    </div>
+					<div class="input-row">
+						<label for="localesDir">Locales Directory</label>
+						<input
+							id="localesDir"
+							type="text"
+							value={localesDir()}
+							onInput={(e) => {
+								setLocalesDir(e.currentTarget.value);
+							}}
+						/>
+					</div>
 
-                    <div class="input-row">
-                        <label for="defaultLocaleDir">Default Locale Directory</label>
-                        <input
-                            id="defaultLocaleDir"
-                            type="text"
-                            value={defaultLocale()}
-                            onInput={(e) => {
-                                setDefaultLocale(e.currentTarget.value);
-                            }}
-                        />
-                    </div>
+					<div class="input-row">
+						<label for="defaultLocaleDir">Default Locale Directory</label>
+						<input
+							id="defaultLocaleDir"
+							type="text"
+							value={defaultLocale()}
+							onInput={(e) => {
+								setDefaultLocale(e.currentTarget.value);
+							}}
+						/>
+					</div>
 
-                    <div class="action-buttons">
-                        <button type="button" onclick={handleReset}>
-                            Reset
-                        </button>
-                        <button type="button" class="primary" onclick={handleSave}>
-                            Save changes
-                        </button>
-                    </div>
-                </div>
-            </Dialog>
-        </div>
-    );
+					<div class="action-buttons">
+						<button type="button" onclick={handleReset}>
+							Reset
+						</button>
+						<button type="button" class="primary" onclick={handleSave}>
+							Save changes
+						</button>
+					</div>
+				</div>
+			</Dialog>
+		</div>
+	);
 }

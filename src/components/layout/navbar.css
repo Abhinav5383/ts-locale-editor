@@ -1,162 +1,159 @@
 .nav-header {
-    background-color: var(--gh-bg-secondary);
-    display: grid;
-    width: 100%;
+	background-color: var(--gh-bg-secondary);
+	display: grid;
+	width: 100%;
 }
 
 .nav-header .site-title {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 
-    svg {
-        width: 2em;
-        height: 2em;
-        color: var(--gh-token-string);
-    }
+	svg {
+		width: 2em;
+		height: 2em;
+		color: var(--gh-token-string);
+	}
 
-    span {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--gh-text-primary);
-        font-family: monospace;
-    }
+	span {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: var(--gh-text-primary);
+		font-family: monospace;
+	}
 }
 
 .nav-header nav {
-    padding-inline: 1rem;
-    padding-block: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+	padding-inline: 1rem;
+	padding-block: 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 
-    .right {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+	.right {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
 
+	.github-link,
+	.theme-toggle,
+	.preference-dialog .trigger {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 0.5rem;
+		background-color: transparent;
+		border: 1px solid transparent;
+		outline: transparent;
 
-    .github-link,
-    .theme-toggle,
-    .preference-dialog .trigger {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 2.5rem;
-        height: 2.5rem;
-        border-radius: 0.5rem;
-        background-color: transparent;
-        border: 1px solid transparent;
-        outline: transparent;
+		svg {
+			color: var(--gh-text-primary);
+			width: 1.3em;
+			height: 1.3em;
+		}
 
+		&:where(:hover, :focus-visible) {
+			background-color: var(--gh-bg-tertiary);
+			border-color: var(--gh-border-hover);
+		}
+	}
 
-        svg {
-            color: var(--gh-text-primary);
-            width: 1.3em;
-            height: 1.3em;
-        }
+	.theme-toggle {
+		color: var(--gh-text-secondary);
 
-
-        &:where(:hover, :focus-visible) {
-            background-color: var(--gh-bg-tertiary);
-            border-color: var(--gh-border-hover);
-        }
-    }
-
-    .theme-toggle {
-        color: var(--gh-text-secondary);
-
-        svg {
-            width: 75%;
-            height: 75%;
-        }
-    }
+		svg {
+			width: 75%;
+			height: 75%;
+		}
+	}
 }
 
 .preference-dialog {
-    dialog {
-        border-radius: 1rem;
-    }
+	dialog {
+		border-radius: 1rem;
+	}
 }
 
 .pref-settings {
-    display: grid;
-    gap: 1rem;
-    padding: 1.5rem;
+	display: grid;
+	gap: 1rem;
+	padding: 1.5rem;
 }
 
 .pref-settings .title {
-    font-size: 1.33rem;
-    font-weight: 600;
-    color: var(--gh-text-primary);
-    border-block-end: 2px solid var(--gh-border);
-    padding-block-end: 0.4rem;
+	font-size: 1.33rem;
+	font-weight: 600;
+	color: var(--gh-text-primary);
+	border-block-end: 2px solid var(--gh-border);
+	padding-block-end: 0.4rem;
 }
 
 .pref-settings .input-row {
-    display: grid;
-    gap: 0.3rem;
+	display: grid;
+	gap: 0.3rem;
 
-    label {
-        color: var(--gh-text-primary);
-    }
+	label {
+		color: var(--gh-text-primary);
+	}
 
-    input {
-        outline: none;
-        border: 1px solid var(--gh-border);
-        background-color: var(--gh-bg-secondary);
-        color: var(--gh-text-primary);
-        font-size: 0.9rem;
-        padding: 0.5rem 0.6rem;
-        font-family: monospace;
-        border-radius: 0.3rem;
-        transition: all 0.2s ease;
+	input {
+		outline: none;
+		border: 1px solid var(--gh-border);
+		background-color: var(--gh-bg-secondary);
+		color: var(--gh-text-primary);
+		font-size: 0.9rem;
+		padding: 0.5rem 0.6rem;
+		font-family: monospace;
+		border-radius: 0.3rem;
+		transition: all 0.2s ease;
 
-        &:hover {
-            background-color: var(--gh-bg-tertiary);
-        }
+		&:hover {
+			background-color: var(--gh-bg-tertiary);
+		}
 
-        &:focus-visible {
-            border-color: var(--gh-border-hover);
-        }
-    }
+		&:focus-visible {
+			border-color: var(--gh-border-hover);
+		}
+	}
 }
 
 .pref-settings .action-buttons {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    justify-content: flex-end;
-    flex-wrap: wrap-reverse;
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap-reverse;
 
-    button {
-        outline: none;
-        font-family: inherit;
-        color: inherit;
-        font-size: inherit;
-        background-color: var(--gh-bg-secondary);
-        border: 1px solid var(--gh-border);
-        cursor: pointer;
-        min-height: 2.5rem;
-        padding-inline: 0.8rem;
-        border-radius: 0.4rem;
-        transition: all 0.2s ease;
+	button {
+		outline: none;
+		font-family: inherit;
+		color: inherit;
+		font-size: inherit;
+		background-color: var(--gh-bg-secondary);
+		border: 1px solid var(--gh-border);
+		cursor: pointer;
+		min-height: 2.5rem;
+		padding-inline: 0.8rem;
+		border-radius: 0.4rem;
+		transition: all 0.2s ease;
 
-        &:where(:hover, :focus-visible) {
-            background-color: var(--gh-bg-tertiary);
-            border-color: var(--gh-border-hover);
-        }
-    }
+		&:where(:hover, :focus-visible) {
+			background-color: var(--gh-bg-tertiary);
+			border-color: var(--gh-border-hover);
+		}
+	}
 
-    button.primary {
-        border-color: transparent;
-        background-color: var(--gh-text-primary);
-        color: var(--gh-bg-primary);
+	button.primary {
+		border-color: transparent;
+		background-color: var(--gh-text-primary);
+		color: var(--gh-bg-primary);
 
-        &:focus-visible {
-            outline: 2px solid var(--gh-text-primary);
-            outline-offset: 2px;
-        }
-    }
+		&:focus-visible {
+			outline: 2px solid var(--gh-text-primary);
+			outline-offset: 2px;
+		}
+	}
 }

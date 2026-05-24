@@ -1,133 +1,136 @@
 body:has(select:open) {
-    overflow: hidden;
+	overflow: hidden;
 }
 
 select * {
-    font-family: monospace;
+	font-family: monospace;
 }
 
 .select-wrapper select {
-    font-family: monospace;
-    background-color: var(--gh-bg-secondary);
-    border: 1px solid var(--gh-border);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0.4rem 0.6rem;
-    border-radius: 0.4em;
+	font-family: monospace;
+	background-color: var(--gh-bg-secondary);
+	border: 1px solid var(--gh-border);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	padding: 0.4rem 0.6rem;
+	border-radius: 0.4em;
 
-    &:where(:focus, :hover) {
-        background-color: var(--gh-bg-tertiary);
-        border-color: var(--gh-border-hover);
-    }
+	&:where(:focus, :hover) {
+		background-color: var(--gh-bg-tertiary);
+		border-color: var(--gh-border-hover);
+	}
 
-    @supports (appearance: base-select) {
-        padding: 0.2rem 0.5rem;
-        appearance: base-select;
+	@supports (appearance: base-select) {
+		padding: 0.2rem 0.5rem;
+		appearance: base-select;
 
-        &::picker-icon {
-            display: none;
-        }
+		&::picker-icon {
+			display: none;
+		}
 
-        .arrow {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+		.arrow {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
 
-        svg {
-            color: var(--gh-text-secondary);
-            width: 1.5em;
-            height: 1.5em;
-            transform-origin: center center;
-            translate: 0 5%;
-            transition: rotate 0.25s ease-in-out;
-        }
+		svg {
+			color: var(--gh-text-secondary);
+			width: 1.5em;
+			height: 1.5em;
+			transform-origin: center center;
+			translate: 0 5%;
+			transition: rotate 0.25s ease-in-out;
+		}
 
-        &:open .arrow svg {
-            rotate: 180deg;
-        }
+		&:open .arrow svg {
+			rotate: 180deg;
+		}
 
-        .select-trigger {
-            display: grid;
-            align-items: center;
-            grid-template-columns: 1fr min-content;
-            gap: 0.7em;
-            min-height: 1.5rem;
-            min-width: 10em;
-        }
+		.select-trigger {
+			display: grid;
+			align-items: center;
+			grid-template-columns: 1fr min-content;
+			gap: 0.7em;
+			min-height: 1.5rem;
+			min-width: 10em;
+		}
 
-        &::picker(select) {
-            appearance: base-select;
-            border: 1px solid var(--gh-border);
-            background-color: var(--gh-bg-secondary);
-            padding: 0.3rem;
-            padding-block-start: 0.4rem;
-            border-radius: 0.4em;
-            transform: translateY(0.5em);
-            opacity: 1;
-            transition: opacity 0.25s ease-in-out, transform 0.3s, display 1s;
-            box-shadow: 2px 6px 8px #0006;
-            scrollbar-width: thin;
+		&::picker(select) {
+			appearance: base-select;
+			border: 1px solid var(--gh-border);
+			background-color: var(--gh-bg-secondary);
+			padding: 0.3rem;
+			padding-block-start: 0.4rem;
+			border-radius: 0.4em;
+			transform: translateY(0.5em);
+			opacity: 1;
+			transition:
+				opacity 0.25s ease-in-out,
+				transform 0.3s,
+				display 1s;
+			box-shadow: 2px 6px 8px #0006;
+			scrollbar-width: thin;
 
-            @starting-style {
-                opacity: 0;
-                transform: translateY(1em);
-            }
-        }
+			@starting-style {
+				opacity: 0;
+				transform: translateY(1em);
+			}
+		}
 
-        &::picker(select)::backdrop {
-            background-color: #00000044;
-            opacity: 1;
-            transition: opacity 0.5s ease-in-out;
+		&::picker(select)::backdrop {
+			background-color: #00000044;
+			opacity: 1;
+			transition: opacity 0.5s ease-in-out;
 
-            @starting-style {
-                opacity: 0;
-            }
-        }
+			@starting-style {
+				opacity: 0;
+			}
+		}
 
-        option {
-            outline: transparent;
-            border-radius: 0.3rem;
-            display: grid;
-            color: var(--gh-text-primary);
-            margin-block-end: 0.3rem;
+		option {
+			outline: transparent;
+			border-radius: 0.3rem;
+			display: grid;
+			color: var(--gh-text-primary);
+			margin-block-end: 0.3rem;
 
-            &:last-of-type {
-                margin-block-end: 0;
-            }
+			&:last-of-type {
+				margin-block-end: 0;
+			}
 
-            &::checkmark {
-                display: none;
-            }
+			&::checkmark {
+				display: none;
+			}
 
-            &:focus {
-                background-color: lch(from var(--gh-text-primary) l c h / 0.15);
-            }
+			&:focus {
+				background-color: lch(from var(--gh-text-primary) l c h / 0.15);
+			}
 
-            .opt-content {
-                padding: 0.3rem 0.2rem;
-                display: grid;
-            }
+			.opt-content {
+				padding: 0.3rem 0.2rem;
+				display: grid;
+			}
 
-            .opt-label {
-                font-size: 1.07em;
-                font-weight: 500;
-            }
+			.opt-label {
+				font-size: 1.07em;
+				font-weight: 500;
+			}
 
-            .opt-desc {
-                font-size: 0.83em;
-                color: var(--gh-text-secondary);
-            }
-        }
+			.opt-desc {
+				font-size: 0.83em;
+				color: var(--gh-text-secondary);
+			}
+		}
 
-        selectedcontent {
-            .opt-content {
-                padding: 0.15rem 0.2rem;
-            }
+		selectedcontent {
+			.opt-content {
+				padding: 0.15rem 0.2rem;
+			}
 
-            .opt-desc {
-                display: none;
-            }
-        }
-    }
+			.opt-desc {
+				display: none;
+			}
+		}
+	}
 }

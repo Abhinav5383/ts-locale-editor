@@ -1,57 +1,57 @@
 :root {
-    --gh-bg-primary: #0d1117;
-    --gh-bg-secondary: #161b22;
-    --gh-bg-tertiary: #21262d;
-    --gh-text-primary: #d9e1e9;
-    --gh-text-secondary: #8b949e;
-    --gh-border: #30363d;
+	--gh-bg-primary: #0d1117;
+	--gh-bg-secondary: #161b22;
+	--gh-bg-tertiary: #21262d;
+	--gh-text-primary: #d9e1e9;
+	--gh-text-secondary: #8b949e;
+	--gh-border: #30363d;
 
-    --gh-token-keyword: #ff7b72;
-    --gh-token-string: #a5d6ff;
-    --gh-token-variable: #ffa657;
-    --gh-token-punctuation: #c9d1d9;
-    --gh-token-type: #79c0ff;
-    --gh-token-comment: #8b949e;
-    --gh-token-bracket: #c9d1d9;
-    --gh-token-parameter: #ffa657;
+	--gh-token-keyword: #ff7b72;
+	--gh-token-string: #a5d6ff;
+	--gh-token-variable: #ffa657;
+	--gh-token-punctuation: #c9d1d9;
+	--gh-token-type: #79c0ff;
+	--gh-token-comment: #8b949e;
+	--gh-token-bracket: #c9d1d9;
+	--gh-token-parameter: #ffa657;
 
-    --indent-size: 3ch;
-    --gh-border-hover: #444c56;
-    color-scheme: dark;
+	--indent-size: 3ch;
+	--gh-border-hover: #444c56;
+	color-scheme: dark;
 }
 
 [data-theme="light"] {
-    --gh-bg-primary: #ffffff;
-    --gh-bg-secondary: #f6f8fa;
-    --gh-bg-tertiary: #eaeef2;
-    --gh-text-primary: #24292f;
-    --gh-text-secondary: #57606a;
-    --gh-border: #d0d7de;
-    --gh-border-hover: #9ca5af;
+	--gh-bg-primary: #ffffff;
+	--gh-bg-secondary: #f6f8fa;
+	--gh-bg-tertiary: #eaeef2;
+	--gh-text-primary: #24292f;
+	--gh-text-secondary: #57606a;
+	--gh-border: #d0d7de;
+	--gh-border-hover: #9ca5af;
 
-    --gh-token-keyword: #cf222e;
-    --gh-token-string: #0a3069;
-    --gh-token-variable: #953800;
-    --gh-token-punctuation: #24292f;
-    --gh-token-type: #0550ae;
-    --gh-token-comment: #57606a;
-    --gh-token-bracket: #24292f;
-    --gh-token-parameter: #953800;
+	--gh-token-keyword: #cf222e;
+	--gh-token-string: #0a3069;
+	--gh-token-variable: #953800;
+	--gh-token-punctuation: #24292f;
+	--gh-token-type: #0550ae;
+	--gh-token-comment: #57606a;
+	--gh-token-bracket: #24292f;
+	--gh-token-parameter: #953800;
 
-    color-scheme: light;
+	color-scheme: light;
 }
 
 body,
 html {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    background-color: var(--gh-bg-primary);
-    color: var(--gh-text-primary);
-    font-family: "Space Grotesk", system-ui;
-    scrollbar-gutter: stable;
-    interpolate-size: allow-keywords;
-    font-size: 0.94rem;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	background-color: var(--gh-bg-primary);
+	color: var(--gh-text-primary);
+	font-family: "Space Grotesk", system-ui;
+	scrollbar-gutter: stable;
+	interpolate-size: allow-keywords;
+	font-size: 0.94rem;
 }
 
 h1,
@@ -60,17 +60,17 @@ h3,
 h4,
 h5,
 h6 {
-    margin: 0;
-    padding: 0;
+	margin: 0;
+	padding: 0;
 }
 
 button,
 a,
 input {
-    font-family: inherit;
-    font-size: inherit;
+	font-family: inherit;
+	font-size: inherit;
 }
 
 button {
-    cursor: pointer;
+	cursor: pointer;
 }
