@@ -1,14 +1,15 @@
 import JSON5 from "json5";
+import { jsonrepair } from "jsonrepair";
 import {
-    type ArrayNode,
-    NodeType,
-    type ObjectNode,
-    type StringNode,
-    type WithKey,
+	type ArrayNode,
+	NodeType,
+	type ObjectNode,
+	type StringNode,
+	type WithKey,
 } from "~/lib/types";
 
 export function getTranslationNodesFromJSONFile(str: string): ObjectNode {
-    const json = JSON5.parse(str);
+    const json = JSON5.parse(jsonrepair(str));
 
     if (typeof json !== NodeType.Object || Array.isArray(json)) {
         return {
