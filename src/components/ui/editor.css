@@ -152,7 +152,7 @@
 	font-family: inherit;
 	font-size: inherit;
 	border: 1px solid var(--gh-border);
-	padding: 0.25rem 0.5rem;
+	padding: 0.3rem 0.7rem;
 	border-radius: 0.3rem;
 	color: var(--gh-token-string);
 	caret-color: var(--gh-token-keyword);
