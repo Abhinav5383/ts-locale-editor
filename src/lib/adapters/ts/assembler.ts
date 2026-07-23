@@ -1,3 +1,4 @@
+import * as t from "@babel/types";
 import { type AssembleTranslationProps, sortNodes } from "~/lib/adapters/utils";
 import {
 	type ArrayNode,
@@ -40,8 +41,8 @@ export function AssembleTsTranslation(props: AssembleTranslationProps): string |
 			continue;
 		}
 
-		const startIdx = unwrappedDecl.start ?? null;
-		const endIdx = unwrappedDecl.end ?? null;
+		let startIdx = unwrappedDecl.start ?? null;
+		let endIdx = unwrappedDecl.end ?? null;
 
 		if (startIdx === null || endIdx === null) {
 			console.error("Export node is missing start and/or end position:", exportItem);
@@ -49,6 +50,26 @@ export function AssembleTsTranslation(props: AssembleTranslationProps): string |
 		}
 
 		const assembled = stringifyNode(translatedNode, 0, exportItem.type);
+
+		// when a variable declaration is happening at the export Node
+		// replace only the initializer
+		// e.g: export const VarA = {};
+		// only the object should be replaced, the "const VarA = " should remain as is
+		if (t.isVariableDeclaration(exportItem.decl)) {
+			const varDeclarator = exportItem.decl.declarations[0];
+			const varInit = varDeclarator.init;
+			if (varInit) {
+				const initNode = unwrapExpression(varInit);
+
+				const varDeclStart = initNode.start;
+				const varDeclEnd = initNode.end;
+				if (varDeclStart && varDeclEnd) {
+					startIdx = varDeclStart;
+					endIdx = varDeclEnd;
+				}
+			}
+		}
+
 		finalCode += template.slice(lastEndIndex, startIdx) + assembled;
 
 		lastEndIndex = endIdx;
