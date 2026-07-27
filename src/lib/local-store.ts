@@ -132,6 +132,7 @@ function getDbInstance(): Promise<IDBDatabase | null> {
             switch (db.version) {
                 case 1:
                     db.deleteObjectStore(TRANSLATIONS_STORE);
+                    initializeDb(db);
                     break;
 
                 default:
