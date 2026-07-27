@@ -2,7 +2,7 @@ import { unwrap } from "solid-js/store";
 import { isEmptyNode } from "~/components/ui/node-updater";
 import type { ObjectNode } from "./types";
 
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const DB_NAME = "saves";
 const TRANSLATIONS_STORE = "translations";
 
@@ -129,9 +129,11 @@ function getDbInstance(): Promise<IDBDatabase | null> {
             if (!(evTarget instanceof IDBOpenDBRequest)) return;
 
             const db = evTarget.result;
-
-            // const objStore = db.createObjectStore("translations", {});
             switch (db.version) {
+                case 1:
+                    db.deleteObjectStore(TRANSLATIONS_STORE);
+                    break;
+
                 default:
                     initializeDb(db);
                     break;
