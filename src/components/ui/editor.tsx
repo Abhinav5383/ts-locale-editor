@@ -10,14 +10,16 @@ import ThreeDotsVerticalIcon from "../icons/dots-vertical";
 import { ExternalLinkIcon } from "../icons/external-link";
 import Dialog from "./dialog";
 import "./editor.css";
+import { mergeNodes } from "./node-updater";
 import type { node_OnEditHandler } from "./renderers/types";
 import { Select } from "./select";
 
 interface EditorProps {
-	refNodes: ObjectNode; // the base reference locale
-	
+	refLocale: ObjectNode; // the base reference locale
+
 	editingLocaleSrc: string | undefined;
-	editedNodes: ObjectNode; // the locale being edited
+	editingLocale: ObjectNode; // the locale being edited
+	changedNodes: ObjectNode;
 	onEdit: node_OnEditHandler;
 	preferences: PrefsObj;
 
@@ -90,8 +92,8 @@ export default function Editor(props: EditorProps) {
 				</div>
 
 				<EditorContent
-					refLocale={props.refNodes}
-					editLocale={props.editedNodes}
+					refLocale={props.refLocale}
+					editingLocale={props.editingLocale}
 					onEdit={props.onEdit}
 					hideTranslated={hideTranslated()}
 				/>
@@ -103,8 +105,9 @@ export default function Editor(props: EditorProps) {
 				translatingTo={props.translatingTo}
 				selectedFile={props.selectedFile}
 				editingLocaleSrc={props.editingLocaleSrc}
-				refNodes={props.refNodes}
-				editedNodes={props.editedNodes}
+				refLocale={props.refLocale}
+				editingLocale={props.editingLocale}
+				changedNodes={props.changedNodes}
 				hideTranslated={hideTranslated()}
 				setHideTranslated={setHideTranslated}
 			/>
@@ -114,14 +117,14 @@ export default function Editor(props: EditorProps) {
 
 interface EditorContentProps {
 	refLocale: ObjectNode;
-	editLocale: ObjectNode;
+	editingLocale: ObjectNode;
 	onEdit: node_OnEditHandler;
 	hideTranslated: boolean;
 }
 
 function EditorContent(props: EditorContentProps) {
 	const flattenedItems = () =>
-		flattenLocaleEntries(props.refLocale, props.editLocale, undefined, undefined, props.hideTranslated);
+		flattenLocaleEntries(props.refLocale, props.editingLocale, undefined, undefined, props.hideTranslated);
 
 	return (
 		<div class="object-renderer">
@@ -145,23 +148,13 @@ function EditorContent(props: EditorContentProps) {
 
 										<div class="cell-wrapper scrollable">
 											<div class="node-value-ref">
-												<NodeRenderer
-													node={item.refNode}
-													isEditable={false}
-													path={item.path}
-													onEdit={props.onEdit}
-												/>
+												<NodeRenderer node={item.refNode} isEditable={false} path={item.path} onEdit={props.onEdit} />
 											</div>
 										</div>
 
 										<div class="cell-wrapper scrollable">
 											<div class="node-value-edit">
-												<NodeRenderer
-													node={item.editNode}
-													isEditable={true}
-													path={item.path}
-													onEdit={props.onEdit}
-												/>
+												<NodeRenderer node={item.editNode} isEditable={true} path={item.path} onEdit={props.onEdit} />
 											</div>
 										</div>
 									</div>
@@ -201,9 +194,11 @@ interface ExportActionsProps {
 	translatingFrom: string;
 	translatingTo: string;
 	selectedFile: string;
+
 	editingLocaleSrc: string | undefined;
-	refNodes: ObjectNode;
-	editedNodes: ObjectNode;
+	refLocale: ObjectNode;
+	editingLocale: ObjectNode;
+	changedNodes: ObjectNode;
 
 	hideTranslated: boolean;
 	setHideTranslated: Setter<boolean>;
@@ -218,8 +213,8 @@ function BottomBar(props: ExportActionsProps) {
 		return AssembleTranslation({
 			fileName: props.selectedFile,
 			translatingLocaleCode: props.editingLocaleSrc,
-			refNodes: props.refNodes,
-			translatedNodes: props.editedNodes,
+			refNodes: props.refLocale,
+			translatedNodes: mergeNodes(props.editingLocale, props.changedNodes),
 		});
 	}
 

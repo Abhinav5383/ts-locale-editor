@@ -1,12 +1,12 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: --- */
 
 import { type SearchParams, useSearchParams } from "@solidjs/router";
-import { createResource, createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createResource, createSignal, Show } from "solid-js";
 import "~/App.css";
 import Navbar from "~/components/layout/navbar";
 import Editor from "~/components/ui/editor";
 import { mergeNodes, updateNodeValue } from "~/components/ui/node-updater";
-import type { node_OnChangeHandler } from "~/components/ui/renderers/types";
+import type { node_OnEditHandler } from "~/components/ui/renderers/types";
 import { getFilesListFromLocale, getLocaleFileContents, getLocalesList } from "~/lib/gh_api";
 import { EMPTY_OBJECT_NODE, getTranslationNodesFromTxtFile } from "~/lib/parser";
 import { getDefaultLocaleFile, loadPreferences } from "~/lib/preferences";
@@ -31,7 +31,6 @@ export default function App() {
 	const selectedFile = () =>
 		getSearchParam(searchParams, "file", getDefaultLocaleFile((localeFilesList() ?? []).map((file) => file.name)));
 	function setSelectedFile(file: string) {
-		saveToLocalStorage(editedLocale()!);
 		setSearchParams({ file });
 	}
 
@@ -42,7 +41,6 @@ export default function App() {
 
 	const translatingTo = () => getSearchParam(searchParams, "to", "");
 	function setTranslatingTo(locale: string) {
-		saveToLocalStorage(editedLocale()!);
 		setSearchParams({ to: locale });
 	}
 
@@ -91,74 +89,48 @@ export default function App() {
 		const saved = await getSavedTranslation(deps.translatingTo, deps.selectedFile);
 		if (saved) {
 			result.nodes = mergeNodes(result.nodes, saved);
-			console.log("Loaded saved translations");
+			console.log("Loaded saved edits");
 		}
 
 		return result;
 	});
 
-	const [editedLocale, { mutate: setEditedLocale }] = createResource(
-		translatingLocale,
-		(translatingLocale): ObjectNode => {
-			const translating = translatingLocale;
-			if (!translating) {
-				return {
-					type: NodeType.Object,
-					value: [],
-				};
-			}
+	const [changedNodes, { mutate: setChangedNodes }] = createResource(translatingTo_Deps, async (deps) => {
+		const saved = await getSavedTranslation(deps.translatingTo, deps.selectedFile);
+		if (saved) return saved;
 
-			return translating.nodes;
-		},
-	);
+		return {
+			type: NodeType.Object,
+			value: [],
+		} as ObjectNode;
+	});
 
-	function saveToLocalStorage(data: ObjectNode) {
+	let saveTimeoutRef: number | null = null;
+	function saveToLocalStorage(data: ObjectNode, noDelay = false) {
 		if (saveTimeoutRef) {
 			clearTimeout(saveTimeoutRef);
 			saveTimeoutRef = null;
 		}
 
-		if (data) {
+		if (noDelay) {
 			saveTranslationWork(data, translatingTo(), selectedFile());
+		} else {
+			saveTimeoutRef = window.setTimeout(() => {
+				saveTranslationWork(data, translatingTo(), selectedFile());
+			}, 5_000);
 		}
 	}
 
-	let saveTimeoutRef: number | null = null;
-	const handleTranslatingLocaleChange: node_OnChangeHandler = (path: string[], node: TranslationNode) => {
-		let oldEditedState = editedLocale();
-		if (!oldEditedState) {
-			oldEditedState = {
-				type: NodeType.Object,
-				value: [],
-			};
-		}
+	const handleTranslatingLocaleEdit: node_OnEditHandler = (path: string[], node: TranslationNode) => {
+		setChangedNodes((prev) => {
+			if (!prev) return prev;
+			// NOTE: updates the existing object, if reactivity is needed for this variable return a new Object
+			const updated = updateNodeValue(path, prev, node);
+			saveToLocalStorage(updated);
 
-		const updatedState = updateNodeValue(path, oldEditedState, node);
-		setEditedLocale(updatedState);
-
-		if (saveTimeoutRef) clearTimeout(saveTimeoutRef);
-
-		saveTimeoutRef = window.setTimeout(() => {
-			saveTranslationWork(updatedState, translatingTo(), selectedFile());
-			saveTimeoutRef = null;
-		}, 10_000);
-	};
-
-	function handleLeavePage(ev: BeforeUnloadEvent) {
-		const editedState = editedLocale();
-		if (saveTimeoutRef && editedState) {
-			ev.preventDefault();
-			saveToLocalStorage(editedState);
-		}
-	}
-
-	onMount(() => {
-		window.addEventListener("beforeunload", handleLeavePage);
-
-		onCleanup(() => {
-			window.removeEventListener("beforeunload", handleLeavePage);
+			return updated;
 		});
-	});
+	};
 
 	return (
 		<main class="main-wrapper">
@@ -173,7 +145,9 @@ export default function App() {
 					refLocale.loading === false &&
 					refLocale() &&
 					translatingLocale.loading === false &&
-					translatingLocale()
+					translatingLocale() &&
+					changedNodes.loading === false &&
+					changedNodes()
 				}
 				fallback={
 					<div class="loading">
@@ -182,10 +156,11 @@ export default function App() {
 				}
 			>
 				<Editor
-					refNodes={refLocale()!.nodes}
+					refLocale={refLocale()!.nodes}
 					editingLocaleSrc={translatingLocale()!.src}
-					editedNodes={translatingLocale()!.nodes}
-					onChange={handleTranslatingLocaleChange}
+					editingLocale={translatingLocale()!.nodes}
+					changedNodes={changedNodes()!}
+					onEdit={handleTranslatingLocaleEdit}
 					preferences={preferences()}
 					// select controls
 					localesList={localesList()!}
