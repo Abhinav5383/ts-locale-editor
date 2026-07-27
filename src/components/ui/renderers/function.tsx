@@ -6,7 +6,7 @@ import type { NodeRendererProps } from "./types";
 
 export function FunctionRenderer(props: NodeRendererProps<FunctionNode>) {
 	function handleBlockFnChange(newValue: string) {
-		props.onChange(props.path, {
+		props.onEdit(props.path, {
 			...props.node,
 			body: {
 				type: NodeType.BlockExpression,
@@ -19,7 +19,7 @@ export function FunctionRenderer(props: NodeRendererProps<FunctionNode>) {
 		const updatedBody = updateFnBody(props.node, bodyNode);
 		if (!updatedBody) return;
 
-		props.onChange(path, updatedBody);
+		props.onEdit(path, updatedBody);
 	}
 
 	return (
@@ -98,7 +98,7 @@ export function FunctionRenderer(props: NodeRendererProps<FunctionNode>) {
 						<NodeRenderer
 							node={fnBody}
 							path={props.path}
-							onChange={handleArrowFnChange}
+							onEdit={handleArrowFnChange}
 							isEditable={props.isEditable}
 						/>
 					</div>

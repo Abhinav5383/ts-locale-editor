@@ -4,7 +4,7 @@ import type { NodeRendererProps } from "./types";
 
 export function StringRenderer(props: NodeRendererProps<StringNode>) {
 	function handleChange(newValue: string) {
-		props.onChange(props.path, {
+		props.onEdit(props.path, {
 			...props.node,
 			value: newValue,
 		});

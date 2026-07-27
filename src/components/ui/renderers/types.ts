@@ -6,7 +6,7 @@ export interface NodeRendererProps<T extends TranslationNode = TranslationNode> 
 	node: T;
 	isEditable: boolean;
 	postInlineContent?: JSX.Element;
-	onChange: node_OnChangeHandler;
+	onEdit: node_OnEditHandler;
 }
 
-export type node_OnChangeHandler = (path: string[], node: TranslationNode) => void;
+export type node_OnEditHandler = (path: string[], node: TranslationNode) => void;

@@ -23,7 +23,7 @@ export function ArrayRenderer(props: NodeRendererProps<ArrayNode>) {
 			draggable: () => props.isEditable,
 			onDragend: (_data) => {
 				const newOrder = _data.values as unknown as ReturnType<typeof initialValues>;
-				props.onChange(props.path, {
+				props.onEdit(props.path, {
 					...props.node,
 					value: newOrder.map((item) => item.node),
 				});
@@ -48,7 +48,7 @@ export function ArrayRenderer(props: NodeRendererProps<ArrayNode>) {
 
 				return items;
 			});
-			props.onChange(props.path, {
+			props.onEdit(props.path, {
 				...props.node,
 				value: updatedArrayItems,
 			});
@@ -69,7 +69,7 @@ export function ArrayRenderer(props: NodeRendererProps<ArrayNode>) {
 				];
 			});
 
-			props.onChange(props.path, {
+			props.onEdit(props.path, {
 				...props.node,
 				value: newArray,
 			});
@@ -86,7 +86,7 @@ export function ArrayRenderer(props: NodeRendererProps<ArrayNode>) {
 				return items.filter((_, i) => i !== index);
 			});
 
-			props.onChange(props.path, {
+			props.onEdit(props.path, {
 				...props.node,
 				value: newArray,
 			});
@@ -107,7 +107,7 @@ export function ArrayRenderer(props: NodeRendererProps<ArrayNode>) {
 							<NodeRenderer
 								node={node}
 								path={[...props.path, index().toString()]}
-								onChange={(_path, newVal) => handleChange(index(), newVal)}
+								onEdit={(_path, newVal) => handleChange(index(), newVal)}
 								isEditable={props.isEditable}
 								postInlineContent={index() < items().length - 1 ? <span class="token">,</span> : null}
 							/>

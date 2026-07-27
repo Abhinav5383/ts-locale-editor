@@ -10,14 +10,15 @@ import ThreeDotsVerticalIcon from "../icons/dots-vertical";
 import { ExternalLinkIcon } from "../icons/external-link";
 import Dialog from "./dialog";
 import "./editor.css";
-import type { node_OnChangeHandler } from "./renderers/types";
+import type { node_OnEditHandler } from "./renderers/types";
 import { Select } from "./select";
 
 interface EditorProps {
 	refNodes: ObjectNode; // the base reference locale
+	
 	editingLocaleSrc: string | undefined;
 	editedNodes: ObjectNode; // the locale being edited
-	onChange: node_OnChangeHandler;
+	onEdit: node_OnEditHandler;
 	preferences: PrefsObj;
 
 	// select controls
@@ -91,7 +92,7 @@ export default function Editor(props: EditorProps) {
 				<EditorContent
 					refLocale={props.refNodes}
 					editLocale={props.editedNodes}
-					onChange={props.onChange}
+					onEdit={props.onEdit}
 					hideTranslated={hideTranslated()}
 				/>
 			</div>
@@ -114,7 +115,7 @@ export default function Editor(props: EditorProps) {
 interface EditorContentProps {
 	refLocale: ObjectNode;
 	editLocale: ObjectNode;
-	onChange: node_OnChangeHandler;
+	onEdit: node_OnEditHandler;
 	hideTranslated: boolean;
 }
 
@@ -148,7 +149,7 @@ function EditorContent(props: EditorContentProps) {
 													node={item.refNode}
 													isEditable={false}
 													path={item.path}
-													onChange={props.onChange}
+													onEdit={props.onEdit}
 												/>
 											</div>
 										</div>
@@ -159,7 +160,7 @@ function EditorContent(props: EditorContentProps) {
 													node={item.editNode}
 													isEditable={true}
 													path={item.path}
-													onChange={props.onChange}
+													onEdit={props.onEdit}
 												/>
 											</div>
 										</div>
@@ -306,6 +307,7 @@ function BottomBar(props: ExportActionsProps) {
 						target="_blank"
 						title="Goto reference file on github"
 						class="external-link"
+						rel="noopener"
 					>
 						<span>
 							{props.translatingFrom}/{props.selectedFile} <ExternalLinkIcon />
