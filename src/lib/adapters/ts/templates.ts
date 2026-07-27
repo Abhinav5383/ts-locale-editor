@@ -1,35 +1,35 @@
 // assembling templates for locales other than en-GB (default locale)
 const ASSEMBLING_TEMPLATE_DEFAULTS = {
-	translation: `import type { Locale } from "~/locales/types";\n
+    translation: `import type { Locale } from "~/locales/types";\n
 export default {} satisfies Locale;\n`,
 
-	tags: `import type tags from "~/locales/en-GB/tags";\n
+    tags: `import type tags from "~/locales/en-GB/tags";\n
 export default {} satisfies typeof tags;\n`,
 
-	about: `import type { AboutUsProps } from "~/locales/en-GB/about";\n
+    about: `import type { AboutUsProps } from "~/locales/en-GB/about";\n
 export const AboutUs = (props: AboutUsProps) => \`\`;\n`,
 
-	terms: `import type { TermsProps } from "~/locales/en-GB/terms";\n
+    terms: `import type { TermsProps } from "~/locales/en-GB/terms";\n
 export const TermsOfUse = (props: TermsProps) => \`\`;\n`,
 
-	security: `import type { SecurityProps } from "~/locales/en-GB/legal/security";\n
+    security: `import type { SecurityProps } from "~/locales/en-GB/legal/security";\n
 export const SecurityNotice = (props: SecurityProps) => \`\`;\n`,
 
-	rules: `import type { RulesProps } from "~/locales/en-GB/legal/rules";\n
+    rules: `import type { RulesProps } from "~/locales/en-GB/legal/rules";\n
 export const Rules = (props: RulesProps) => \`\`;\n`,
 
-	privacy: `import type { PrivacyProps } from "~/locales/en-GB/legal/privacy";\n
+    privacy: `import type { PrivacyProps } from "~/locales/en-GB/legal/privacy";\n
 export const PrivacyPolicy = (props: PrivacyProps) => \`\`;\n`,
 
-	copyright: `import type { CopyrightProps } from "~/locales/en-GB/legal/copyright";\n
+    copyright: `import type { CopyrightProps } from "~/locales/en-GB/legal/copyright";\n
 export const CopyrightPolicy = (props: CopyrightProps) => \`\`;\n`,
 };
 
 export function getAssemblingTemplate(fileName: string, translatingLocaleCode: string | undefined) {
-	if (translatingLocaleCode) return translatingLocaleCode;
+    if (translatingLocaleCode) return translatingLocaleCode;
 
-	const filePart = fileName.split("/").at(-1)?.split(".")[0];
-	const defaultTemplate = ASSEMBLING_TEMPLATE_DEFAULTS[filePart as keyof typeof ASSEMBLING_TEMPLATE_DEFAULTS];
+    const filePart = fileName.split("/").at(-1)?.split(".")[0];
+    const defaultTemplate = ASSEMBLING_TEMPLATE_DEFAULTS[filePart as keyof typeof ASSEMBLING_TEMPLATE_DEFAULTS];
 
-	return defaultTemplate ?? "export default {};\n";
+    return defaultTemplate ?? "export default {};\n";
 }

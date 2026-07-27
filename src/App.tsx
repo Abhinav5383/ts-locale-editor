@@ -15,213 +15,213 @@ import { getSavedTranslation, saveTranslationWork } from "./lib/local-store";
 import "~/App.css";
 
 interface TranslationNodesResult {
-	src: string | undefined;
-	nodes: ObjectNode;
+    src: string | undefined;
+    nodes: ObjectNode;
 }
 
 export default function App() {
-	const [preferences, setPreferences] = createSignal(loadPreferences());
-	const [localesList] = createResource(preferences, async (prefs) => {
-		return await getLocalesList(prefs.repo, prefs.localesDir);
-	});
-	const [localeFilesList] = createResource(preferences, async (prefs) => {
-		return await getFilesListFromLocale(prefs.repo, `${prefs.localesDir}/${prefs.defaultLocale}`);
-	});
+    const [preferences, setPreferences] = createSignal(loadPreferences());
+    const [localesList] = createResource(preferences, async (prefs) => {
+        return await getLocalesList(prefs.repo, prefs.localesDir);
+    });
+    const [localeFilesList] = createResource(preferences, async (prefs) => {
+        return await getFilesListFromLocale(prefs.repo, `${prefs.localesDir}/${prefs.defaultLocale}`);
+    });
 
-	const [searchParams, setSearchParams] = useSearchParams();
-	const selectedFile = () =>
-		getSearchParam(searchParams, "file", getDefaultLocaleFile((localeFilesList() ?? []).map((file) => file.name)));
-	function setSelectedFile(file: string) {
-		saveToLocalStorage(changedNodes(), true);
-		setSearchParams({ file });
-	}
+    const [searchParams, setSearchParams] = useSearchParams();
+    const selectedFile = () =>
+        getSearchParam(searchParams, "file", getDefaultLocaleFile((localeFilesList() ?? []).map((file) => file.name)));
+    function setSelectedFile(file: string) {
+        saveToLocalStorage(changedNodes(), true);
+        setSearchParams({ file });
+    }
 
-	const translatingFrom = () => getSearchParam(searchParams, "from", preferences().defaultLocale);
-	function setTranslatingFrom(locale: string) {
-		setSearchParams({ from: locale });
-	}
+    const translatingFrom = () => getSearchParam(searchParams, "from", preferences().defaultLocale);
+    function setTranslatingFrom(locale: string) {
+        setSearchParams({ from: locale });
+    }
 
-	const translatingTo = () => getSearchParam(searchParams, "to", "");
-	function setTranslatingTo(locale: string) {
-		saveToLocalStorage(changedNodes(), true);
-		setSearchParams({ to: locale });
-	}
+    const translatingTo = () => getSearchParam(searchParams, "to", "");
+    function setTranslatingTo(locale: string) {
+        saveToLocalStorage(changedNodes(), true);
+        setSearchParams({ to: locale });
+    }
 
-	const refDeps = () => ({
-		prefs: preferences(),
-		selectedFile: selectedFile(),
-		translatingFrom: translatingFrom(),
-	});
+    const refDeps = () => ({
+        prefs: preferences(),
+        selectedFile: selectedFile(),
+        translatingFrom: translatingFrom(),
+    });
 
-	const [refLocale] = createResource(refDeps, async (deps): Promise<TranslationNodesResult> => {
-		if (!deps.selectedFile) {
-			return {
-				src: undefined,
-				nodes: EMPTY_OBJECT_NODE,
-			};
-		}
+    const [refLocale] = createResource(refDeps, async (deps): Promise<TranslationNodesResult> => {
+        if (!deps.selectedFile) {
+            return {
+                src: undefined,
+                nodes: EMPTY_OBJECT_NODE,
+            };
+        }
 
-		return await getTranslationNodes(
-			deps.prefs.repo,
-			`${deps.prefs.localesDir}/${deps.translatingFrom}/${deps.selectedFile}`,
-		);
-	});
+        return await getTranslationNodes(
+            deps.prefs.repo,
+            `${deps.prefs.localesDir}/${deps.translatingFrom}/${deps.selectedFile}`,
+        );
+    });
 
-	const translatingTo_Deps = () => ({
-		prefs: preferences(),
-		selectedFile: selectedFile(),
-		translatingTo: translatingTo(),
-	});
+    const translatingTo_Deps = () => ({
+        prefs: preferences(),
+        selectedFile: selectedFile(),
+        translatingTo: translatingTo(),
+    });
 
-	const [translatingLocale] = createResource(translatingTo_Deps, async (deps): Promise<TranslationNodesResult> => {
-		let result: TranslationNodesResult;
+    const [translatingLocale] = createResource(translatingTo_Deps, async (deps): Promise<TranslationNodesResult> => {
+        let result: TranslationNodesResult;
 
-		if (deps.translatingTo) {
-			const fetched = await getTranslationNodes(
-				deps.prefs.repo,
-				`${deps.prefs.localesDir}/${deps.translatingTo}/${deps.selectedFile}`,
-			);
-			result = fetched;
-		} else {
-			result = {
-				src: undefined,
-				nodes: EMPTY_OBJECT_NODE,
-			};
-		}
+        if (deps.translatingTo) {
+            const fetched = await getTranslationNodes(
+                deps.prefs.repo,
+                `${deps.prefs.localesDir}/${deps.translatingTo}/${deps.selectedFile}`,
+            );
+            result = fetched;
+        } else {
+            result = {
+                src: undefined,
+                nodes: EMPTY_OBJECT_NODE,
+            };
+        }
 
-		const saved = await getSavedTranslation(deps.translatingTo, deps.selectedFile);
-		if (saved) {
-			result.nodes = mergeNodes(result.nodes, saved);
-			console.log("Loaded saved edits");
-		}
+        const saved = await getSavedTranslation(deps.translatingTo, deps.selectedFile);
+        if (saved) {
+            result.nodes = mergeNodes(result.nodes, saved);
+            console.log("Loaded saved edits");
+        }
 
-		return result;
-	});
+        return result;
+    });
 
-	const [changedNodes, { mutate: setChangedNodes }] = createResource(translatingTo_Deps, async (deps) => {
-		const saved = await getSavedTranslation(deps.translatingTo, deps.selectedFile);
-		if (saved) return saved;
+    const [changedNodes, { mutate: setChangedNodes }] = createResource(translatingTo_Deps, async (deps) => {
+        const saved = await getSavedTranslation(deps.translatingTo, deps.selectedFile);
+        if (saved) return saved;
 
-		return {
-			type: NodeType.Object,
-			value: [],
-		} as ObjectNode;
-	});
+        return {
+            type: NodeType.Object,
+            value: [],
+        } as ObjectNode;
+    });
 
-	let saveTimeoutRef: number | null = null;
-	function saveToLocalStorage(data: ObjectNode | undefined, noDelay = false) {
-		if (saveTimeoutRef) {
-			clearTimeout(saveTimeoutRef);
-			saveTimeoutRef = null;
-		}
-		if (!data) return;
+    let saveTimeoutRef: number | null = null;
+    function saveToLocalStorage(data: ObjectNode | undefined, noDelay = false) {
+        if (saveTimeoutRef) {
+            clearTimeout(saveTimeoutRef);
+            saveTimeoutRef = null;
+        }
+        if (!data) return;
 
-		if (noDelay) {
-			saveTranslationWork(data, translatingTo(), selectedFile());
-		} else {
-			saveTimeoutRef = window.setTimeout(() => {
-				saveTranslationWork(data, translatingTo(), selectedFile());
-			}, 5_000);
-		}
-	}
+        if (noDelay) {
+            saveTranslationWork(data, translatingTo(), selectedFile());
+        } else {
+            saveTimeoutRef = window.setTimeout(() => {
+                saveTranslationWork(data, translatingTo(), selectedFile());
+            }, 5_000);
+        }
+    }
 
-	const handleTranslatingLocaleEdit: node_OnEditHandler = (path: string[], node: TranslationNode) => {
-		setChangedNodes((prev) => {
-			if (!prev) return prev;
-			// NOTE: updates the existing object, if reactivity is needed for this variable return a new Object
-			const updated = updateNodeValue(path, prev, node);
-			saveToLocalStorage(updated);
+    const handleTranslatingLocaleEdit: node_OnEditHandler = (path: string[], node: TranslationNode) => {
+        setChangedNodes((prev) => {
+            if (!prev) return prev;
+            // NOTE: updates the existing object, if reactivity is needed for this variable return a new Object
+            const updated = updateNodeValue(path, prev, node);
+            saveToLocalStorage(updated);
 
-			return updated;
-		});
-	};
+            return updated;
+        });
+    };
 
-	function handleLeavePage(ev: BeforeUnloadEvent) {
-		const editedState = changedNodes();
+    function handleLeavePage(ev: BeforeUnloadEvent) {
+        const editedState = changedNodes();
 
-		if (saveTimeoutRef && editedState) {
-			ev.preventDefault();
-			saveToLocalStorage(editedState, true);
-		}
-	}
+        if (saveTimeoutRef && editedState) {
+            ev.preventDefault();
+            saveToLocalStorage(editedState, true);
+        }
+    }
 
-	onMount(() => {
-		window.addEventListener("beforeunload", handleLeavePage);
+    onMount(() => {
+        window.addEventListener("beforeunload", handleLeavePage);
 
-		onCleanup(() => {
-			window.removeEventListener("beforeunload", handleLeavePage);
-		});
-	});
+        onCleanup(() => {
+            window.removeEventListener("beforeunload", handleLeavePage);
+        });
+    });
 
-	return (
-		<main class="main-wrapper">
-			<Navbar currPrefs={preferences()} setPrefs={setPreferences} />
+    return (
+        <main class="main-wrapper">
+            <Navbar currPrefs={preferences()} setPrefs={setPreferences} />
 
-			<Show
-				when={
-					localesList.loading === false &&
-					localesList() &&
-					localeFilesList.loading === false &&
-					localeFilesList() &&
-					refLocale.loading === false &&
-					refLocale() &&
-					translatingLocale.loading === false &&
-					translatingLocale() &&
-					changedNodes.loading === false &&
-					changedNodes()
-				}
-				fallback={
-					<div class="loading">
-						<p>Loading...</p>
-					</div>
-				}
-			>
-				<Editor
-					refLocale={refLocale()!.nodes}
-					editingLocaleSrc={translatingLocale()!.src}
-					editingLocale={translatingLocale()!.nodes}
-					changedNodes={changedNodes()!}
-					onEdit={handleTranslatingLocaleEdit}
-					preferences={preferences()}
-					// select controls
-					localesList={localesList()!}
-					localeFilesList={localeFilesList()!}
-					selectedFile={selectedFile()}
-					setSelectedFile={setSelectedFile}
-					translatingFrom={translatingFrom()}
-					setTranslatingFrom={setTranslatingFrom}
-					translatingTo={translatingTo()}
-					setTranslatingTo={setTranslatingTo}
-				/>
-			</Show>
+            <Show
+                when={
+                    localesList.loading === false &&
+                    localesList() &&
+                    localeFilesList.loading === false &&
+                    localeFilesList() &&
+                    refLocale.loading === false &&
+                    refLocale() &&
+                    translatingLocale.loading === false &&
+                    translatingLocale() &&
+                    changedNodes.loading === false &&
+                    changedNodes()
+                }
+                fallback={
+                    <div class="loading">
+                        <p>Loading...</p>
+                    </div>
+                }
+            >
+                <Editor
+                    refLocale={refLocale()!.nodes}
+                    editingLocaleSrc={translatingLocale()!.src}
+                    editingLocale={translatingLocale()!.nodes}
+                    changedNodes={changedNodes()!}
+                    onEdit={handleTranslatingLocaleEdit}
+                    preferences={preferences()}
+                    // select controls
+                    localesList={localesList()!}
+                    localeFilesList={localeFilesList()!}
+                    selectedFile={selectedFile()}
+                    setSelectedFile={setSelectedFile}
+                    translatingFrom={translatingFrom()}
+                    setTranslatingFrom={setTranslatingFrom}
+                    translatingTo={translatingTo()}
+                    setTranslatingTo={setTranslatingTo}
+                />
+            </Show>
 
-			{/* Errors */}
-			<Show when={localesList.error}>
-				<p>Error: {localesList.error?.message}</p>
-			</Show>
+            {/* Errors */}
+            <Show when={localesList.error}>
+                <p>Error: {localesList.error?.message}</p>
+            </Show>
 
-			<Show when={localeFilesList.error}>
-				<p>Error: {localeFilesList.error?.message}</p>
-			</Show>
-		</main>
-	);
+            <Show when={localeFilesList.error}>
+                <p>Error: {localeFilesList.error?.message}</p>
+            </Show>
+        </main>
+    );
 }
 
 async function getTranslationNodes(repo: string, localeFile: string) {
-	const fileContents =
-		(await getLocaleFileContents(repo, localeFile).catch((error) => {
-			console.error(error);
-			return null;
-		})) ?? undefined;
+    const fileContents =
+        (await getLocaleFileContents(repo, localeFile).catch((error) => {
+            console.error(error);
+            return null;
+        })) ?? undefined;
 
-	return {
-		src: fileContents,
-		nodes: getTranslationNodesFromTxtFile(localeFile, fileContents),
-	};
+    return {
+        src: fileContents,
+        nodes: getTranslationNodesFromTxtFile(localeFile, fileContents),
+    };
 }
 
 function getSearchParam(searchParams: SearchParams, key: string, defaultValue: string): string {
-	const value = searchParams[key];
-	if (typeof value === "string") return value;
-	return defaultValue;
+    const value = searchParams[key];
+    if (typeof value === "string") return value;
+    return defaultValue;
 }

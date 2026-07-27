@@ -1,20 +1,21 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.15/schema.json",
-	"files": {
-		"includes": ["**/*.{tsx,ts,json,css}", "!**/node_modules/*", "!**/dist/*", "!**/build/*", "!**/public/*"]
-	},
-	"formatter": {
-		"lineWidth": 120,
-		"indentStyle": "tab"
-	},
-	"linter": {
-		"rules": {
-			"a11y": {
-				"noStaticElementInteractions": "off"
-			},
-			"suspicious": {
-				"noTemplateCurlyInString": "off"
-			}
-		}
-	}
+    "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
+    "files": {
+        "includes": ["**/*.{tsx,ts,json,css}", "!**/node_modules/*", "!**/dist/*", "!**/build/*", "!**/public/*"]
+    },
+    "formatter": {
+        "lineWidth": 120,
+        "indentStyle": "space",
+        "indentWidth": 4
+    },
+    "linter": {
+        "rules": {
+            "a11y": {
+                "noStaticElementInteractions": "off"
+            },
+            "suspicious": {
+                "noTemplateCurlyInString": "off"
+            }
+        }
+    }
 }
