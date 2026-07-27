@@ -1,8 +1,7 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: --- */
 
 import { type SearchParams, useSearchParams } from "@solidjs/router";
-import { createResource, createSignal, Show } from "solid-js";
-import "~/App.css";
+import { createResource, createSignal, onCleanup, onMount, Show } from "solid-js";
 import Navbar from "~/components/layout/navbar";
 import Editor from "~/components/ui/editor";
 import { mergeNodes, updateNodeValue } from "~/components/ui/node-updater";
@@ -12,6 +11,8 @@ import { EMPTY_OBJECT_NODE, getTranslationNodesFromTxtFile } from "~/lib/parser"
 import { getDefaultLocaleFile, loadPreferences } from "~/lib/preferences";
 import { NodeType, type ObjectNode, type TranslationNode } from "~/lib/types";
 import { getSavedTranslation, saveTranslationWork } from "./lib/local-store";
+
+import "~/App.css";
 
 interface TranslationNodesResult {
 	src: string | undefined;
@@ -131,6 +132,23 @@ export default function App() {
 			return updated;
 		});
 	};
+
+	function handleLeavePage(ev: BeforeUnloadEvent) {
+		const editedState = changedNodes();
+
+		if (saveTimeoutRef && editedState) {
+			ev.preventDefault();
+			saveToLocalStorage(editedState, true);
+		}
+	}
+
+	onMount(() => {
+		window.addEventListener("beforeunload", handleLeavePage);
+
+		onCleanup(() => {
+			window.removeEventListener("beforeunload", handleLeavePage);
+		});
+	});
 
 	return (
 		<main class="main-wrapper">
