@@ -32,6 +32,7 @@ export default function App() {
 	const selectedFile = () =>
 		getSearchParam(searchParams, "file", getDefaultLocaleFile((localeFilesList() ?? []).map((file) => file.name)));
 	function setSelectedFile(file: string) {
+		saveToLocalStorage(changedNodes(), true);
 		setSearchParams({ file });
 	}
 
@@ -42,6 +43,7 @@ export default function App() {
 
 	const translatingTo = () => getSearchParam(searchParams, "to", "");
 	function setTranslatingTo(locale: string) {
+		saveToLocalStorage(changedNodes(), true);
 		setSearchParams({ to: locale });
 	}
 
@@ -107,11 +109,12 @@ export default function App() {
 	});
 
 	let saveTimeoutRef: number | null = null;
-	function saveToLocalStorage(data: ObjectNode, noDelay = false) {
+	function saveToLocalStorage(data: ObjectNode | undefined, noDelay = false) {
 		if (saveTimeoutRef) {
 			clearTimeout(saveTimeoutRef);
 			saveTimeoutRef = null;
 		}
+		if (!data) return;
 
 		if (noDelay) {
 			saveTranslationWork(data, translatingTo(), selectedFile());
