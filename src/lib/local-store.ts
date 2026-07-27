@@ -129,13 +129,13 @@ function getDbInstance(): Promise<IDBDatabase | null> {
             if (!(evTarget instanceof IDBOpenDBRequest)) return;
 
             const db = evTarget.result;
-            switch (db.version) {
-                case 1:
-                    db.deleteObjectStore(TRANSLATIONS_STORE);
+            switch (ev.oldVersion) {
+                case 0:
                     initializeDb(db);
                     break;
 
                 default:
+                    db.deleteObjectStore(TRANSLATIONS_STORE);
                     initializeDb(db);
                     break;
             }
