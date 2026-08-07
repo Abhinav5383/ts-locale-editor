@@ -325,6 +325,7 @@
     font-family: monospace;
 
     position: fixed;
+    z-index: 10;
     bottom: 0;
     left: 0;
     width: 100%;
@@ -334,7 +335,7 @@
     transform: translateY(0);
 
     &.hidden:not(:hover) {
-        transform: translateY(calc(100% - 0.1rem));
+        transform: translateY(calc(100% - 0.5rem));
     }
 }
 

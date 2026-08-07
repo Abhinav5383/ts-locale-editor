@@ -116,6 +116,7 @@
 
         &:focus-visible {
             border-color: var(--gh-border-hover);
+            background-color: transparent;
         }
     }
 }
@@ -140,9 +141,14 @@
         border-radius: 0.4rem;
         transition: all 0.2s ease;
 
-        &:where(:hover, :focus-visible) {
+        &:hover {
             background-color: var(--gh-bg-tertiary);
             border-color: var(--gh-border-hover);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--gh-text-primary);
+            outline-offset: 2px;
         }
     }
 
@@ -150,10 +156,5 @@
         border-color: transparent;
         background-color: var(--gh-text-primary);
         color: var(--gh-bg-primary);
-
-        &:focus-visible {
-            outline: 2px solid var(--gh-text-primary);
-            outline-offset: 2px;
-        }
     }
 }

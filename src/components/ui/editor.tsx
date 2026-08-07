@@ -92,6 +92,19 @@ export default function Editor(props: EditorProps) {
                     </div>
                 </div>
 
+                <ActionsBar
+                    preferences={props.preferences}
+                    translatingFrom={props.translatingFrom}
+                    translatingTo={props.translatingTo}
+                    selectedFile={props.selectedFile}
+                    editingLocaleSrc={props.editingLocaleSrc}
+                    refLocale={props.refLocale}
+                    editingLocale={props.editingLocale}
+                    changedNodes={props.changedNodes}
+                    hideTranslated={hideTranslated()}
+                    setHideTranslated={setHideTranslated}
+                />
+
                 <EditorContent
                     refLocale={props.refLocale}
                     editingLocale={props.editingLocale}
@@ -99,19 +112,6 @@ export default function Editor(props: EditorProps) {
                     hideTranslated={hideTranslated()}
                 />
             </div>
-
-            <BottomBar
-                preferences={props.preferences}
-                translatingFrom={props.translatingFrom}
-                translatingTo={props.translatingTo}
-                selectedFile={props.selectedFile}
-                editingLocaleSrc={props.editingLocaleSrc}
-                refLocale={props.refLocale}
-                editingLocale={props.editingLocale}
-                changedNodes={props.changedNodes}
-                hideTranslated={hideTranslated()}
-                setHideTranslated={setHideTranslated}
-            />
         </div>
     );
 }
@@ -221,7 +221,7 @@ interface ExportActionsProps {
     setHideTranslated: Setter<boolean>;
 }
 
-function BottomBar(props: ExportActionsProps) {
+function ActionsBar(props: ExportActionsProps) {
     let prevScrollY = window.scrollY;
     const [bottomBarVisible, setBottomBarVisible] = createSignal(true);
     const [dialogOpen, setDialogOpen] = createSignal(false);
